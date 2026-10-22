@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import SiteHeader from "../../components/SiteHeader";
 import {
   BRANDS,
   PRODUCTS,
@@ -142,45 +143,6 @@ export default async function BrandPage({
 
         .luxury-brand-page a {
           text-decoration: none;
-        }
-
-        .luxury-brand-page .brand-header {
-          background: #19262b;
-          border-bottom: 1px solid rgba(255,255,255,.13);
-        }
-
-        .luxury-brand-page .header-inner {
-          max-width: 1360px;
-          width: calc(100% - 80px);
-          height: 90px;
-          margin: auto;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 20px;
-        }
-
-        .luxury-brand-page .brand-logo {
-          color: #fff;
-          font-size: 25px;
-          font-weight: 700;
-          letter-spacing: .22em;
-        }
-
-        .luxury-brand-page .header-links {
-          display: flex;
-          align-items: center;
-          gap: 32px;
-        }
-
-        .luxury-brand-page .header-links a {
-          color: rgba(255,255,255,.8);
-          font-size: 11px;
-          letter-spacing: .12em;
-        }
-
-        .luxury-brand-page .header-links a:hover {
-          color: #e5d2ad;
         }
 
         .luxury-brand-page .brand-hero {
@@ -616,23 +578,6 @@ export default async function BrandPage({
         }
 
         @media (max-width: 768px) {
-          .luxury-brand-page .header-inner {
-            width: calc(100% - 36px);
-            height: 74px;
-          }
-
-          .luxury-brand-page .brand-logo {
-            font-size: 21px;
-          }
-
-          .luxury-brand-page .header-links {
-            gap: 14px;
-          }
-
-          .luxury-brand-page .header-links a {
-            font-size: 10px;
-          }
-
           .luxury-brand-page .brand-hero {
             padding: 80px 20px 95px;
           }
@@ -690,10 +635,6 @@ export default async function BrandPage({
             width: calc(100% - 32px);
           }
 
-          .luxury-brand-page .header-links a:first-child {
-            display: none;
-          }
-
           .luxury-brand-page .info-grid {
             grid-template-columns: 1fr;
           }
@@ -716,25 +657,7 @@ export default async function BrandPage({
         }
       `}</style>
 
-      <header className="brand-header">
-        <div className="header-inner">
-          <Link href="/" className="brand-logo">
-            SINKMOA
-          </Link>
-
-          <nav className="header-links">
-            <Link href="/#brands">
-              ALL BRANDS
-            </Link>
-            <Link href="#products">
-              COLLECTION
-            </Link>
-            <Link href={`/order?brand=${brandSlug}`}>
-              ORDER ↗
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <section className="brand-hero">
         <span className="eyebrow">
@@ -846,7 +769,7 @@ export default async function BrandPage({
                     </div>
 
                     <span className="price-label">
-                      PRODUCT PRICE
+                      제품 판매가격
                     </span>
 
                     <div className="product-price">
