@@ -5,6 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+type SiteHeaderProps = {
+  transparent?: boolean;
+};
+
 const menuItems = [
   {
     label: "브랜드별 상품",
@@ -13,7 +17,7 @@ const menuItems = [
   },
   {
     label: "설치 서비스",
-    href: "/installation",
+    href: "/#service",
     type: "installation",
   },
   {
@@ -28,7 +32,9 @@ const menuItems = [
   },
 ];
 
-export default function SiteHeader() {
+export default function SiteHeader({
+  transparent = false,
+}: SiteHeaderProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -48,20 +54,13 @@ export default function SiteHeader() {
     window.addEventListener("keydown", handleEscape);
 
     return () => {
-      window.removeEventListener(
-        "keydown",
-        handleEscape
-      );
+      window.removeEventListener("keydown", handleEscape);
     };
   }, [menuOpen]);
 
   function isActive(type: string) {
     if (type === "brands") {
       return pathname.startsWith("/products");
-    }
-
-    if (type === "installation") {
-      return pathname === "/installation";
     }
 
     if (type === "guide") {
@@ -76,7 +75,11 @@ export default function SiteHeader() {
   }
 
   return (
-    <header className="sm-header">
+    <header
+      className={`sm-header ${
+        transparent ? "sm-transparent" : ""
+      } ${menuOpen ? "sm-menu-open" : ""}`}
+    >
       <div className="sm-header-inner">
         <Link
           href="/"
@@ -114,9 +117,9 @@ export default function SiteHeader() {
           }
           aria-expanded={menuOpen}
           aria-controls="sm-mobile-menu"
-          onClick={() =>
-            setMenuOpen((prev) => !prev)
-          }
+          onClick={() => {
+            setMenuOpen((prev) => !prev);
+          }}
         >
           <span />
           <span />
@@ -124,28 +127,27 @@ export default function SiteHeader() {
         </button>
       </div>
 
-      <nav
-        id="sm-mobile-menu"
-        className={`sm-mobile-nav ${
-          menuOpen ? "show" : ""
-        }`}
-        aria-label="모바일 메뉴"
-        inert={!menuOpen}
-      >
-        {menuItems.map((item) => (
-          <Link
-            key={item.type}
-            href={item.href}
-            className={
-              isActive(item.type) ? "active" : ""
-            }
-            onClick={() => setMenuOpen(false)}
-          >
-            <span>{item.label}</span>
-            <span className="sm-nav-arrow">↗</span>
-          </Link>
-        ))}
-      </nav>
+      {menuOpen && (
+        <nav
+          id="sm-mobile-menu"
+          className="sm-mobile-nav"
+          aria-label="모바일 메뉴"
+        >
+          {menuItems.map((item) => (
+            <Link
+              key={item.type}
+              href={item.href}
+              className={
+                isActive(item.type) ? "active" : ""
+              }
+              onClick={() => setMenuOpen(false)}
+            >
+              <span>{item.label}</span>
+              <span className="sm-nav-arrow">↗</span>
+            </Link>
+          ))}
+        </nav>
+      )}
 
       <style jsx global>{`
         .sm-header {
@@ -168,6 +170,14 @@ export default function SiteHeader() {
           text-decoration: none;
         }
 
+        .sm-header.sm-transparent {
+          position: absolute;
+          top: 0;
+          left: 0;
+          background: transparent;
+          border-bottom: 1px solid rgba(255,255,255,.22);
+        }
+
         .sm-header-inner {
           width: min(1360px, calc(100% - 80px));
           height: 88px;
@@ -176,6 +186,10 @@ export default function SiteHeader() {
           align-items: center;
           justify-content: space-between;
           gap: 25px;
+        }
+
+        .sm-transparent .sm-header-inner {
+          height: 94px;
         }
 
         .sm-logo {
@@ -195,7 +209,7 @@ export default function SiteHeader() {
         .sm-desktop-nav a {
           position: relative;
           padding: 12px 0;
-          color: rgba(255,255,255,.83);
+          color: rgba(255,255,255,.85);
           font-size: 13px;
           font-weight: 500;
           white-space: nowrap;
@@ -253,7 +267,8 @@ export default function SiteHeader() {
         }
 
         @media (max-width: 900px) {
-          .sm-header-inner {
+          .sm-header-inner,
+          .sm-transparent .sm-header-inner {
             width: calc(100% - 36px);
             height: 74px;
           }
@@ -270,7 +285,7 @@ export default function SiteHeader() {
             display: block;
           }
 
-          .sm-mobile-nav.show {
+          .sm-mobile-nav {
             display: flex;
             flex-direction: column;
             padding: 12px 23px 25px;
