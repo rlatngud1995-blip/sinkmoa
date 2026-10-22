@@ -38,25 +38,57 @@ export const BRANDS: Record<
   },
 };
 
-// 실제 판매 모델과 가격이 확정되면
-// 이 배열에 상품을 추가합니다.
-// 현재는 임의 상품을 등록하지 않습니다.
-export const PRODUCTS: SinkProduct[] = [];
+/* =========================================
+   싱크모아 판매 상품 목록
+
+   제품 사진은 추후 추가 예정
+   실제 판매 모델과 가격만 등록
+========================================= */
+
+export const PRODUCTS: SinkProduct[] = [
+  {
+    id: "baekjo-goni-8630",
+    brand: "baekjo",
+    name: "백조 고니 8630",
+    price: 390000,
+    width: 780,
+    depth: 400,
+    installationType: "인셋",
+    description:
+      "백조 고니 8630 인셋 싱크볼. 제품 단독 구매 및 설치 포함 주문 상담이 가능합니다.",
+  },
+];
+
+/* =========================================
+   브랜드별 상품 조회
+========================================= */
 
 export function getProductsByBrand(
   brand: BrandSlug
-) {
+): SinkProduct[] {
   return PRODUCTS.filter(
     (product) => product.brand === brand
   );
 }
 
-export function getProductById(id: string) {
+/* =========================================
+   상품 ID로 개별 상품 조회
+========================================= */
+
+export function getProductById(
+  id: string
+): SinkProduct | undefined {
   return PRODUCTS.find(
     (product) => product.id === id
   );
 }
 
-export function formatPrice(price: number) {
+/* =========================================
+   가격 표시
+========================================= */
+
+export function formatPrice(
+  price: number
+): string {
   return price.toLocaleString("ko-KR") + "원";
 }
