@@ -3,46 +3,33 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import {
+  BRANDS,
+  PRODUCTS,
+  formatPrice,
+  type BrandSlug,
+} from "../data/products";
 
 const PHONE = "01094134686";
 
-const PRICES = {
+const PRICE = {
   installation: 170000,
-  stainlessDrain: 20000,
+  drain: 20000,
   cutting: 50000,
-  faucet6way: 70000,
+  faucet: 70000,
 };
-
-const BRANDS = [
-  { value: "regens", name: "리젠스" },
-  { value: "bellago", name: "벨라고" },
-  { value: "artisan", name: "아티잔" },
-  { value: "baekjo", name: "백조" },
-];
-
-function formatPrice(value: number) {
-  return value.toLocaleString("ko-KR") + "원";
-}
 
 export default function OrderPage() {
   const [brand, setBrand] = useState("");
-  const [model, setModel] = useState("");
-  const [productPrice, setProductPrice] = useState("");
+  const [productId, setProductId] = useState("");
 
   const [installation, setInstallation] =
     useState(false);
-
-  const [stainlessDrain, setStainlessDrain] =
-    useState(false);
-
+  const [drain, setDrain] = useState(false);
   const [cutting, setCutting] = useState(false);
+  const [faucet, setFaucet] = useState(false);
 
-  const [faucet6way, setFaucet6way] =
-    useState(false);
-
-  const [customerName, setCustomerName] =
-    useState("");
-
+  const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [request, setRequest] = useState("");
 
@@ -51,88 +38,89 @@ export default function OrderPage() {
       window.location.search
     );
 
+    const id = params.get("product");
+    const selectedProduct = PRODUCTS.find(
+      (item) => item.id === id
+    );
+
+    if (selectedProduct) {
+      setBrand(selectedProduct.brand);
+      setProductId(selectedProduct.id);
+      return;
+    }
+
     const selectedBrand = params.get("brand");
 
     if (
       selectedBrand &&
-      BRANDS.some(
-        (item) => item.value === selectedBrand
+      Object.prototype.hasOwnProperty.call(
+        BRANDS,
+        selectedBrand
       )
     ) {
       setBrand(selectedBrand);
     }
   }, []);
 
-  const productAmount =
-    Number(productPrice) > 0
-      ? Number(productPrice)
-      : 0;
+  const availableProducts = PRODUCTS.filter(
+    (item) => item.brand === brand
+  );
 
-  const installationAmount = installation
-    ? PRICES.installation
+  const product = PRODUCTS.find(
+    (item) => item.id === productId
+  );
+
+  const productPrice = product?.price ?? 0;
+  const installPrice = installation
+    ? PRICE.installation
     : 0;
-
-  const drainAmount = stainlessDrain
-    ? PRICES.stainlessDrain
-    : 0;
-
-  const cuttingAmount =
-    installation && cutting
-      ? PRICES.cutting
-      : 0;
-
-  const faucetAmount =
-    installation && faucet6way
-      ? PRICES.faucet6way
-      : 0;
+  const drainPrice = drain ? PRICE.drain : 0;
+  const cuttingPrice =
+    installation && cutting ? PRICE.cutting : 0;
+  const faucetPrice =
+    installation && faucet ? PRICE.faucet : 0;
 
   const total =
-    productAmount +
-    installationAmount +
-    drainAmount +
-    cuttingAmount +
-    faucetAmount;
-
-  const selectedBrand = BRANDS.find(
-    (item) => item.value === brand
-  );
+    productPrice +
+    installPrice +
+    drainPrice +
+    cuttingPrice +
+    faucetPrice;
 
   function changeInstallation(value: boolean) {
     setInstallation(value);
 
     if (!value) {
       setCutting(false);
-      setFaucet6way(false);
+      setFaucet(false);
     }
   }
 
-  function handleSMS() {
+  function sendSMS() {
     if (!brand) {
       alert("브랜드를 선택해주세요.");
       return;
     }
 
-    if (!model.trim()) {
-      alert("제품 모델명을 입력해주세요.");
+    if (!name.trim() || !address.trim()) {
+      alert("성함과 배송/설치 지역을 입력해주세요.");
       return;
     }
 
-    if (!customerName.trim()) {
-      alert("고객 성함을 입력해주세요.");
+    if (availableProducts.length > 0 && !product) {
+      alert("주문할 제품을 선택해주세요.");
       return;
     }
 
-    if (!address.trim()) {
-      alert("배송 또는 설치 지역을 입력해주세요.");
-      return;
-    }
+    const brandName =
+      BRANDS[brand as BrandSlug]?.name ?? brand;
 
-    const message = [
-      "[싱크모아 주문 문의]",
+    const lines = [
+      "[싱크모아 주문 및 견적 문의]",
       "",
-      "■ 제품 정보",
-      `브랜드: ${selectedBrand?.name}`,
-      `모델명: ${model}`,
+      "■ 상품 정보",
+      `브랜드: ${brandName}`,
+      `모델: ${product?.name ?? "모델 상담 요청"}`,
       `구매 방식: ${
         installation
           ? "싱크볼 제품 + 설치"
@@ -141,49 +129,44 @@ export default function OrderPage() {
       "",
       "■ 선택 옵션",
       `올스텐 배수구: ${
-        stainlessDrain ? "선택" : "미선택"
+        drain ? "선택 (+20,000원)" : "미선택"
       }`,
       `상판 타공: ${
-        cuttingAmount > 0 ? "선택" : "미선택"
+        cuttingPrice
+          ? "선택 (+50,000원)"
+          : "미선택"
       }`,
       `6WAY 수전: ${
-        faucetAmount > 0
-          ? "제품 구매 + 무료 교체 설치"
+        faucetPrice
+          ? "제품 추가 (+70,000원), 교체 설치비 무료"
           : "미선택"
       }`,
       "",
       "■ 예상 금액",
-      `싱크볼 제품: ${
-        productAmount > 0
-          ? formatPrice(productAmount)
+      `싱크볼: ${
+        product
+          ? formatPrice(productPrice)
           : "상담 후 안내"
       }`,
-      `싱크볼 설치비: ${
-        formatPrice(installationAmount)
-      }`,
-      `올스텐 배수구: ${
-        formatPrice(drainAmount)
-      }`,
-      `상판 타공: ${
-        formatPrice(cuttingAmount)
-      }`,
-      `6WAY 수전 제품: ${
-        formatPrice(faucetAmount)
-      }`,
-      "6WAY 수전 교체 설치비: 무료",
+      `설치비: ${formatPrice(installPrice)}`,
+      `올스텐 배수구: ${formatPrice(drainPrice)}`,
+      `상판 타공: ${formatPrice(cuttingPrice)}`,
+      `6WAY 수전: ${formatPrice(faucetPrice)}`,
       `예상 총금액: ${
-        productAmount > 0
+        product
           ? formatPrice(total)
-          : "제품 가격 확인 후 안내"
+          : "모델 및 제품 가격 확인 후 안내"
       }`,
       "",
       "■ 고객 정보",
-      `성함: ${customerName}`,
+      `성함: ${name}`,
       `배송/설치 지역: ${address}`,
       `요청사항: ${request || "없음"}`,
       "",
-      "구매 및 설치 상담 부탁드립니다.",
-    ].join("\n");
+      "상담 부탁드립니다.",
+    ];
+
+    const message = lines.join("\n");
 
     const separator =
       /iPhone|iPad|iPod/i.test(navigator.userAgent)
@@ -205,233 +188,176 @@ export default function OrderPage() {
           color: #19262b;
           font-family: Arial, sans-serif;
         }
-
-        .header {
+        .order-page * { box-sizing: border-box; }
+        .top {
           background: #19262b;
+          padding: 25px;
           text-align: center;
-          padding: 25px 20px;
         }
-
         .logo {
           color: #e5d2ad;
-          font-size: 26px;
           letter-spacing: 4px;
+          font-size: 26px;
           font-weight: 700;
           text-decoration: none;
         }
-
         .hero {
           background: #19262b;
           color: white;
+          padding: 60px 20px 85px;
           text-align: center;
-          padding: 65px 20px 85px;
         }
-
-        .eyebrow {
-          color: #c4b49a;
-          font-size: 11px;
-          letter-spacing: 3px;
-        }
-
         .hero h1 {
-          font-size: clamp(30px, 5vw, 48px);
+          font-size: clamp(30px, 5vw, 45px);
           font-weight: 500;
-          margin: 20px 0;
         }
-
-        .hero p:last-child {
-          color: #d1d1d1;
+        .hero p {
+          color: #ccc;
           line-height: 1.9;
           font-size: 14px;
         }
-
-        .container {
-          width: min(760px, calc(100% - 28px));
+        .wrap {
+          max-width: 760px;
+          width: calc(100% - 28px);
           margin: -35px auto 0;
           position: relative;
-          padding-bottom: 90px;
+          padding-bottom: 75px;
         }
-
         .card {
           background: white;
+          padding: 35px;
           border: 1px solid #e8e3da;
-          padding: 36px;
           margin-bottom: 20px;
         }
-
-        .section-label {
-          font-size: 11px;
+        .eyebrow {
           color: #a89576;
           letter-spacing: 2px;
+          font-size: 11px;
         }
-
         .card h2 {
           font-size: 23px;
           margin: 12px 0 28px;
-          font-weight: 600;
         }
-
-        .field {
-          margin-bottom: 24px;
-        }
-
+        .field { margin-bottom: 23px; }
         .field label {
           display: block;
-          font-size: 13px;
           font-weight: 600;
+          font-size: 13px;
           margin-bottom: 10px;
         }
-
-        .field input,
         .field select,
+        .field input,
         .field textarea {
+          display: block;
           width: 100%;
           padding: 15px;
           border: 1px solid #dedbd4;
+          border-radius: 0;
           background: white;
           color: #19262b;
           font-size: 14px;
-          border-radius: 0;
-          box-sizing: border-box;
         }
-
         .option {
           display: flex;
           justify-content: space-between;
           align-items: center;
           gap: 12px;
-          padding: 19px 15px;
           border: 1px solid #e5e1da;
+          padding: 19px 14px;
           margin-bottom: 10px;
           cursor: pointer;
         }
-
         .option.active {
-          border-color: #b8a17b;
           background: #faf8f4;
+          border-color: #b8a17b;
         }
-
         .option.disabled {
-          opacity: 0.45;
+          opacity: .45;
           cursor: not-allowed;
         }
-
         .option-left {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 10px;
         }
-
         .option input {
           accent-color: #b8a17b;
           width: 18px;
           height: 18px;
         }
-
-        .option strong {
-          font-size: 13px;
-        }
-
+        .option strong { font-size: 13px; }
         .option-price {
-          font-size: 13px;
           color: #8e7857;
+          font-size: 13px;
           white-space: nowrap;
         }
-
         .helper {
-          font-size: 12px;
           color: #777;
+          font-size: 12px;
           line-height: 1.9;
-          margin-top: 18px;
         }
-
         .summary {
           background: #19262b;
           color: white;
           padding: 30px;
         }
-
         .summary h2 {
           color: #e5d2ad;
-          font-size: 20px;
-          margin: 0 0 25px;
+          font-size: 21px;
+          margin-top: 0;
         }
-
-        .summary-row {
-          display: flex;
-          justify-content: space-between;
-          gap: 12px;
-          margin-bottom: 16px;
-          font-size: 13px;
-          color: #d1d4d4;
-        }
-
+        .summary-row,
         .summary-total {
           display: flex;
           justify-content: space-between;
-          align-items: center;
-          border-top: 1px solid #4d585c;
-          margin-top: 22px;
-          padding-top: 25px;
+          gap: 12px;
+          padding: 12px 0;
+          font-size: 13px;
         }
-
+        .summary-row { color: #d1d4d4; }
+        .summary-total {
+          margin-top: 15px;
+          border-top: 1px solid #4d585c;
+          align-items: center;
+        }
         .summary-total strong {
           color: #e5d2ad;
-          font-size: 26px;
+          font-size: 25px;
         }
-
-        .sms-button {
+        .sms {
           width: 100%;
-          padding: 20px;
-          margin-top: 22px;
           background: #c4b49a;
           color: #19262b;
-          border: none;
-          font-size: 15px;
+          padding: 19px;
+          border: 0;
+          margin-top: 20px;
           font-weight: 700;
+          font-size: 15px;
           cursor: pointer;
         }
-
         .notice {
-          color: #aeb6b6;
           font-size: 12px;
+          color: #bbc2c2;
           line-height: 1.9;
-          margin-top: 18px;
         }
-
-        .back-link {
+        .back {
           display: block;
           text-align: center;
-          margin-top: 35px;
-          font-size: 13px;
+          margin-top: 30px;
           color: #777;
           text-decoration: none;
+          font-size: 13px;
         }
-
         @media (max-width: 600px) {
-          .card {
-            padding: 25px 19px;
-          }
-
-          .summary {
-            padding: 25px 20px;
-          }
-
-          .summary-total strong {
-            font-size: 22px;
-          }
-
-          .option strong {
-            font-size: 12px;
-          }
-
-          .option-price {
-            font-size: 12px;
-          }
+          .card { padding: 25px 19px; }
+          .summary { padding: 25px 20px; }
+          .option strong,
+          .option-price { font-size: 12px; }
+          .summary-total strong { font-size: 21px; }
         }
       `}</style>
 
-      <header className="header">
+      <header className="top">
         <Link href="/" className="logo">
           SINKMOA
         </Link>
@@ -443,70 +369,79 @@ export default function OrderPage() {
         </p>
         <h1>주문 및 설치 문의</h1>
         <p>
-          싱크볼 제품 선택부터 설치까지
-          <br />
-          편리하게 상담받으세요.
+          원하는 싱크볼과 추가 옵션을
+          선택해주세요.
         </p>
       </section>
 
-      <div className="container">
+      <div className="wrap">
         <section className="card">
-          <p className="section-label">
+          <span className="eyebrow">
             01 / PRODUCT
-          </p>
+          </span>
           <h2>제품 선택</h2>
 
           <div className="field">
-            <label>제품 브랜드 *</label>
+            <label htmlFor="brand">브랜드 *</label>
             <select
+              id="brand"
               value={brand}
+              onChange={(e) => {
+                setBrand(e.target.value);
+                setProductId("");
+              }}
+            >
+              <option value="">브랜드 선택</option>
+              {Object.entries(BRANDS).map(
+                ([slug, item]) => (
+                  <option key={slug} value={slug}>
+                    {item.name}
+                  </option>
+                )
+              )}
+            </select>
+          </div>
+
+          <div className="field">
+            <label htmlFor="product">제품 모델</label>
+            <select
+              id="product"
+              value={productId}
+              disabled={!brand || availableProducts.length === 0}
               onChange={(e) =>
-                setBrand(e.target.value)
+                setProductId(e.target.value)
               }
             >
               <option value="">
-                브랜드 선택
+                {availableProducts.length
+                  ? "모델을 선택하세요"
+                  : "등록된 상품이 없습니다"}
               </option>
-              {BRANDS.map((item) => (
+
+              {availableProducts.map((item) => (
                 <option
-                  key={item.value}
-                  value={item.value}
+                  key={item.id}
+                  value={item.id}
                 >
-                  {item.name}
+                  {item.name} -{" "}
+                  {formatPrice(item.price)}
                 </option>
               ))}
             </select>
           </div>
 
-          <div className="field">
-            <label>제품 모델명 *</label>
-            <input
-              value={model}
-              onChange={(e) =>
-                setModel(e.target.value)
-              }
-              placeholder="제품 모델명 입력"
-            />
-          </div>
-
-          <div className="field">
-            <label>싱크볼 제품 가격 (원)</label>
-            <input
-              type="number"
-              min="0"
-              value={productPrice}
-              onChange={(e) =>
-                setProductPrice(e.target.value)
-              }
-              placeholder="모르면 비워두세요"
-            />
-          </div>
+          <p className="helper">
+            판매 모델과 가격은 싱크모아에서
+            등록한 정보만 표시됩니다.
+            등록 전인 모델은 문자 상담으로
+            문의할 수 있습니다.
+          </p>
         </section>
 
         <section className="card">
-          <p className="section-label">
+          <span className="eyebrow">
             02 / OPTIONS
-          </p>
+          </span>
           <h2>구매 및 설치 옵션</h2>
 
           <label
@@ -551,19 +486,17 @@ export default function OrderPage() {
             </span>
           </label>
 
-          <div style={{ height: 20 }} />
-
           <label
             className={`option ${
-              stainlessDrain ? "active" : ""
+              drain ? "active" : ""
             }`}
           >
             <span className="option-left">
               <input
                 type="checkbox"
-                checked={stainlessDrain}
+                checked={drain}
                 onChange={(e) =>
-                  setStainlessDrain(e.target.checked)
+                  setDrain(e.target.checked)
                 }
               />
               <strong>올스텐 배수구</strong>
@@ -598,7 +531,7 @@ export default function OrderPage() {
 
           <label
             className={`option ${
-              faucet6way ? "active" : ""
+              faucet ? "active" : ""
             } ${
               !installation ? "disabled" : ""
             }`}
@@ -607,13 +540,13 @@ export default function OrderPage() {
               <input
                 type="checkbox"
                 disabled={!installation}
-                checked={faucet6way}
+                checked={faucet}
                 onChange={(e) =>
-                  setFaucet6way(e.target.checked)
+                  setFaucet(e.target.checked)
                 }
               />
               <strong>
-                6WAY 수전 제품 + 무료 교체 설치
+                6WAY 수전 + 무료 교체 설치
               </strong>
             </span>
             <span className="option-price">
@@ -622,38 +555,37 @@ export default function OrderPage() {
           </label>
 
           <p className="helper">
-            기본 배수구는 싱크볼 제품 가격에
-            포함됩니다.
-            <br />
-            기본 설치비에는 수전 연결 및 배수구
-            연결 작업이 포함됩니다.
-            <br />
+            기본 배수구는 싱크볼 가격에 포함됩니다.
             6WAY 수전은 싱크볼 설치 주문 시에만
-            추가할 수 있으며 교체 설치비는
-            무료입니다.
+            추가할 수 있으며 교체 시공비는
+            별도로 받지 않습니다.
           </p>
         </section>
 
         <section className="card">
-          <p className="section-label">
+          <span className="eyebrow">
             03 / CUSTOMER
-          </p>
+          </span>
           <h2>고객 정보</h2>
 
           <div className="field">
-            <label>고객 성함 *</label>
+            <label htmlFor="name">성함 *</label>
             <input
-              value={customerName}
+              id="name"
+              value={name}
               onChange={(e) =>
-                setCustomerName(e.target.value)
+                setName(e.target.value)
               }
-              placeholder="성함 입력"
+              placeholder="성함을 입력해주세요"
             />
           </div>
 
           <div className="field">
-            <label>배송 또는 설치 지역 *</label>
+            <label htmlFor="address">
+              배송 또는 설치 지역 *
+            </label>
             <input
+              id="address"
               value={address}
               onChange={(e) =>
                 setAddress(e.target.value)
@@ -663,14 +595,17 @@ export default function OrderPage() {
           </div>
 
           <div className="field">
-            <label>추가 요청사항</label>
+            <label htmlFor="request">
+              추가 요청사항
+            </label>
             <textarea
+              id="request"
               rows={4}
               value={request}
               onChange={(e) =>
                 setRequest(e.target.value)
               }
-              placeholder="싱크볼 규격, 설치 희망일 등"
+              placeholder="희망 모델, 설치 일정, 타공 규격 등"
             />
           </div>
         </section>
@@ -681,51 +616,36 @@ export default function OrderPage() {
           <div className="summary-row">
             <span>싱크볼 제품</span>
             <span>
-              {productAmount > 0
-                ? formatPrice(productAmount)
-                : "상담 후 안내"}
+              {product
+                ? formatPrice(productPrice)
+                : "모델 상담 필요"}
             </span>
           </div>
 
           <div className="summary-row">
-            <span>싱크볼 설치비</span>
-            <span>
-              {formatPrice(installationAmount)}
-            </span>
+            <span>기본 설치</span>
+            <span>{formatPrice(installPrice)}</span>
           </div>
 
           <div className="summary-row">
             <span>올스텐 배수구</span>
-            <span>
-              {formatPrice(drainAmount)}
-            </span>
+            <span>{formatPrice(drainPrice)}</span>
           </div>
 
           <div className="summary-row">
             <span>상판 타공</span>
-            <span>
-              {formatPrice(cuttingAmount)}
-            </span>
+            <span>{formatPrice(cuttingPrice)}</span>
           </div>
 
           <div className="summary-row">
             <span>6WAY 수전 제품</span>
-            <span>
-              {formatPrice(faucetAmount)}
-            </span>
+            <span>{formatPrice(faucetPrice)}</span>
           </div>
-
-          {faucet6way && installation && (
-            <div className="summary-row">
-              <span>6WAY 수전 교체 설치비</span>
-              <span>무료</span>
-            </div>
-          )}
 
           <div className="summary-total">
             <span>예상 총금액</span>
             <strong>
-              {productAmount > 0
+              {product
                 ? formatPrice(total)
                 : "견적 문의"}
             </strong>
@@ -733,23 +653,22 @@ export default function OrderPage() {
 
           <button
             type="button"
-            className="sms-button"
-            onClick={handleSMS}
+            className="sms"
+            onClick={sendSMS}
           >
             문자로 주문 문의하기 ↗
           </button>
 
           <p className="notice">
-            문자 버튼을 누르면 휴대폰 문자 앱이
-            실행됩니다. 고객이 직접 전송해야
-            문의가 접수됩니다.
+            문자 앱이 실행되면 고객이 직접
+            전송해야 문의가 접수됩니다.
             <br />
-            현장 상태에 따라 최종 견적은
-            달라질 수 있습니다.
+            현장 상태와 추가 작업에 따라
+            최종 금액은 달라질 수 있습니다.
           </p>
         </section>
 
-        <Link href="/" className="back-link">
+        <Link href="/" className="back">
           ← 메인 홈페이지로 돌아가기
         </Link>
       </div>
