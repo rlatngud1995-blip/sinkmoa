@@ -20,6 +20,51 @@ const PRICE = {
   faucet: 70000,
 };
 
+function onlyDigits(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+function formatPhone(value: string) {
+  const digits = onlyDigits(value).slice(0, 11);
+
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) {
+    return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  }
+
+  if (digits.length === 10) {
+    return `${digits.slice(0, 3)}-${digits.slice(
+      3,
+      6
+    )}-${digits.slice(6)}`;
+  }
+
+  return `${digits.slice(0, 3)}-${digits.slice(
+    3,
+    7
+  )}-${digits.slice(7)}`;
+}
+
+function validPhone(value: string) {
+  return /^01[016789]\d{7,8}$/.test(
+    onlyDigits(value)
+  );
+}
+
+function todayLocal() {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(
+    date.getMonth() + 1
+  ).padStart(2, "0");
+  const day = String(date.getDate()).padStart(
+    2,
+    "0"
+  );
+
+  return `${year}-${month}-${day}`;
+}
+
 export default function OrderPage() {
   const [brand, setBrand] = useState("");
   const [productId, setProductId] = useState("");
@@ -31,8 +76,16 @@ export default function OrderPage() {
   const [faucet, setFaucet] = useState(false);
 
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [cutoutWidth, setCutoutWidth] = useState("");
+  const [cutoutDepth, setCutoutDepth] = useState("");
+  const [preferredDate, setPreferredDate] =
+    useState("");
   const [request, setRequest] = useState("");
+
+  const [confirmOpen, setConfirmOpen] =
+    useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(
@@ -63,6 +116,28 @@ export default function OrderPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (!confirmOpen) return;
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setConfirmOpen(false);
+      }
+    }
+
+    window.addEventListener(
+      "keydown",
+      handleEscape
+    );
+
+    return () => {
+      window.removeEventListener(
+        "keydown",
+        handleEscape
+      );
+    };
+  }, [confirmOpen]);
+
   const availableProducts = PRODUCTS.filter(
     (item) => item.brand === brand
   );
@@ -72,12 +147,16 @@ export default function OrderPage() {
   );
 
   const productPrice = product?.price ?? 0;
+
   const installPrice = installation
     ? PRICE.installation
     : 0;
+
   const drainPrice = drain ? PRICE.drain : 0;
+
   const cuttingPrice =
     installation && cutting ? PRICE.cutting : 0;
+
   const faucetPrice =
     installation && faucet ? PRICE.faucet : 0;
 
@@ -88,46 +167,111 @@ export default function OrderPage() {
     cuttingPrice +
     faucetPrice;
 
+  const brandName = brand
+    ? BRANDS[brand as BrandSlug]?.name ?? brand
+    : "";
+
+  const cutoutSize =
+    product?.width && product?.depth
+      ? `${product.width} × ${product.depth}mm`
+      : "상담 시 확인";
+
+  const existingCutout =
+    cutoutWidth && cutoutDepth
+      ? `${cutoutWidth} × ${cutoutDepth}mm`
+      : cutoutWidth || cutoutDepth
+      ? `가로 ${cutoutWidth || "미입력"}mm / 세로 ${
+          cutoutDepth || "미입력"
+        }mm`
+      : "미측정";
+
+  const addressLabel = installation
+    ? "설치 주소"
+    : "배송지 주소";
+
   function changeInstallation(value: boolean) {
     setInstallation(value);
+    setConfirmOpen(false);
 
     if (!value) {
       setCutting(false);
       setFaucet(false);
+      setCutoutWidth("");
+      setCutoutDepth("");
+      setPreferredDate("");
     }
   }
 
-  function sendSMS() {
+  function validateOrder() {
     if (!brand) {
       alert("브랜드를 선택해주세요.");
-      return;
+      return false;
     }
 
-    if (availableProducts.length > 0 && !product) {
-      alert("주문할 제품을 선택해주세요.");
-      return;
+    if (!product) {
+      alert("주문할 제품 모델을 선택해주세요.");
+      return false;
     }
 
-    if (!name.trim() || !address.trim()) {
-      alert("성함과 배송/설치 지역을 입력해주세요.");
-      return;
+    if (!name.trim()) {
+      alert("고객 성함을 입력해주세요.");
+      return false;
     }
 
-    const brandName =
-      BRANDS[brand as BrandSlug]?.name ?? brand;
+    if (!validPhone(phone)) {
+      alert(
+        "연락 가능한 휴대폰 번호를 정확히 입력해주세요."
+      );
+      return false;
+    }
 
-    const cutoutSize =
-      product?.width && product?.depth
-        ? `${product.width} × ${product.depth}mm`
-        : "상담 시 확인";
+    if (!address.trim()) {
+      alert(`${addressLabel}를 입력해주세요.`);
+      return false;
+    }
 
+    if (
+      installation &&
+      ((cutoutWidth &&
+        (!Number.isFinite(Number(cutoutWidth)) ||
+          Number(cutoutWidth) <= 0)) ||
+        (cutoutDepth &&
+          (!Number.isFinite(Number(cutoutDepth)) ||
+            Number(cutoutDepth) <= 0)))
+    ) {
+      alert(
+        "기존 상판 타공 치수를 올바르게 입력해주세요."
+      );
+      return false;
+    }
+
+    if (
+      installation &&
+      preferredDate &&
+      preferredDate < todayLocal()
+    ) {
+      alert(
+        "희망 설치 날짜는 오늘 이후로 선택해주세요."
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  function openConfirmation() {
+    if (!validateOrder()) return;
+    setConfirmOpen(true);
+  }
+
+  function buildMessage() {
     const lines = [
       "[싱크모아 주문 및 견적 문의]",
       "",
       "■ 상품 정보",
       `브랜드: ${brandName}`,
       `모델: ${product?.name ?? "모델 상담 요청"}`,
-      `상판 타공 사이즈: ${cutoutSize}`,
+      `선택 모델 상판 타공 사이즈: ${cutoutSize}`,
       `구매 방식: ${
         installation
           ? "싱크볼 제품 + 설치"
@@ -143,47 +287,66 @@ export default function OrderPage() {
           ? "선택 (+50,000원)"
           : "미선택"
       }`,
-      `6WAY 수전: ${
+      `6WAY 수전 제품: ${
         faucetPrice
-          ? "제품 추가 (+70,000원), 교체 설치비 무료"
+          ? "추가 (+70,000원), 교체 설치비 무료"
           : "미선택"
       }`,
       "",
       "■ 예상 금액",
-      `싱크볼: ${
-        product
-          ? formatPrice(productPrice)
-          : "상담 후 안내"
-      }`,
+      `싱크볼: ${formatPrice(productPrice)}`,
       `설치비: ${formatPrice(installPrice)}`,
       `올스텐 배수구: ${formatPrice(drainPrice)}`,
       `상판 타공: ${formatPrice(cuttingPrice)}`,
-      `6WAY 수전: ${formatPrice(faucetPrice)}`,
-      `예상 총금액: ${
-        product
-          ? formatPrice(total)
-          : "모델 및 제품 가격 확인 후 안내"
-      }`,
+      `6WAY 수전 제품: ${formatPrice(faucetPrice)}`,
+      `예상 총금액: ${formatPrice(total)}`,
       "",
       "■ 고객 정보",
       `성함: ${name.trim()}`,
-      `배송/설치 지역: ${address.trim()}`,
-      `요청사항: ${request.trim() || "없음"}`,
-      "",
-      "상담 부탁드립니다.",
+      `연락처: ${formatPhone(phone)}`,
+      `${addressLabel}: ${address.trim()}`,
     ];
 
-    const message = lines.join("\n");
+    if (installation) {
+      lines.push(
+        `기존 상판 타공 사이즈: ${existingCutout}`,
+        `희망 설치 날짜: ${
+          preferredDate || "일정 상담 희망"
+        }`
+      );
+    }
+
+    lines.push(
+      `요청사항: ${request.trim() || "없음"}`,
+      "",
+      "※ 최종 금액과 일정은 상담 후 확정됩니다.",
+      "상담 부탁드립니다."
+    );
+
+    return lines.join("\n");
+  }
+
+  function sendSMS() {
+    if (!validateOrder()) {
+      setConfirmOpen(false);
+      return;
+    }
+
+    const message = buildMessage();
 
     const separator =
-      /iPhone|iPad|iPod/i.test(navigator.userAgent)
+      /iPhone|iPad|iPod/i.test(
+        navigator.userAgent
+      )
         ? "&"
         : "?";
 
-    window.location.href =
-      `sms:${PHONE}${separator}body=${encodeURIComponent(
-        message
-      )}`;
+    const smsUrl = `sms:${PHONE}${separator}body=${encodeURIComponent(
+      message
+    )}`;
+
+    setConfirmOpen(false);
+    window.location.href = smsUrl;
   }
 
   return (
@@ -317,6 +480,19 @@ export default function OrderPage() {
         .field textarea {
           resize: vertical;
           line-height: 1.8;
+        }
+
+        .field-hint {
+          color: #888;
+          font-size: 12px;
+          line-height: 1.8;
+          margin: 9px 0 0;
+        }
+
+        .field-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0,1fr));
+          gap: 16px;
         }
 
         .product-detail {
@@ -495,6 +671,26 @@ export default function OrderPage() {
           margin: 18px 0 0;
         }
 
+        .installation-fields {
+          margin-top: 28px;
+          padding: 28px;
+          background: #faf8f4;
+          border: 1px solid #e5dfd5;
+        }
+
+        .installation-fields h3 {
+          font-size: 19px;
+          font-weight: 600;
+          margin: 0 0 12px;
+        }
+
+        .installation-fields > p {
+          color: #777;
+          font-size: 12px;
+          line-height: 1.9;
+          margin: 0 0 25px;
+        }
+
         .summary {
           background: #19262b;
           color: white;
@@ -528,6 +724,7 @@ export default function OrderPage() {
         .summary-row strong {
           color: #fff;
           font-weight: 500;
+          text-align: right;
         }
 
         .summary-total {
@@ -555,6 +752,7 @@ export default function OrderPage() {
           display: flex;
           align-items: center;
           justify-content: space-between;
+          gap: 15px;
           background: #c4b49a;
           color: #19262b;
           padding: 23px 27px;
@@ -583,6 +781,105 @@ export default function OrderPage() {
           margin-top: 35px;
           color: #777;
           font-size: 13px;
+        }
+
+        .confirm-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 1000;
+          background: rgba(8,16,20,.78);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 18px;
+        }
+
+        .confirm-dialog {
+          width: 100%;
+          max-width: 560px;
+          max-height: calc(100dvh - 36px);
+          overflow-y: auto;
+          background: #f7f5f0;
+          padding: 35px;
+          color: #19262b;
+          box-shadow: 0 20px 80px rgba(0,0,0,.25);
+        }
+
+        .confirm-dialog h2 {
+          font-size: 28px;
+          font-weight: 500;
+          margin: 14px 0 12px;
+        }
+
+        .confirm-intro {
+          color: #777;
+          font-size: 13px;
+          line-height: 1.9;
+          margin-bottom: 25px;
+        }
+
+        .confirm-row {
+          display: flex;
+          justify-content: space-between;
+          gap: 15px;
+          border-bottom: 1px solid #ded8ce;
+          padding: 13px 0;
+          font-size: 13px;
+          line-height: 1.7;
+        }
+
+        .confirm-row span {
+          color: #777;
+          flex-shrink: 0;
+        }
+
+        .confirm-row strong {
+          text-align: right;
+          overflow-wrap: anywhere;
+        }
+
+        .confirm-total {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 15px;
+          padding: 25px 0;
+        }
+
+        .confirm-total strong {
+          color: #927a55;
+          font-size: 27px;
+        }
+
+        .confirm-actions {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+        }
+
+        .confirm-actions button {
+          padding: 18px 10px;
+          border: 1px solid #19262b;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+
+        .confirm-cancel {
+          background: transparent;
+          color: #19262b;
+        }
+
+        .confirm-send {
+          background: #19262b;
+          color: white;
+        }
+
+        .confirm-notice {
+          color: #777;
+          font-size: 12px;
+          line-height: 1.8;
+          margin: 18px 0 0;
         }
 
         @media (max-width: 700px) {
@@ -635,6 +932,15 @@ export default function OrderPage() {
             font-size: 18px;
           }
 
+          .field-grid {
+            grid-template-columns: 1fr;
+            gap: 0;
+          }
+
+          .installation-fields {
+            padding: 22px 17px;
+          }
+
           .summary {
             padding: 30px 23px;
           }
@@ -646,6 +952,18 @@ export default function OrderPage() {
 
           .sms {
             padding: 20px;
+          }
+
+          .confirm-dialog {
+            padding: 25px 20px;
+          }
+
+          .confirm-dialog h2 {
+            font-size: 24px;
+          }
+
+          .confirm-total strong {
+            font-size: 23px;
           }
         }
       `}</style>
@@ -687,6 +1005,7 @@ export default function OrderPage() {
               onChange={(e) => {
                 setBrand(e.target.value);
                 setProductId("");
+                setConfirmOpen(false);
               }}
             >
               <option value="">
@@ -714,9 +1033,10 @@ export default function OrderPage() {
               disabled={
                 !brand || availableProducts.length === 0
               }
-              onChange={(e) =>
-                setProductId(e.target.value)
-              }
+              onChange={(e) => {
+                setProductId(e.target.value);
+                setConfirmOpen(false);
+              }}
             >
               <option value="">
                 {!brand
@@ -977,12 +1297,37 @@ export default function OrderPage() {
               }
               placeholder="성함을 입력해주세요"
               autoComplete="name"
+              maxLength={40}
             />
           </div>
 
           <div className="field">
+            <label htmlFor="phone">
+              휴대폰 번호 *
+            </label>
+
+            <input
+              id="phone"
+              type="tel"
+              inputMode="tel"
+              value={phone}
+              onChange={(e) =>
+                setPhone(formatPhone(e.target.value))
+              }
+              placeholder="010-1234-5678"
+              autoComplete="tel"
+              maxLength={13}
+            />
+
+            <p className="field-hint">
+              상담 연락을 받을 휴대폰 번호를
+              입력해주세요.
+            </p>
+          </div>
+
+          <div className="field">
             <label htmlFor="address">
-              배송 또는 설치 지역 *
+              {addressLabel} *
             </label>
 
             <input
@@ -991,11 +1336,108 @@ export default function OrderPage() {
               onChange={(e) =>
                 setAddress(e.target.value)
               }
-              placeholder="예: 경기도 안산시 단원구"
+              placeholder={
+                installation
+                  ? "예: 경기도 안산시 단원구 ○○로 00, 101동 101호"
+                  : "예: 서울시 강남구 ○○로 00, 101동 101호"
+              }
+              autoComplete="street-address"
+              maxLength={200}
             />
+
+            <p className="field-hint">
+              {installation
+                ? "설치 방문이 필요한 주소를 입력해주세요."
+                : "제품을 택배로 받을 주소를 입력해주세요."}
+            </p>
           </div>
 
-          <div className="field">
+          {installation && (
+            <div className="installation-fields">
+              <h3>설치 환경 및 희망 일정</h3>
+
+              <p>
+                기존 상판 타공 사이즈를 알고
+                계시면 입력해주세요.
+                치수를 모르셔도 상담 신청은 가능합니다.
+              </p>
+
+              <div className="field-grid">
+                <div className="field">
+                  <label htmlFor="cutoutWidth">
+                    기존 상판 타공 가로 (mm)
+                  </label>
+
+                  <input
+                    id="cutoutWidth"
+                    type="number"
+                    min="1"
+                    step="1"
+                    inputMode="numeric"
+                    value={cutoutWidth}
+                    onChange={(e) =>
+                      setCutoutWidth(e.target.value)
+                    }
+                    placeholder="예: 780"
+                  />
+                </div>
+
+                <div className="field">
+                  <label htmlFor="cutoutDepth">
+                    기존 상판 타공 세로 (mm)
+                  </label>
+
+                  <input
+                    id="cutoutDepth"
+                    type="number"
+                    min="1"
+                    step="1"
+                    inputMode="numeric"
+                    value={cutoutDepth}
+                    onChange={(e) =>
+                      setCutoutDepth(e.target.value)
+                    }
+                    placeholder="예: 400"
+                  />
+                </div>
+              </div>
+
+              <p className="field-hint">
+                제품에 표시된 타공 사이즈와
+                현재 주방 상판의 실제 타공 치수를
+                구분해서 입력해주세요.
+              </p>
+
+              <div
+                className="field"
+                style={{ marginTop: 25 }}
+              >
+                <label htmlFor="preferredDate">
+                  희망 설치 날짜
+                </label>
+
+                <input
+                  id="preferredDate"
+                  type="date"
+                  min={todayLocal()}
+                  value={preferredDate}
+                  onChange={(e) =>
+                    setPreferredDate(e.target.value)
+                  }
+                />
+
+                <p className="field-hint">
+                  희망 날짜이며, 실제 설치 일정은
+                  상담 후 확정됩니다.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div
+            className="field"
+            style={{ marginTop: 28 }}
+          >
             <label htmlFor="request">
               추가 요청사항
             </label>
@@ -1007,7 +1449,8 @@ export default function OrderPage() {
               onChange={(e) =>
                 setRequest(e.target.value)
               }
-              placeholder="희망 설치 일정, 기존 상판 타공 사이즈, 문의사항 등을 입력해주세요."
+              placeholder="상판 재질, 배송 관련 요청, 기존 싱크볼 상태 등 추가로 알려주실 내용을 입력해주세요."
+              maxLength={1000}
             />
           </div>
         </section>
@@ -1069,18 +1512,19 @@ export default function OrderPage() {
           <button
             type="button"
             className="sms"
-            onClick={sendSMS}
+            onClick={openConfirmation}
           >
-            문자로 주문 및 견적 문의
+            주문 내용 확인 후 문자 문의
             <span>↗</span>
           </button>
 
           <p className="notice">
-            문자 앱이 실행되면 고객이 직접
-            전송해야 문의가 접수됩니다.
+            주문 내용을 확인한 뒤 문자 앱으로
+            이동합니다. 문자 앱에서 고객이
+            직접 전송해야 문의가 접수됩니다.
             <br />
-            표시된 금액은 예상금액이며
-            상판 재질, 타공 가능 여부 및
+            표시된 금액은 예상금액이며,
+            배송비, 상판 재질, 타공 가능 여부 및
             현장 상태에 따라 최종 견적이
             달라질 수 있습니다.
           </p>
@@ -1090,6 +1534,146 @@ export default function OrderPage() {
           ← 싱크모아 메인으로 돌아가기
         </Link>
       </div>
+
+      {confirmOpen && (
+        <div className="confirm-overlay">
+          <div
+            className="confirm-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-title"
+          >
+            <span className="eyebrow">
+              FINAL ORDER REVIEW
+            </span>
+
+            <h2 id="confirm-title">
+              주문 내용 최종 확인
+            </h2>
+
+            <p className="confirm-intro">
+              아래 내용을 확인해주세요.
+              확인 후 문자 앱으로 이동하며,
+              문자를 직접 전송해야 상담이 접수됩니다.
+            </p>
+
+            <div className="confirm-row">
+              <span>브랜드</span>
+              <strong>{brandName}</strong>
+            </div>
+
+            <div className="confirm-row">
+              <span>제품</span>
+              <strong>{product?.name}</strong>
+            </div>
+
+            <div className="confirm-row">
+              <span>구매 방식</span>
+              <strong>
+                {installation
+                  ? "제품 + 설치"
+                  : "제품만 구매"}
+              </strong>
+            </div>
+
+            <div className="confirm-row">
+              <span>올스텐 배수구</span>
+              <strong>
+                {drain ? "선택" : "미선택"}
+              </strong>
+            </div>
+
+            {installation && (
+              <>
+                <div className="confirm-row">
+                  <span>상판 타공</span>
+                  <strong>
+                    {cutting ? "선택" : "미선택"}
+                  </strong>
+                </div>
+
+                <div className="confirm-row">
+                  <span>6WAY 수전 제품</span>
+                  <strong>
+                    {faucet ? "선택" : "미선택"}
+                  </strong>
+                </div>
+              </>
+            )}
+
+            <div className="confirm-row">
+              <span>성함</span>
+              <strong>{name.trim()}</strong>
+            </div>
+
+            <div className="confirm-row">
+              <span>연락처</span>
+              <strong>{formatPhone(phone)}</strong>
+            </div>
+
+            <div className="confirm-row">
+              <span>{addressLabel}</span>
+              <strong>{address.trim()}</strong>
+            </div>
+
+            {installation && (
+              <>
+                <div className="confirm-row">
+                  <span>기존 상판 타공</span>
+                  <strong>{existingCutout}</strong>
+                </div>
+
+                <div className="confirm-row">
+                  <span>희망 설치 날짜</span>
+                  <strong>
+                    {preferredDate ||
+                      "일정 상담 희망"}
+                  </strong>
+                </div>
+              </>
+            )}
+
+            <div className="confirm-row">
+              <span>추가 요청사항</span>
+              <strong>
+                {request.trim() || "없음"}
+              </strong>
+            </div>
+
+            <div className="confirm-total">
+              <span>예상 총금액</span>
+              <strong>{formatPrice(total)}</strong>
+            </div>
+
+            <div className="confirm-actions">
+              <button
+                type="button"
+                className="confirm-cancel"
+                onClick={() =>
+                  setConfirmOpen(false)
+                }
+              >
+                다시 수정하기
+              </button>
+
+              <button
+                type="button"
+                className="confirm-send"
+                onClick={sendSMS}
+              >
+                문자 앱 열기 ↗
+              </button>
+            </div>
+
+            <p className="confirm-notice">
+              상담 문자 수신 번호: 010-9413-4686
+              <br />
+              실제 결제나 주문 확정이 아닌
+              상담 요청 단계입니다.
+            </p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
