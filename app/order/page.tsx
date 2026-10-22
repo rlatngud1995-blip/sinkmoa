@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import SiteHeader from "../components/SiteHeader";
 import {
   BRANDS,
   PRODUCTS,
@@ -215,34 +216,6 @@ export default function OrderPage() {
         .premium-order-page select,
         .premium-order-page textarea {
           font-family: inherit;
-        }
-
-        .top {
-          background: #19262b;
-          border-bottom: 1px solid rgba(255,255,255,.12);
-        }
-
-        .top-inner {
-          max-width: 1360px;
-          width: calc(100% - 80px);
-          height: 90px;
-          margin: auto;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .logo {
-          color: #fff;
-          letter-spacing: .22em;
-          font-size: 25px;
-          font-weight: 700;
-        }
-
-        .top-link {
-          color: #e5d2ad;
-          font-size: 11px;
-          letter-spacing: .1em;
         }
 
         .hero {
@@ -613,15 +586,6 @@ export default function OrderPage() {
         }
 
         @media (max-width: 700px) {
-          .top-inner {
-            width: calc(100% - 36px);
-            height: 74px;
-          }
-
-          .logo {
-            font-size: 21px;
-          }
-
           .hero {
             padding: 75px 20px 100px;
           }
@@ -686,17 +650,7 @@ export default function OrderPage() {
         }
       `}</style>
 
-      <header className="top">
-        <div className="top-inner">
-          <Link href="/" className="logo">
-            SINKMOA
-          </Link>
-
-          <Link href="/#brands" className="top-link">
-            VIEW COLLECTION ↗
-          </Link>
-        </div>
-      </header>
+      <SiteHeader />
 
       <section className="hero">
         <span className="eyebrow">
@@ -735,7 +689,9 @@ export default function OrderPage() {
                 setProductId("");
               }}
             >
-              <option value="">브랜드를 선택해주세요</option>
+              <option value="">
+                브랜드를 선택해주세요
+              </option>
 
               {Object.entries(BRANDS).map(
                 ([slug, item]) => (
