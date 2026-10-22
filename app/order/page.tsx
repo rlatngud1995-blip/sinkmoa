@@ -2,12 +2,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const PHONE = "01094134686";
-const INSTALL_PRICE = 170000;
-const DRAIN_PRICE = 20000;
-const CUTTING_PRICE = 50000;
+
+const PRICES = {
+  installation: 170000,
+  stainlessDrain: 20000,
+  cutting: 50000,
+  faucet6way: 70000,
+};
 
 const BRANDS = [
   { value: "regens", name: "리젠스" },
@@ -16,8 +20,9 @@ const BRANDS = [
   { value: "baekjo", name: "백조" },
 ];
 
-const money = (value: number) =>
-  value.toLocaleString("ko-KR") + "원";
+function formatPrice(value: number) {
+  return value.toLocaleString("ko-KR") + "원";
+}
 
 export default function OrderPage() {
   const [brand, setBrand] = useState("");
@@ -25,12 +30,15 @@ export default function OrderPage() {
   const [productPrice, setProductPrice] = useState("");
 
   const [installation, setInstallation] =
-    useState("product");
+    useState(false);
 
   const [stainlessDrain, setStainlessDrain] =
     useState(false);
 
   const [cutting, setCutting] = useState(false);
+
+  const [faucet6way, setFaucet6way] =
+    useState(false);
 
   const [customerName, setCustomerName] =
     useState("");
@@ -38,36 +46,69 @@ export default function OrderPage() {
   const [address, setAddress] = useState("");
   const [request, setRequest] = useState("");
 
-  const priceNumber =
+  useEffect(() => {
+    const params = new URLSearchParams(
+      window.location.search
+    );
+
+    const selectedBrand = params.get("brand");
+
+    if (
+      selectedBrand &&
+      BRANDS.some(
+        (item) => item.value === selectedBrand
+      )
+    ) {
+      setBrand(selectedBrand);
+    }
+  }, []);
+
+  const productAmount =
     Number(productPrice) > 0
       ? Number(productPrice)
       : 0;
 
-  const installFee =
-    installation === "install"
-      ? INSTALL_PRICE
+  const installationAmount = installation
+    ? PRICES.installation
+    : 0;
+
+  const drainAmount = stainlessDrain
+    ? PRICES.stainlessDrain
+    : 0;
+
+  const cuttingAmount =
+    installation && cutting
+      ? PRICES.cutting
       : 0;
 
-  const drainFee =
-    stainlessDrain ? DRAIN_PRICE : 0;
-
-  const cuttingFee =
-    installation === "install" && cutting
-      ? CUTTING_PRICE
+  const faucetAmount =
+    installation && faucet6way
+      ? PRICES.faucet6way
       : 0;
 
   const total =
-    priceNumber +
-    installFee +
-    drainFee +
-    cuttingFee;
+    productAmount +
+    installationAmount +
+    drainAmount +
+    cuttingAmount +
+    faucetAmount;
 
-  const selectedBrand =
-    BRANDS.find((item) => item.value === brand);
+  const selectedBrand = BRANDS.find(
+    (item) => item.value === brand
+  );
 
-  const handleSMS = () => {
+  function changeInstallation(value: boolean) {
+    setInstallation(value);
+
+    if (!value) {
+      setCutting(false);
+      setFaucet6way(false);
+    }
+  }
+
+  function handleSMS() {
     if (!brand) {
-      alert("제품 브랜드를 선택해주세요.");
+      alert("브랜드를 선택해주세요.");
       return;
     }
 
@@ -89,47 +130,59 @@ export default function OrderPage() {
     const message = [
       "[싱크모아 주문 문의]",
       "",
+      "■ 제품 정보",
       `브랜드: ${selectedBrand?.name}`,
-      `제품 모델명: ${model}`,
+      `모델명: ${model}`,
       `구매 방식: ${
-        installation === "install"
-          ? "제품 + 설치"
-          : "제품만 구매"
+        installation
+          ? "싱크볼 제품 + 설치"
+          : "싱크볼 제품만 구매"
       }`,
       "",
-      "[추가 옵션]",
+      "■ 선택 옵션",
       `올스텐 배수구: ${
-        stainlessDrain
-          ? "추가 (+20,000원)"
-          : "선택 안 함"
+        stainlessDrain ? "선택" : "미선택"
       }`,
       `상판 타공: ${
-        installation === "install" && cutting
-          ? "추가 (+50,000원)"
-          : "선택 안 함"
+        cuttingAmount > 0 ? "선택" : "미선택"
+      }`,
+      `6WAY 수전: ${
+        faucetAmount > 0
+          ? "제품 구매 + 무료 교체 설치"
+          : "미선택"
       }`,
       "",
-      "[예상 금액]",
-      `제품 가격: ${
-        priceNumber > 0
-          ? money(priceNumber)
+      "■ 예상 금액",
+      `싱크볼 제품: ${
+        productAmount > 0
+          ? formatPrice(productAmount)
           : "상담 후 안내"
       }`,
-      `설치비: ${money(installFee)}`,
-      `올스텐 배수구: ${money(drainFee)}`,
-      `상판 타공: ${money(cuttingFee)}`,
+      `싱크볼 설치비: ${
+        formatPrice(installationAmount)
+      }`,
+      `올스텐 배수구: ${
+        formatPrice(drainAmount)
+      }`,
+      `상판 타공: ${
+        formatPrice(cuttingAmount)
+      }`,
+      `6WAY 수전 제품: ${
+        formatPrice(faucetAmount)
+      }`,
+      "6WAY 수전 교체 설치비: 무료",
       `예상 총금액: ${
-        priceNumber > 0
-          ? money(total)
+        productAmount > 0
+          ? formatPrice(total)
           : "제품 가격 확인 후 안내"
       }`,
       "",
-      "[고객 정보]",
+      "■ 고객 정보",
       `성함: ${customerName}`,
       `배송/설치 지역: ${address}`,
       `요청사항: ${request || "없음"}`,
       "",
-      "제품 구매 및 설치 상담 부탁드립니다.",
+      "구매 및 설치 상담 부탁드립니다.",
     ].join("\n");
 
     const separator =
@@ -138,10 +191,10 @@ export default function OrderPage() {
         : "?";
 
     window.location.href =
-      `sms:${PHONE}${separator}body=${
-        encodeURIComponent(message)
-      }`;
-  };
+      `sms:${PHONE}${separator}body=${encodeURIComponent(
+        message
+      )}`;
+  }
 
   return (
     <main className="order-page">
@@ -150,18 +203,16 @@ export default function OrderPage() {
           min-height: 100vh;
           background: #f7f5f0;
           color: #19262b;
-          font-family: Arial,
-            "Apple SD Gothic Neo",
-            "Malgun Gothic", sans-serif;
+          font-family: Arial, sans-serif;
         }
 
-        .order-header {
+        .header {
           background: #19262b;
-          padding: 24px 20px;
           text-align: center;
+          padding: 25px 20px;
         }
 
-        .order-logo {
+        .logo {
           color: #e5d2ad;
           font-size: 26px;
           letter-spacing: 4px;
@@ -169,11 +220,11 @@ export default function OrderPage() {
           text-decoration: none;
         }
 
-        .order-hero {
+        .hero {
           background: #19262b;
           color: white;
-          padding: 65px 20px 85px;
           text-align: center;
+          padding: 65px 20px 85px;
         }
 
         .eyebrow {
@@ -182,44 +233,42 @@ export default function OrderPage() {
           letter-spacing: 3px;
         }
 
-        .order-hero h1 {
+        .hero h1 {
           font-size: clamp(30px, 5vw, 48px);
           font-weight: 500;
           margin: 20px 0;
         }
 
-        .order-hero p:last-child {
-          color: #c9c9c9;
-          line-height: 1.8;
+        .hero p:last-child {
+          color: #d1d1d1;
+          line-height: 1.9;
           font-size: 14px;
         }
 
-        .order-container {
+        .container {
           width: min(760px, calc(100% - 28px));
           margin: -35px auto 0;
           position: relative;
           padding-bottom: 90px;
         }
 
-        .order-card {
+        .card {
           background: white;
           border: 1px solid #e8e3da;
           padding: 36px;
           margin-bottom: 20px;
-          box-shadow: 0 12px 35px
-            rgba(0, 0, 0, 0.035);
         }
 
-        .card-label {
+        .section-label {
           font-size: 11px;
           color: #a89576;
           letter-spacing: 2px;
         }
 
-        .order-card h2 {
+        .card h2 {
           font-size: 23px;
-          font-weight: 600;
           margin: 12px 0 28px;
+          font-weight: 600;
         }
 
         .field {
@@ -236,21 +285,14 @@ export default function OrderPage() {
         .field input,
         .field select,
         .field textarea {
-          display: block;
           width: 100%;
           padding: 15px;
-          background: white;
           border: 1px solid #dedbd4;
-          border-radius: 0;
+          background: white;
           color: #19262b;
           font-size: 14px;
-          outline: none;
-        }
-
-        .field input:focus,
-        .field select:focus,
-        .field textarea:focus {
-          border-color: #c4b49a;
+          border-radius: 0;
+          box-sizing: border-box;
         }
 
         .option {
@@ -267,6 +309,11 @@ export default function OrderPage() {
         .option.active {
           border-color: #b8a17b;
           background: #faf8f4;
+        }
+
+        .option.disabled {
+          opacity: 0.45;
+          cursor: not-allowed;
         }
 
         .option-left {
@@ -289,6 +336,13 @@ export default function OrderPage() {
           font-size: 13px;
           color: #8e7857;
           white-space: nowrap;
+        }
+
+        .helper {
+          font-size: 12px;
+          color: #777;
+          line-height: 1.9;
+          margin-top: 18px;
         }
 
         .summary {
@@ -323,17 +377,16 @@ export default function OrderPage() {
 
         .summary-total strong {
           color: #e5d2ad;
-          font-size: 27px;
+          font-size: 26px;
         }
 
         .sms-button {
-          display: block;
           width: 100%;
           padding: 20px;
           margin-top: 22px;
           background: #c4b49a;
           color: #19262b;
-          border: 0;
+          border: none;
           font-size: 15px;
           font-weight: 700;
           cursor: pointer;
@@ -356,7 +409,7 @@ export default function OrderPage() {
         }
 
         @media (max-width: 600px) {
-          .order-card {
+          .card {
             padding: 25px 19px;
           }
 
@@ -365,44 +418,55 @@ export default function OrderPage() {
           }
 
           .summary-total strong {
-            font-size: 23px;
+            font-size: 22px;
+          }
+
+          .option strong {
+            font-size: 12px;
+          }
+
+          .option-price {
+            font-size: 12px;
           }
         }
       `}</style>
 
-      <header className="order-header">
-        <Link href="/" className="order-logo">
+      <header className="header">
+        <Link href="/" className="logo">
           SINKMOA
         </Link>
       </header>
 
-      <section className="order-hero">
+      <section className="hero">
         <p className="eyebrow">
           PREMIUM KITCHEN COLLECTION
         </p>
         <h1>주문 및 설치 문의</h1>
         <p>
-          제품 선택부터 설치까지
+          싱크볼 제품 선택부터 설치까지
           <br />
-          싱크모아에서 편리하게 상담받으세요.
+          편리하게 상담받으세요.
         </p>
       </section>
 
-      <div className="order-container">
-        <section className="order-card">
-          <p className="card-label">01 / PRODUCT</p>
+      <div className="container">
+        <section className="card">
+          <p className="section-label">
+            01 / PRODUCT
+          </p>
           <h2>제품 선택</h2>
 
           <div className="field">
-            <label htmlFor="brand">제품 브랜드 *</label>
+            <label>제품 브랜드 *</label>
             <select
-              id="brand"
               value={brand}
               onChange={(e) =>
                 setBrand(e.target.value)
               }
             >
-              <option value="">브랜드 선택</option>
+              <option value="">
+                브랜드 선택
+              </option>
               {BRANDS.map((item) => (
                 <option
                   key={item.value}
@@ -415,56 +479,51 @@ export default function OrderPage() {
           </div>
 
           <div className="field">
-            <label htmlFor="model">제품 모델명 *</label>
+            <label>제품 모델명 *</label>
             <input
-              id="model"
               value={model}
               onChange={(e) =>
                 setModel(e.target.value)
               }
-              placeholder="구매 희망 모델명"
+              placeholder="제품 모델명 입력"
             />
           </div>
 
           <div className="field">
-            <label htmlFor="price">
-              제품 가격 (원)
-            </label>
+            <label>싱크볼 제품 가격 (원)</label>
             <input
-              id="price"
               type="number"
               min="0"
               value={productPrice}
               onChange={(e) =>
                 setProductPrice(e.target.value)
               }
-              placeholder="가격을 모르면 비워두세요"
+              placeholder="모르면 비워두세요"
             />
           </div>
         </section>
 
-        <section className="order-card">
-          <p className="card-label">02 / OPTIONS</p>
+        <section className="card">
+          <p className="section-label">
+            02 / OPTIONS
+          </p>
           <h2>구매 및 설치 옵션</h2>
 
           <label
             className={`option ${
-              installation === "product"
-                ? "active"
-                : ""
+              !installation ? "active" : ""
             }`}
           >
             <span className="option-left">
               <input
                 type="radio"
                 name="installation"
-                checked={installation === "product"}
-                onChange={() => {
-                  setInstallation("product");
-                  setCutting(false);
-                }}
+                checked={!installation}
+                onChange={() =>
+                  changeInstallation(false)
+                }
               />
-              <strong>제품만 구매</strong>
+              <strong>싱크볼 제품만 구매</strong>
             </span>
             <span className="option-price">
               설치비 없음
@@ -473,21 +532,19 @@ export default function OrderPage() {
 
           <label
             className={`option ${
-              installation === "install"
-                ? "active"
-                : ""
+              installation ? "active" : ""
             }`}
           >
             <span className="option-left">
               <input
                 type="radio"
                 name="installation"
-                checked={installation === "install"}
+                checked={installation}
                 onChange={() =>
-                  setInstallation("install")
+                  changeInstallation(true)
                 }
               />
-              <strong>제품 + 설치</strong>
+              <strong>싱크볼 제품 + 설치</strong>
             </span>
             <span className="option-price">
               +170,000원
@@ -509,7 +566,7 @@ export default function OrderPage() {
                   setStainlessDrain(e.target.checked)
                 }
               />
-              <strong>올스텐 배수구 추가</strong>
+              <strong>올스텐 배수구</strong>
             </span>
             <span className="option-price">
               +20,000원
@@ -519,52 +576,73 @@ export default function OrderPage() {
           <label
             className={`option ${
               cutting ? "active" : ""
+            } ${
+              !installation ? "disabled" : ""
             }`}
-            style={{
-              opacity:
-                installation === "install"
-                  ? 1
-                  : 0.45,
-            }}
           >
             <span className="option-left">
               <input
                 type="checkbox"
-                disabled={installation !== "install"}
+                disabled={!installation}
                 checked={cutting}
                 onChange={(e) =>
                   setCutting(e.target.checked)
                 }
               />
-              <strong>상판 타공 추가</strong>
+              <strong>상판 타공</strong>
             </span>
             <span className="option-price">
               +50,000원
             </span>
           </label>
 
-          <p style={{
-            fontSize: 12,
-            color: "#777",
-            lineHeight: 1.8,
-            marginTop: 20,
-          }}>
-            기본 배수구는 제품 가격에 포함됩니다.
-            설치비에는 기본 수전 연결 및
-            배수구 연결 시공이 포함됩니다.
-            상판 타공은 설치 포함 주문 시 선택할 수
-            있습니다.
+          <label
+            className={`option ${
+              faucet6way ? "active" : ""
+            } ${
+              !installation ? "disabled" : ""
+            }`}
+          >
+            <span className="option-left">
+              <input
+                type="checkbox"
+                disabled={!installation}
+                checked={faucet6way}
+                onChange={(e) =>
+                  setFaucet6way(e.target.checked)
+                }
+              />
+              <strong>
+                6WAY 수전 제품 + 무료 교체 설치
+              </strong>
+            </span>
+            <span className="option-price">
+              +70,000원
+            </span>
+          </label>
+
+          <p className="helper">
+            기본 배수구는 싱크볼 제품 가격에
+            포함됩니다.
+            <br />
+            기본 설치비에는 수전 연결 및 배수구
+            연결 작업이 포함됩니다.
+            <br />
+            6WAY 수전은 싱크볼 설치 주문 시에만
+            추가할 수 있으며 교체 설치비는
+            무료입니다.
           </p>
         </section>
 
-        <section className="order-card">
-          <p className="card-label">03 / CUSTOMER</p>
+        <section className="card">
+          <p className="section-label">
+            03 / CUSTOMER
+          </p>
           <h2>고객 정보</h2>
 
           <div className="field">
-            <label htmlFor="name">고객 성함 *</label>
+            <label>고객 성함 *</label>
             <input
-              id="name"
               value={customerName}
               onChange={(e) =>
                 setCustomerName(e.target.value)
@@ -574,11 +652,8 @@ export default function OrderPage() {
           </div>
 
           <div className="field">
-            <label htmlFor="address">
-              배송 또는 설치 지역 *
-            </label>
+            <label>배송 또는 설치 지역 *</label>
             <input
-              id="address"
               value={address}
               onChange={(e) =>
                 setAddress(e.target.value)
@@ -588,11 +663,8 @@ export default function OrderPage() {
           </div>
 
           <div className="field">
-            <label htmlFor="request">
-              추가 요청사항
-            </label>
+            <label>추가 요청사항</label>
             <textarea
-              id="request"
               rows={4}
               value={request}
               onChange={(e) =>
@@ -607,39 +679,60 @@ export default function OrderPage() {
           <h2>ORDER SUMMARY</h2>
 
           <div className="summary-row">
-            <span>제품 가격</span>
+            <span>싱크볼 제품</span>
             <span>
-              {priceNumber > 0
-                ? money(priceNumber)
+              {productAmount > 0
+                ? formatPrice(productAmount)
                 : "상담 후 안내"}
             </span>
           </div>
 
           <div className="summary-row">
-            <span>기본 설치비</span>
-            <span>{money(installFee)}</span>
+            <span>싱크볼 설치비</span>
+            <span>
+              {formatPrice(installationAmount)}
+            </span>
           </div>
 
           <div className="summary-row">
             <span>올스텐 배수구</span>
-            <span>{money(drainFee)}</span>
+            <span>
+              {formatPrice(drainAmount)}
+            </span>
           </div>
 
           <div className="summary-row">
             <span>상판 타공</span>
-            <span>{money(cuttingFee)}</span>
+            <span>
+              {formatPrice(cuttingAmount)}
+            </span>
           </div>
+
+          <div className="summary-row">
+            <span>6WAY 수전 제품</span>
+            <span>
+              {formatPrice(faucetAmount)}
+            </span>
+          </div>
+
+          {faucet6way && installation && (
+            <div className="summary-row">
+              <span>6WAY 수전 교체 설치비</span>
+              <span>무료</span>
+            </div>
+          )}
 
           <div className="summary-total">
             <span>예상 총금액</span>
             <strong>
-              {priceNumber > 0
-                ? money(total)
+              {productAmount > 0
+                ? formatPrice(total)
                 : "견적 문의"}
             </strong>
           </div>
 
           <button
+            type="button"
             className="sms-button"
             onClick={handleSMS}
           >
@@ -648,11 +741,11 @@ export default function OrderPage() {
 
           <p className="notice">
             문자 버튼을 누르면 휴대폰 문자 앱이
-            실행됩니다. 작성된 내용을 확인한 후
-            직접 전송해주세요.
+            실행됩니다. 고객이 직접 전송해야
+            문의가 접수됩니다.
             <br />
-            현장 상황 및 추가 작업 여부에 따라
-            최종 견적이 달라질 수 있습니다.
+            현장 상태에 따라 최종 견적은
+            달라질 수 있습니다.
           </p>
         </section>
 
