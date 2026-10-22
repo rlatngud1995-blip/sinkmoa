@@ -1,6 +1,7 @@
 
 import Link from "next/link";
 import type { Metadata } from "next";
+import SiteHeader from "../components/SiteHeader";
 
 export const metadata: Metadata = {
   title: "구매·배송·설치 안내 | 싱크모아",
@@ -91,33 +92,6 @@ export default function GuidePage() {
 
         .guide-page a {
           text-decoration: none;
-        }
-
-        .guide-header {
-          background: #19262b;
-          border-bottom: 1px solid rgba(255,255,255,.12);
-        }
-
-        .guide-header-inner {
-          max-width: 1250px;
-          width: calc(100% - 48px);
-          height: 86px;
-          margin: auto;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-
-        .guide-logo {
-          color: white;
-          font-size: 24px;
-          font-weight: 700;
-          letter-spacing: .22em;
-        }
-
-        .guide-header-link {
-          color: #d4c2a3;
-          font-size: 12px;
         }
 
         .guide-hero {
@@ -358,14 +332,6 @@ export default function GuidePage() {
         }
 
         @media (max-width: 650px) {
-          .guide-header-inner {
-            height: 74px;
-          }
-
-          .guide-logo {
-            font-size: 21px;
-          }
-
           .guide-hero {
             padding: 75px 20px 90px;
           }
@@ -397,17 +363,7 @@ export default function GuidePage() {
         }
       `}</style>
 
-      <header className="guide-header">
-        <div className="guide-header-inner">
-          <Link href="/" className="guide-logo">
-            SINKMOA
-          </Link>
-
-          <Link href="/order" className="guide-header-link">
-            ORDER & CONSULTATION ↗
-          </Link>
-        </div>
-      </header>
+      <SiteHeader />
 
       <section className="guide-hero">
         <span className="guide-eyebrow">
@@ -471,7 +427,9 @@ export default function GuidePage() {
                 현장으로 가져가 설치합니다.
               </p>
 
-              <strong>제품가격 + 기본 설치비 170,000원</strong>
+              <strong>
+                제품가격 + 기본 설치비 170,000원
+              </strong>
             </article>
           </div>
         </div>
