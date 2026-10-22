@@ -59,13 +59,34 @@ const brands = [
   },
 ];
 
+const navigation = [
+  {
+    label: "브랜드별 상품",
+    href: "/#brands",
+  },
+  {
+    label: "설치 서비스",
+    href: "/#service",
+  },
+  {
+    label: "구매·배송 안내",
+    href: "/guide",
+  },
+  {
+    label: "주문·견적 문의",
+    href: "/order",
+  },
+];
+
 export default function Home() {
   const [current, setCurrent] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % slides.length);
+      setCurrent(
+        (prev) => (prev + 1) % slides.length
+      );
     }, 5500);
 
     return () => clearInterval(timer);
@@ -130,14 +151,14 @@ export default function Home() {
         .sinkmoa-home .desktop-nav {
           display: flex;
           align-items: center;
-          gap: 38px;
+          gap: 34px;
         }
 
         .sinkmoa-home .desktop-nav a {
-          color: rgba(255,255,255,.88);
-          font-size: 11px;
-          font-weight: 600;
-          letter-spacing: .16em;
+          color: rgba(255,255,255,.9);
+          font-size: 13px;
+          font-weight: 500;
+          letter-spacing: -.02em;
           transition: color .25s;
         }
 
@@ -159,6 +180,19 @@ export default function Home() {
           height: 1px;
           background: white;
           margin: 6px 0;
+          transition: transform .2s, opacity .2s;
+        }
+
+        .sinkmoa-home .menu-button.open span:first-child {
+          transform: translateY(7px) rotate(45deg);
+        }
+
+        .sinkmoa-home .menu-button.open span:nth-child(2) {
+          opacity: 0;
+        }
+
+        .sinkmoa-home .menu-button.open span:last-child {
+          transform: translateY(-7px) rotate(-45deg);
         }
 
         .sinkmoa-home .mobile-nav {
@@ -245,9 +279,8 @@ export default function Home() {
           padding: 18px 22px;
           color: #fff;
           border: 1px solid rgba(255,255,255,.7);
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 600;
-          letter-spacing: .14em;
           transition: background .25s, color .25s;
         }
 
@@ -599,8 +632,7 @@ export default function Home() {
 
         .sinkmoa-home .footer-links a {
           color: #d4d8d7;
-          font-size: 11px;
-          letter-spacing: .12em;
+          font-size: 12px;
         }
 
         .sinkmoa-home .copyright {
@@ -773,19 +805,33 @@ export default function Home() {
             SINKMOA
           </Link>
 
-          <nav className="desktop-nav">
-            <Link href="/#brands">COLLECTION</Link>
-            <Link href="/#service">INSTALLATION</Link>
-            <Link href="/#about">OUR STORY</Link>
-            <Link href="/order">CONTACT</Link>
+          <nav
+            className="desktop-nav"
+            aria-label="주 메뉴"
+          >
+            {navigation.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+              >
+                {item.label}
+              </Link>
+            ))}
           </nav>
 
           <button
             type="button"
-            className="menu-button"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label={menuOpen ? "메뉴 닫기" : "메뉴 열기"}
+            className={`menu-button ${
+              menuOpen ? "open" : ""
+            }`}
+            onClick={() =>
+              setMenuOpen((prev) => !prev)
+            }
+            aria-label={
+              menuOpen ? "메뉴 닫기" : "메뉴 열기"
+            }
             aria-expanded={menuOpen}
+            aria-controls="mobile-navigation"
           >
             <span />
             <span />
@@ -794,31 +840,20 @@ export default function Home() {
         </div>
 
         {menuOpen && (
-          <nav className="mobile-nav">
-            <Link
-              href="/#brands"
-              onClick={() => setMenuOpen(false)}
-            >
-              브랜드 컬렉션
-            </Link>
-            <Link
-              href="/#service"
-              onClick={() => setMenuOpen(false)}
-            >
-              설치 서비스
-            </Link>
-            <Link
-              href="/#about"
-              onClick={() => setMenuOpen(false)}
-            >
-              싱크모아 소개
-            </Link>
-            <Link
-              href="/order"
-              onClick={() => setMenuOpen(false)}
-            >
-              주문 및 견적 문의
-            </Link>
+          <nav
+            className="mobile-nav"
+            id="mobile-navigation"
+            aria-label="모바일 메뉴"
+          >
+            {navigation.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMenuOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))}
           </nav>
         )}
       </header>
@@ -850,8 +885,11 @@ export default function Home() {
             {slides[current].description}
           </p>
 
-          <Link href="/#brands" className="outline-button">
-            EXPLORE COLLECTION
+          <Link
+            href="/#brands"
+            className="outline-button"
+          >
+            브랜드별 상품 보기
             <span>↗</span>
           </Link>
         </div>
@@ -862,8 +900,11 @@ export default function Home() {
               type="button"
               key={slide.image}
               onClick={() => setCurrent(index)}
-              className={current === index ? "selected" : ""}
+              className={
+                current === index ? "selected" : ""
+              }
               aria-label={`슬라이드 ${index + 1}`}
+              aria-pressed={current === index}
             />
           ))}
         </div>
@@ -875,7 +916,9 @@ export default function Home() {
 
       <section className="intro-section" id="about">
         <div className="intro-content">
-          <p className="section-label">THE SINKMOA STORY</p>
+          <p className="section-label">
+            THE SINKMOA STORY
+          </p>
 
           <h2>
             주방이라는 공간에
@@ -899,8 +942,12 @@ export default function Home() {
 
       <section className="brands-section" id="brands">
         <div className="section-heading">
-          <p className="section-label">CURATED COLLECTION</p>
-          <h2>Discover Our Brands</h2>
+          <p className="section-label">
+            CURATED COLLECTION
+          </p>
+
+          <h2>브랜드별 상품</h2>
+
           <p>
             당신의 주방에 어울리는 브랜드를 선택하세요.
           </p>
@@ -923,19 +970,25 @@ export default function Home() {
               <div className="brand-info">
                 <div>
                   <p>
-                    COLLECTION {brand.number} · {brand.korean}
+                    COLLECTION {brand.number} ·{" "}
+                    {brand.korean}
                   </p>
                   <h3>{brand.name}</h3>
                 </div>
 
-                <span className="brand-arrow">↗</span>
+                <span className="brand-arrow">
+                  ↗
+                </span>
               </div>
             </Link>
           ))}
         </div>
       </section>
 
-      <section className="service-section" id="service">
+      <section
+        className="service-section"
+        id="service"
+      >
         <div className="service-image">
           <img
             src="/installation.jpg"
@@ -976,7 +1029,10 @@ export default function Home() {
             추가 비용이 발생할 수 있습니다.
           </p>
 
-          <Link href="/order" className="gold-button">
+          <Link
+            href="/order"
+            className="gold-button"
+          >
             설치 상담하기
             <span>↗</span>
           </Link>
@@ -1000,7 +1056,10 @@ export default function Home() {
           싱크모아에서 편리하게 문의하세요.
         </p>
 
-        <Link href="/order" className="gold-button">
+        <Link
+          href="/order"
+          className="gold-button"
+        >
           주문 및 견적 문의
           <span>↗</span>
         </Link>
@@ -1009,14 +1068,24 @@ export default function Home() {
       <footer className="footer">
         <div className="footer-inner">
           <h2>SINKMOA</h2>
-          <p>프리미엄 싱크볼 판매 및 설치 전문몰</p>
 
-          <div className="footer-links">
-            <Link href="/#brands">COLLECTION</Link>
-            <Link href="/#service">INSTALLATION</Link>
-            <Link href="/#about">OUR STORY</Link>
-            <Link href="/order">CONTACT</Link>
-          </div>
+          <p>
+            프리미엄 싱크볼 판매 및 설치 전문몰
+          </p>
+
+          <nav
+            className="footer-links"
+            aria-label="하단 메뉴"
+          >
+            {navigation.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
           <p className="copyright">
             © {new Date().getFullYear()} SINKMOA.
