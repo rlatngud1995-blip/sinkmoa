@@ -28,6 +28,7 @@ function formatPhone(value: string) {
   const digits = onlyDigits(value).slice(0, 11);
 
   if (digits.length <= 3) return digits;
+
   if (digits.length <= 7) {
     return `${digits.slice(0, 3)}-${digits.slice(3)}`;
   }
@@ -53,16 +54,12 @@ function validPhone(value: string) {
 
 function todayLocal() {
   const date = new Date();
-  const year = date.getFullYear();
-  const month = String(
-    date.getMonth() + 1
-  ).padStart(2, "0");
-  const day = String(date.getDate()).padStart(
-    2,
-    "0"
-  );
 
-  return `${year}-${month}-${day}`;
+  return `${date.getFullYear()}-${String(
+    date.getMonth() + 1
+  ).padStart(2, "0")}-${String(
+    date.getDate()
+  ).padStart(2, "0")}`;
 }
 
 export default function OrderPage() {
@@ -71,6 +68,7 @@ export default function OrderPage() {
 
   const [installation, setInstallation] =
     useState(false);
+
   const [drain, setDrain] = useState(false);
   const [cutting, setCutting] = useState(false);
   const [faucet, setFaucet] = useState(false);
@@ -78,10 +76,16 @@ export default function OrderPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [cutoutWidth, setCutoutWidth] = useState("");
-  const [cutoutDepth, setCutoutDepth] = useState("");
+
+  const [cutoutWidth, setCutoutWidth] =
+    useState("");
+
+  const [cutoutDepth, setCutoutDepth] =
+    useState("");
+
   const [preferredDate, setPreferredDate] =
     useState("");
+
   const [request, setRequest] = useState("");
 
   const [confirmOpen, setConfirmOpen] =
@@ -93,6 +97,7 @@ export default function OrderPage() {
     );
 
     const id = params.get("product");
+
     const selectedProduct = PRODUCTS.find(
       (item) => item.id === id
     );
@@ -125,13 +130,13 @@ export default function OrderPage() {
       }
     }
 
-    window.addEventListener(
+    document.addEventListener(
       "keydown",
       handleEscape
     );
 
     return () => {
-      window.removeEventListener(
+      document.removeEventListener(
         "keydown",
         handleEscape
       );
@@ -209,18 +214,18 @@ export default function OrderPage() {
     }
 
     if (!product) {
-      alert("주문할 제품 모델을 선택해주세요.");
+      alert("제품 모델을 선택해주세요.");
       return false;
     }
 
     if (!name.trim()) {
-      alert("고객 성함을 입력해주세요.");
+      alert("성함을 입력해주세요.");
       return false;
     }
 
     if (!validPhone(phone)) {
       alert(
-        "연락 가능한 휴대폰 번호를 정확히 입력해주세요."
+        "휴대폰 번호를 정확히 입력해주세요."
       );
       return false;
     }
@@ -240,7 +245,7 @@ export default function OrderPage() {
             Number(cutoutDepth) <= 0)))
     ) {
       alert(
-        "기존 상판 타공 치수를 올바르게 입력해주세요."
+        "상판 타공 치수를 올바르게 입력해주세요."
       );
       return false;
     }
@@ -261,6 +266,7 @@ export default function OrderPage() {
 
   function openConfirmation() {
     if (!validateOrder()) return;
+
     setConfirmOpen(true);
   }
 
@@ -335,9 +341,7 @@ export default function OrderPage() {
     const message = buildMessage();
 
     const separator =
-      /iPhone|iPad|iPod/i.test(
-        navigator.userAgent
-      )
+      /iPhone|iPad|iPod/i.test(navigator.userAgent)
         ? "&"
         : "?";
 
@@ -350,836 +354,267 @@ export default function OrderPage() {
   }
 
   return (
-    <main className="premium-order-page">
-      <style jsx>{`
-        .premium-order-page {
-          --ink: #19262b;
-          --gold: #c4b49a;
-          --ivory: #f7f5f0;
-          min-height: 100vh;
-          background: var(--ivory);
-          color: var(--ink);
-          font-family: Arial, "Apple SD Gothic Neo",
-            "Malgun Gothic", sans-serif;
-          word-break: keep-all;
-        }
-
-        .premium-order-page *,
-        .premium-order-page *::before,
-        .premium-order-page *::after {
-          box-sizing: border-box;
-        }
-
-        .premium-order-page a {
-          text-decoration: none;
-        }
-
-        .premium-order-page button,
-        .premium-order-page input,
-        .premium-order-page select,
-        .premium-order-page textarea {
-          font-family: inherit;
-        }
-
-        .hero {
-          background: #19262b;
-          color: white;
-          padding: 95px 20px 125px;
-          text-align: center;
-        }
-
-        .eyebrow {
-          display: block;
-          color: #a89576;
-          letter-spacing: .25em;
-          font-size: 11px;
-          font-weight: 700;
-        }
-
-        .hero h1 {
-          font-size: clamp(37px, 5vw, 58px);
-          font-weight: 400;
-          letter-spacing: -.045em;
-          margin: 22px 0;
-        }
-
-        .hero p {
-          color: #c4cccb;
-          line-height: 2;
-          font-size: 14px;
-          margin: 0;
-        }
-
-        .hero-line {
-          width: 42px;
-          height: 1px;
-          background: #c4b49a;
-          margin: 35px auto 0;
-        }
-
-        .wrap {
-          max-width: 1000px;
-          width: calc(100% - 40px);
-          margin: -48px auto 0;
-          position: relative;
-          z-index: 2;
-          padding-bottom: 95px;
-        }
-
-        .card {
-          background: white;
-          padding: 48px;
-          border: 1px solid #e5dfd5;
-          margin-bottom: 22px;
-        }
-
-        .card h2 {
-          font-size: clamp(24px, 3vw, 30px);
-          font-weight: 500;
-          letter-spacing: -.035em;
-          margin: 14px 0 32px;
-        }
-
-        .field {
-          margin-bottom: 25px;
-        }
-
-        .field label {
-          display: block;
-          font-weight: 600;
-          font-size: 13px;
-          margin-bottom: 12px;
-        }
-
-        .field select,
-        .field input,
-        .field textarea {
-          display: block;
-          width: 100%;
-          padding: 17px 18px;
-          border: 1px solid #ddd7cd;
-          border-radius: 0;
-          background: #fff;
-          color: #19262b;
-          font-size: 14px;
-          outline: none;
-          transition: border-color .2s;
-        }
-
-        .field select:focus,
-        .field input:focus,
-        .field textarea:focus {
-          border-color: #a89576;
-        }
-
-        .field select:disabled {
-          background: #f5f3ef;
-          color: #999;
-        }
-
-        .field textarea {
-          resize: vertical;
-          line-height: 1.8;
-        }
-
-        .field-hint {
-          color: #888;
-          font-size: 12px;
-          line-height: 1.8;
-          margin: 9px 0 0;
-        }
-
-        .field-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0,1fr));
-          gap: 16px;
-        }
-
-        .product-detail {
-          background: #f7f5f0;
-          border: 1px solid #e5dfd5;
-          padding: 25px;
-          margin-top: 10px;
-        }
-
-        .detail-top {
-          display: flex;
-          justify-content: space-between;
-          gap: 20px;
-          align-items: center;
-          padding-bottom: 17px;
-          border-bottom: 1px solid #ddd6cb;
-        }
-
-        .detail-top span {
-          font-size: 12px;
-          color: #777;
-        }
-
-        .detail-top strong {
-          font-size: 22px;
-          font-weight: 600;
-        }
-
-        .detail-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 15px;
-          padding-top: 18px;
-        }
-
-        .detail-row span {
-          color: #777;
-          font-size: 12px;
-          line-height: 1.7;
-        }
-
-        .detail-row strong {
-          font-size: 14px;
-          text-align: right;
-          line-height: 1.7;
-        }
-
-        .detail-note {
-          font-size: 11px;
-          color: #888;
-          line-height: 1.8;
-          margin: 15px 0 0;
-        }
-
-        .purchase-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 14px;
-          margin-bottom: 30px;
-        }
-
-        .purchase-card {
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-          border: 1px solid #ded8ce;
-          padding: 26px;
-          cursor: pointer;
-          transition: border-color .2s, background .2s;
-        }
-
-        .purchase-card.active {
-          background: #faf8f4;
-          border-color: #aa9270;
-        }
-
-        .purchase-card-top {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .purchase-card input {
-          accent-color: #a89576;
-          width: 19px;
-          height: 19px;
-          margin: 0;
-          flex-shrink: 0;
-        }
-
-        .purchase-card strong {
-          font-size: 15px;
-        }
-
-        .purchase-card-price {
-          color: #927a55;
-          font-size: 17px;
-          font-weight: 600;
-        }
-
-        .purchase-card-note {
-          color: #888;
-          font-size: 12px;
-          line-height: 1.8;
-        }
-
-        .option-heading {
-          font-size: 17px;
-          font-weight: 600;
-          margin: 35px 0 18px;
-        }
-
-        .option {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 20px;
-          border: 1px solid #e5e1da;
-          padding: 22px;
-          margin-bottom: 12px;
-          cursor: pointer;
-          transition: border-color .2s, background .2s;
-        }
-
-        .option.active {
-          background: #faf8f4;
-          border-color: #b8a17b;
-        }
-
-        .option.disabled {
-          opacity: .48;
-          cursor: not-allowed;
-          background: #f7f7f5;
-        }
-
-        .option-left {
-          display: flex;
-          align-items: flex-start;
-          gap: 13px;
-        }
-
-        .option input {
-          accent-color: #b8a17b;
-          width: 19px;
-          height: 19px;
-          margin-top: 1px;
-          flex-shrink: 0;
-        }
-
-        .option-title {
-          display: block;
-          font-size: 14px;
-          font-weight: 600;
-          margin-bottom: 6px;
-        }
-
-        .option-description {
-          display: block;
-          color: #888;
-          font-size: 12px;
-          line-height: 1.7;
-        }
-
-        .option-price {
-          color: #8e7857;
-          font-size: 15px;
-          font-weight: 600;
-          white-space: nowrap;
-        }
-
-        .helper {
-          color: #888;
-          font-size: 12px;
-          line-height: 2;
-          margin: 18px 0 0;
-        }
-
-        .installation-fields {
-          margin-top: 28px;
-          padding: 28px;
-          background: #faf8f4;
-          border: 1px solid #e5dfd5;
-        }
-
-        .installation-fields h3 {
-          font-size: 19px;
-          font-weight: 600;
-          margin: 0 0 12px;
-        }
-
-        .installation-fields > p {
-          color: #777;
-          font-size: 12px;
-          line-height: 1.9;
-          margin: 0 0 25px;
-        }
-
-        .summary {
-          background: #19262b;
-          color: white;
-          padding: 45px;
-        }
-
-        .summary-eyebrow {
-          color: #c4b49a;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: .25em;
-        }
-
-        .summary h2 {
-          color: #fff;
-          font-size: 30px;
-          font-weight: 400;
-          margin: 15px 0 28px;
-        }
-
-        .summary-row {
-          display: flex;
-          justify-content: space-between;
-          gap: 15px;
-          padding: 14px 0;
-          font-size: 13px;
-          color: #cbd2d0;
-          border-bottom: 1px solid rgba(255,255,255,.09);
-        }
-
-        .summary-row strong {
-          color: #fff;
-          font-weight: 500;
-          text-align: right;
-        }
-
-        .summary-total {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 15px;
-          padding-top: 30px;
-          margin-top: 12px;
-        }
-
-        .summary-total span {
-          font-size: 15px;
-        }
-
-        .summary-total strong {
-          color: #e5d2ad;
-          font-size: clamp(27px, 4vw, 39px);
-          font-weight: 500;
-          letter-spacing: -.04em;
-        }
-
-        .sms {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 15px;
-          background: #c4b49a;
-          color: #19262b;
-          padding: 23px 27px;
-          border: 0;
-          margin-top: 32px;
-          font-weight: 700;
-          font-size: 15px;
-          cursor: pointer;
-          transition: background .2s;
-        }
-
-        .sms:hover {
-          background: #d8c8ac;
-        }
-
-        .notice {
-          font-size: 12px;
-          color: #aeb9b7;
-          line-height: 2;
-          margin: 20px 0 0;
-        }
-
-        .back {
-          display: block;
-          text-align: center;
-          margin-top: 35px;
-          color: #777;
-          font-size: 13px;
-        }
-
-        .confirm-overlay {
-          position: fixed;
-          inset: 0;
-          z-index: 1000;
-          background: rgba(8,16,20,.78);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 18px;
-        }
-
-        .confirm-dialog {
-          width: 100%;
-          max-width: 560px;
-          max-height: calc(100dvh - 36px);
-          overflow-y: auto;
-          background: #f7f5f0;
-          padding: 35px;
-          color: #19262b;
-          box-shadow: 0 20px 80px rgba(0,0,0,.25);
-        }
-
-        .confirm-dialog h2 {
-          font-size: 28px;
-          font-weight: 500;
-          margin: 14px 0 12px;
-        }
-
-        .confirm-intro {
-          color: #777;
-          font-size: 13px;
-          line-height: 1.9;
-          margin-bottom: 25px;
-        }
-
-        .confirm-row {
-          display: flex;
-          justify-content: space-between;
-          gap: 15px;
-          border-bottom: 1px solid #ded8ce;
-          padding: 13px 0;
-          font-size: 13px;
-          line-height: 1.7;
-        }
-
-        .confirm-row span {
-          color: #777;
-          flex-shrink: 0;
-        }
-
-        .confirm-row strong {
-          text-align: right;
-          overflow-wrap: anywhere;
-        }
-
-        .confirm-total {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 15px;
-          padding: 25px 0;
-        }
-
-        .confirm-total strong {
-          color: #927a55;
-          font-size: 27px;
-        }
-
-        .confirm-actions {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 10px;
-        }
-
-        .confirm-actions button {
-          padding: 18px 10px;
-          border: 1px solid #19262b;
-          font-size: 13px;
-          font-weight: 700;
-          cursor: pointer;
-        }
-
-        .confirm-cancel {
-          background: transparent;
-          color: #19262b;
-        }
-
-        .confirm-send {
-          background: #19262b;
-          color: white;
-        }
-
-        .confirm-notice {
-          color: #777;
-          font-size: 12px;
-          line-height: 1.8;
-          margin: 18px 0 0;
-        }
-
-        @media (max-width: 700px) {
-          .hero {
-            padding: 75px 20px 100px;
-          }
-
-          .wrap {
-            width: calc(100% - 24px);
-            margin-top: -35px;
-            padding-bottom: 70px;
-          }
-
-          .card {
-            padding: 28px 22px;
-            margin-bottom: 14px;
-          }
-
-          .purchase-grid {
-            grid-template-columns: 1fr;
-            gap: 10px;
-          }
-
-          .purchase-card {
-            padding: 22px;
-          }
-
-          .option {
-            padding: 18px 15px;
-            gap: 10px;
-          }
-
-          .option-price {
-            font-size: 12px;
-          }
-
-          .option-title {
-            font-size: 13px;
-          }
-
-          .option-description {
-            font-size: 11px;
-          }
-
-          .product-detail {
-            padding: 20px;
-          }
-
-          .detail-top strong {
-            font-size: 18px;
-          }
-
-          .field-grid {
-            grid-template-columns: 1fr;
-            gap: 0;
-          }
-
-          .installation-fields {
-            padding: 22px 17px;
-          }
-
-          .summary {
-            padding: 30px 23px;
-          }
-
-          .summary-total {
-            align-items: flex-start;
-            flex-direction: column;
-          }
-
-          .sms {
-            padding: 20px;
-          }
-
-          .confirm-dialog {
-            padding: 25px 20px;
-          }
-
-          .confirm-dialog h2 {
-            font-size: 24px;
-          }
-
-          .confirm-total strong {
-            font-size: 23px;
-          }
-        }
-      `}</style>
-
+    <main className="order-page">
       <SiteHeader />
 
-      <section className="hero">
-        <span className="eyebrow">
-          SINKMOA PRIVATE CONSULTATION
-        </span>
+      {/* HERO */}
+      <section className="order-hero">
+        <div className="hero-inner">
+          <span className="hero-eyebrow">
+            SINKMOA · PRIVATE ORDER
+          </span>
 
-        <h1>주문 및 설치 상담</h1>
+          <h1>
+            나에게 맞는 싱크볼,
+            <br />
+            간편하게 선택하세요.
+          </h1>
 
-        <p>
-          원하는 싱크볼과 옵션을 선택하고
-          <br />
-          예상 금액을 확인해보세요.
-        </p>
+          <p>
+            제품 선택부터 설치 상담까지
+            <br />
+            싱크모아가 함께합니다.
+          </p>
 
-        <div className="hero-line" />
+          <div className="steps">
+            <span>
+              <b>01</b> 제품 선택
+            </span>
+            <i />
+            <span>
+              <b>02</b> 옵션 선택
+            </span>
+            <i />
+            <span>
+              <b>03</b> 문의 접수
+            </span>
+          </div>
+        </div>
       </section>
 
-      <div className="wrap">
-        <section className="card">
-          <span className="eyebrow">
-            STEP 01 — SELECT PRODUCT
-          </span>
-
-          <h2>싱크볼 제품 선택</h2>
-
-          <div className="field">
-            <label htmlFor="brand">
-              브랜드 선택 *
-            </label>
-
-            <select
-              id="brand"
-              value={brand}
-              onChange={(e) => {
-                setBrand(e.target.value);
-                setProductId("");
-                setConfirmOpen(false);
-              }}
-            >
-              <option value="">
-                브랜드를 선택해주세요
-              </option>
-
-              {Object.entries(BRANDS).map(
-                ([slug, item]) => (
-                  <option key={slug} value={slug}>
-                    {item.name} · {item.english}
-                  </option>
-                )
-              )}
-            </select>
-          </div>
-
-          <div className="field">
-            <label htmlFor="product">
-              제품 모델 선택 *
-            </label>
-
-            <select
-              id="product"
-              value={productId}
-              disabled={
-                !brand || availableProducts.length === 0
-              }
-              onChange={(e) => {
-                setProductId(e.target.value);
-                setConfirmOpen(false);
-              }}
-            >
-              <option value="">
-                {!brand
-                  ? "브랜드를 먼저 선택해주세요"
-                  : availableProducts.length
-                  ? "모델을 선택해주세요"
-                  : "등록된 모델이 없습니다"}
-              </option>
-
-              {availableProducts.map((item) => (
-                <option
-                  key={item.id}
-                  value={item.id}
-                >
-                  {item.name} · {formatPrice(item.price)}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {product && (
-            <div className="product-detail">
-              <div className="detail-top">
-                <span>제품 단독 판매가격</span>
-                <strong>
-                  {formatPrice(product.price)}
-                </strong>
-              </div>
-
-              <div className="detail-row">
-                <span>선택한 모델</span>
-                <strong>{product.name}</strong>
-              </div>
-
-              <div className="detail-row">
-                <span>설치 방식</span>
-                <strong>
-                  {product.installationType ??
-                    "상담 시 확인"}
-                </strong>
-              </div>
-
-              <div className="detail-row">
-                <span>
-                  상판 타공 사이즈
-                  <br />
-                  (가로 × 세로)
+      <div className="order-container">
+        <div className="form-column">
+          {/* STEP 01 */}
+          <section className="panel">
+            <div className="section-heading">
+              <div>
+                <span className="section-number">
+                  STEP 01 / PRODUCT
                 </span>
 
-                <strong>
-                  {product.width && product.depth
-                    ? `${product.width} × ${product.depth}mm`
-                    : "상담 시 확인"}
-                </strong>
+                <h2>싱크볼 제품 선택</h2>
               </div>
 
-              <p className="detail-note">
-                ※ 표시된 치수는 싱크볼 외경이 아닌
-                상판 타공 사이즈입니다.
-              </p>
+              <span className="section-icon">01</span>
             </div>
-          )}
 
-          <p className="helper">
-            상품 가격과 상판 타공 사이즈는
-            등록된 모델 정보를 기준으로 표시됩니다.
-            실제 설치 가능 여부는 기존 상판과
-            현장 상태 확인 후 안내합니다.
-          </p>
-        </section>
+            <div className="two-cols">
+              <div className="field">
+                <label htmlFor="brand">
+                  브랜드 <em>*</em>
+                </label>
 
-        <section className="card">
-          <span className="eyebrow">
-            STEP 02 — SELECT OPTIONS
-          </span>
+                <select
+                  id="brand"
+                  value={brand}
+                  onChange={(e) => {
+                    setBrand(e.target.value);
+                    setProductId("");
+                    setConfirmOpen(false);
+                  }}
+                >
+                  <option value="">
+                    브랜드를 선택해주세요
+                  </option>
 
-          <h2>구매 방식 및 추가 옵션</h2>
-
-          <div className="purchase-grid">
-            <label
-              className={`purchase-card ${
-                !installation ? "active" : ""
-              }`}
-            >
-              <div className="purchase-card-top">
-                <input
-                  type="radio"
-                  name="installation"
-                  checked={!installation}
-                  onChange={() =>
-                    changeInstallation(false)
-                  }
-                />
-                <strong>제품만 구매</strong>
+                  {Object.entries(BRANDS).map(
+                    ([slug, item]) => (
+                      <option
+                        key={slug}
+                        value={slug}
+                      >
+                        {item.name} · {item.english}
+                      </option>
+                    )
+                  )}
+                </select>
               </div>
 
-              <span className="purchase-card-price">
-                설치비 없음
-              </span>
+              <div className="field">
+                <label htmlFor="product">
+                  제품 모델 <em>*</em>
+                </label>
 
-              <span className="purchase-card-note">
-                싱크볼 제품을 택배로 받아보는 방식
-              </span>
-            </label>
+                <select
+                  id="product"
+                  value={productId}
+                  disabled={!brand}
+                  onChange={(e) => {
+                    setProductId(e.target.value);
+                    setConfirmOpen(false);
+                  }}
+                >
+                  <option value="">
+                    {!brand
+                      ? "브랜드를 먼저 선택해주세요"
+                      : "모델을 선택해주세요"}
+                  </option>
 
-            <label
-              className={`purchase-card ${
-                installation ? "active" : ""
-              }`}
-            >
-              <div className="purchase-card-top">
-                <input
-                  type="radio"
-                  name="installation"
-                  checked={installation}
-                  onChange={() =>
-                    changeInstallation(true)
-                  }
-                />
-                <strong>제품 + 설치</strong>
+                  {availableProducts.map((item) => (
+                    <option
+                      key={item.id}
+                      value={item.id}
+                    >
+                      {item.name} ·{" "}
+                      {formatPrice(item.price)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {product ? (
+              <div className="selected-product">
+                <div className="selected-info">
+                  <span className="selected-label">
+                    SELECTED PRODUCT
+                  </span>
+
+                  <h3>{product.name}</h3>
+
+                  <p>{brandName} 공식 모델 정보 기준</p>
+                </div>
+
+                <strong className="selected-price">
+                  {formatPrice(product.price)}
+                </strong>
+
+                <div className="product-spec">
+                  <span>
+                    설치 방식
+                    <strong>
+                      {product.installationType ??
+                        "상담 시 확인"}
+                    </strong>
+                  </span>
+
+                  <span>
+                    상판 타공 치수
+                    <strong>{cutoutSize}</strong>
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="empty-product">
+                <span className="empty-symbol">◇</span>
+
+                <div>
+                  <strong>
+                    원하는 제품을 선택해주세요.
+                  </strong>
+
+                  <p>
+                    모델 선택 시 가격과 타공 치수가
+                    자동으로 표시됩니다.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <p className="section-note">
+              ※ 표시된 타공 치수는 싱크볼 외경이
+              아닌 상판 타공 기준입니다. 실제 설치
+              가능 여부는 현장 확인 후 안내됩니다.
+            </p>
+          </section>
+
+          {/* STEP 02 */}
+          <section className="panel">
+            <div className="section-heading">
+              <div>
+                <span className="section-number">
+                  STEP 02 / OPTIONS
+                </span>
+
+                <h2>구매 방식 및 옵션</h2>
               </div>
 
-              <span className="purchase-card-price">
-                +170,000원
-              </span>
+              <span className="section-icon">02</span>
+            </div>
 
-              <span className="purchase-card-note">
-                기존 싱크볼 철거 및
-                기존 수전·배수구 연결 포함
-              </span>
-            </label>
-          </div>
+            <h3 className="subheading">
+              구매 방식
+            </h3>
 
-          <h3 className="option-heading">
-            추가 옵션 선택
-          </h3>
+            <div className="choice-grid">
+              <label
+                className={`choice ${
+                  !installation ? "active" : ""
+                }`}
+              >
+                <div className="choice-top">
+                  <input
+                    type="radio"
+                    name="purchase"
+                    checked={!installation}
+                    onChange={() =>
+                      changeInstallation(false)
+                    }
+                  />
 
-          <label
-            className={`option ${
-              drain ? "active" : ""
-            }`}
-          >
-            <span className="option-left">
+                  <strong>제품만 구매</strong>
+                </div>
+
+                <span className="choice-price">
+                  추가 설치비 없음
+                </span>
+
+                <small>
+                  싱크볼 제품을 택배로 받아보세요.
+                </small>
+              </label>
+
+              <label
+                className={`choice ${
+                  installation ? "active" : ""
+                }`}
+              >
+                <div className="choice-top">
+                  <input
+                    type="radio"
+                    name="purchase"
+                    checked={installation}
+                    onChange={() =>
+                      changeInstallation(true)
+                    }
+                  />
+
+                  <strong>제품 + 설치</strong>
+                </div>
+
+                <span className="choice-price">
+                  +170,000원
+                </span>
+
+                <small>
+                  기존 철거 및 수전·배수구 연결 포함
+                </small>
+              </label>
+            </div>
+
+            <div className="option-title-row">
+              <h3 className="subheading">
+                추가 옵션
+              </h3>
+
+              <span>필요한 옵션만 선택</span>
+            </div>
+
+            <label
+              className={`option-line ${
+                drain ? "checked" : ""
+              }`}
+            >
               <input
                 type="checkbox"
                 checked={drain}
@@ -1188,29 +623,24 @@ export default function OrderPage() {
                 }
               />
 
-              <span>
-                <span className="option-title">
-                  올스텐 배수구
-                </span>
-                <span className="option-description">
-                  기본 배수구에서 올스텐 배수구로 변경
-                </span>
+              <span className="option-copy">
+                <strong>올스텐 배수구</strong>
+
+                <small>
+                  기본 배수구에서 올스텐으로 변경
+                </small>
               </span>
-            </span>
 
-            <span className="option-price">
-              +20,000원
-            </span>
-          </label>
+              <b>+20,000원</b>
+            </label>
 
-          <label
-            className={`option ${
-              cutting ? "active" : ""
-            } ${
-              !installation ? "disabled" : ""
-            }`}
-          >
-            <span className="option-left">
+            <label
+              className={`option-line ${
+                cutting ? "checked" : ""
+              } ${
+                !installation ? "disabled" : ""
+              }`}
+            >
               <input
                 type="checkbox"
                 disabled={!installation}
@@ -1220,30 +650,24 @@ export default function OrderPage() {
                 }
               />
 
-              <span>
-                <span className="option-title">
-                  상판 타공
-                </span>
-                <span className="option-description">
+              <span className="option-copy">
+                <strong>상판 타공</strong>
+
+                <small>
                   기존 상판 타공 사이즈 변경
-                  · 설치 주문 시 선택 가능
-                </span>
+                </small>
               </span>
-            </span>
 
-            <span className="option-price">
-              +50,000원
-            </span>
-          </label>
+              <b>+50,000원</b>
+            </label>
 
-          <label
-            className={`option ${
-              faucet ? "active" : ""
-            } ${
-              !installation ? "disabled" : ""
-            }`}
-          >
-            <span className="option-left">
+            <label
+              className={`option-line ${
+                faucet ? "checked" : ""
+              } ${
+                !installation ? "disabled" : ""
+              }`}
+            >
               <input
                 type="checkbox"
                 disabled={!installation}
@@ -1253,297 +677,325 @@ export default function OrderPage() {
                 }
               />
 
-              <span>
-                <span className="option-title">
-                  6WAY 수전 제품
-                </span>
-                <span className="option-description">
-                  싱크볼 설치 시 수전 교체 시공비 무료
-                </span>
+              <span className="option-copy">
+                <strong>6WAY 수전 제품</strong>
+
+                <small>
+                  설치 주문 시 수전 교체 시공비 무료
+                </small>
               </span>
-            </span>
 
-            <span className="option-price">
-              +70,000원
-            </span>
-          </label>
-
-          <p className="helper">
-            기본 배수구는 제품 가격에 포함됩니다.
-            올스텐 배수구는 제품만 구매해도
-            선택할 수 있습니다. 상판 타공과
-            6WAY 수전은 설치 주문 시에만
-            선택 가능합니다.
-          </p>
-        </section>
-
-        <section className="card">
-          <span className="eyebrow">
-            STEP 03 — CUSTOMER INFORMATION
-          </span>
-
-          <h2>고객 정보 입력</h2>
-
-          <div className="field">
-            <label htmlFor="name">
-              성함 *
+              <b>+70,000원</b>
             </label>
 
-            <input
-              id="name"
-              value={name}
-              onChange={(e) =>
-                setName(e.target.value)
-              }
-              placeholder="성함을 입력해주세요"
-              autoComplete="name"
-              maxLength={40}
-            />
-          </div>
-
-          <div className="field">
-            <label htmlFor="phone">
-              휴대폰 번호 *
-            </label>
-
-            <input
-              id="phone"
-              type="tel"
-              inputMode="tel"
-              value={phone}
-              onChange={(e) =>
-                setPhone(formatPhone(e.target.value))
-              }
-              placeholder="010-1234-5678"
-              autoComplete="tel"
-              maxLength={13}
-            />
-
-            <p className="field-hint">
-              상담 연락을 받을 휴대폰 번호를
-              입력해주세요.
+            <p className="section-note">
+              기본 배수구는 제품 가격에 포함됩니다.
+              올스텐 배수구는 제품만 구매할 때도
+              선택할 수 있습니다. 상판 타공과
+              6WAY 수전은 설치 주문 시에만
+              선택 가능합니다.
             </p>
-          </div>
+          </section>
 
-          <div className="field">
-            <label htmlFor="address">
-              {addressLabel} *
-            </label>
+          {/* STEP 03 */}
+          <section className="panel">
+            <div className="section-heading">
+              <div>
+                <span className="section-number">
+                  STEP 03 / CUSTOMER
+                </span>
 
-            <input
-              id="address"
-              value={address}
-              onChange={(e) =>
-                setAddress(e.target.value)
-              }
-              placeholder={
-                installation
-                  ? "예: 경기도 안산시 단원구 ○○로 00, 101동 101호"
-                  : "예: 서울시 강남구 ○○로 00, 101동 101호"
-              }
-              autoComplete="street-address"
-              maxLength={200}
-            />
-
-            <p className="field-hint">
-              {installation
-                ? "설치 방문이 필요한 주소를 입력해주세요."
-                : "제품을 택배로 받을 주소를 입력해주세요."}
-            </p>
-          </div>
-
-          {installation && (
-            <div className="installation-fields">
-              <h3>설치 환경 및 희망 일정</h3>
-
-              <p>
-                기존 상판 타공 사이즈를 알고
-                계시면 입력해주세요.
-                치수를 모르셔도 상담 신청은 가능합니다.
-              </p>
-
-              <div className="field-grid">
-                <div className="field">
-                  <label htmlFor="cutoutWidth">
-                    기존 상판 타공 가로 (mm)
-                  </label>
-
-                  <input
-                    id="cutoutWidth"
-                    type="number"
-                    min="1"
-                    step="1"
-                    inputMode="numeric"
-                    value={cutoutWidth}
-                    onChange={(e) =>
-                      setCutoutWidth(e.target.value)
-                    }
-                    placeholder="예: 780"
-                  />
-                </div>
-
-                <div className="field">
-                  <label htmlFor="cutoutDepth">
-                    기존 상판 타공 세로 (mm)
-                  </label>
-
-                  <input
-                    id="cutoutDepth"
-                    type="number"
-                    min="1"
-                    step="1"
-                    inputMode="numeric"
-                    value={cutoutDepth}
-                    onChange={(e) =>
-                      setCutoutDepth(e.target.value)
-                    }
-                    placeholder="예: 400"
-                  />
-                </div>
+                <h2>고객 정보 입력</h2>
               </div>
 
-              <p className="field-hint">
-                제품에 표시된 타공 사이즈와
-                현재 주방 상판의 실제 타공 치수를
-                구분해서 입력해주세요.
-              </p>
+              <span className="section-icon">03</span>
+            </div>
 
-              <div
-                className="field"
-                style={{ marginTop: 25 }}
-              >
-                <label htmlFor="preferredDate">
-                  희망 설치 날짜
+            <div className="two-cols">
+              <div className="field">
+                <label htmlFor="name">
+                  성함 <em>*</em>
                 </label>
 
                 <input
-                  id="preferredDate"
-                  type="date"
-                  min={todayLocal()}
-                  value={preferredDate}
+                  id="name"
+                  value={name}
                   onChange={(e) =>
-                    setPreferredDate(e.target.value)
+                    setName(e.target.value)
                   }
+                  placeholder="성함 입력"
+                  autoComplete="name"
+                  maxLength={40}
                 />
+              </div>
 
-                <p className="field-hint">
-                  희망 날짜이며, 실제 설치 일정은
-                  상담 후 확정됩니다.
-                </p>
+              <div className="field">
+                <label htmlFor="phone">
+                  휴대폰 번호 <em>*</em>
+                </label>
+
+                <input
+                  id="phone"
+                  type="tel"
+                  inputMode="tel"
+                  value={phone}
+                  onChange={(e) =>
+                    setPhone(
+                      formatPhone(e.target.value)
+                    )
+                  }
+                  placeholder="010-1234-5678"
+                  autoComplete="tel"
+                  maxLength={13}
+                />
               </div>
             </div>
-          )}
 
-          <div
-            className="field"
-            style={{ marginTop: 28 }}
-          >
-            <label htmlFor="request">
-              추가 요청사항
-            </label>
+            <div className="field">
+              <label htmlFor="address">
+                {addressLabel} <em>*</em>
+              </label>
 
-            <textarea
-              id="request"
-              rows={5}
-              value={request}
-              onChange={(e) =>
-                setRequest(e.target.value)
-              }
-              placeholder="상판 재질, 배송 관련 요청, 기존 싱크볼 상태 등 추가로 알려주실 내용을 입력해주세요."
-              maxLength={1000}
-            />
-          </div>
-        </section>
+              <input
+                id="address"
+                value={address}
+                onChange={(e) =>
+                  setAddress(e.target.value)
+                }
+                placeholder={
+                  installation
+                    ? "설치 방문 주소를 입력해주세요"
+                    : "제품 배송 주소를 입력해주세요"
+                }
+                autoComplete="street-address"
+                maxLength={200}
+              />
+            </div>
 
-        <section className="summary">
-          <span className="summary-eyebrow">
-            YOUR ORDER SUMMARY
-          </span>
+            {installation && (
+              <div className="install-extra">
+                <div className="subheading">
+                  설치 환경 및 희망 일정
+                  <span>선택 입력</span>
+                </div>
 
-          <h2>예상 주문 금액</h2>
+                <p>
+                  기존 상판 타공 치수를 모르셔도
+                  상담 신청이 가능합니다.
+                </p>
 
-          <div className="summary-row">
-            <span>싱크볼 제품</span>
+                <div className="two-cols">
+                  <div className="field">
+                    <label htmlFor="cutoutWidth">
+                      기존 타공 가로 (mm)
+                    </label>
+
+                    <input
+                      id="cutoutWidth"
+                      type="number"
+                      min="1"
+                      step="1"
+                      inputMode="numeric"
+                      value={cutoutWidth}
+                      onChange={(e) =>
+                        setCutoutWidth(
+                          e.target.value
+                        )
+                      }
+                      placeholder="예: 780"
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label htmlFor="cutoutDepth">
+                      기존 타공 세로 (mm)
+                    </label>
+
+                    <input
+                      id="cutoutDepth"
+                      type="number"
+                      min="1"
+                      step="1"
+                      inputMode="numeric"
+                      value={cutoutDepth}
+                      onChange={(e) =>
+                        setCutoutDepth(
+                          e.target.value
+                        )
+                      }
+                      placeholder="예: 400"
+                    />
+                  </div>
+                </div>
+
+                <div className="field">
+                  <label htmlFor="preferredDate">
+                    희망 설치 날짜
+                  </label>
+
+                  <input
+                    id="preferredDate"
+                    type="date"
+                    min={todayLocal()}
+                    value={preferredDate}
+                    onChange={(e) =>
+                      setPreferredDate(
+                        e.target.value
+                      )
+                    }
+                  />
+
+                  <p className="field-help">
+                    실제 설치 일정은 상담 후
+                    확정됩니다.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="field">
+              <label htmlFor="request">
+                추가 요청사항
+              </label>
+
+              <textarea
+                id="request"
+                rows={4}
+                value={request}
+                onChange={(e) =>
+                  setRequest(e.target.value)
+                }
+                placeholder="상판 재질, 기존 싱크볼 상태, 배송 및 설치 관련 요청사항 등을 입력해주세요."
+                maxLength={1000}
+              />
+            </div>
+          </section>
+        </div>
+
+        {/* ORDER SUMMARY */}
+        <aside className="summary-column">
+          <section className="summary-box">
+            <span className="summary-eyebrow">
+              YOUR ORDER SUMMARY
+            </span>
+
+            <h2>예상 주문 금액</h2>
+
+            <div className="summary-rows">
+              <div>
+                <span>싱크볼 제품</span>
+                <strong>
+                  {product
+                    ? formatPrice(productPrice)
+                    : "제품 선택 필요"}
+                </strong>
+              </div>
+
+              <div>
+                <span>기본 설치</span>
+                <strong>
+                  {formatPrice(installPrice)}
+                </strong>
+              </div>
+
+              <div>
+                <span>올스텐 배수구</span>
+                <strong>
+                  {formatPrice(drainPrice)}
+                </strong>
+              </div>
+
+              <div>
+                <span>상판 타공</span>
+                <strong>
+                  {formatPrice(cuttingPrice)}
+                </strong>
+              </div>
+
+              <div>
+                <span>6WAY 수전 제품</span>
+                <strong>
+                  {formatPrice(faucetPrice)}
+                </strong>
+              </div>
+            </div>
+
+            <div className="total-row">
+              <span>예상 총금액</span>
+
+              <strong>
+                {product
+                  ? formatPrice(total)
+                  : "견적 문의"}
+              </strong>
+            </div>
+
+            <button
+              type="button"
+              className="submit-order"
+              onClick={openConfirmation}
+            >
+              주문 내용 확인하기
+              <span>↗</span>
+            </button>
+
+            <p className="summary-notice">
+              주문 내용 확인 후 문자 앱으로
+              이동합니다. 문자를 직접 전송해야
+              문의가 접수됩니다.
+              <br />
+              <br />
+              배송비, 현장 상태, 타공 가능 여부에
+              따라 최종 금액이 달라질 수 있습니다.
+            </p>
+          </section>
+
+          <div className="service-note">
             <strong>
-              {product
-                ? formatPrice(productPrice)
-                : "모델 선택 필요"}
+              SINKMOA INSTALLATION SERVICE
             </strong>
+
+            <p>
+              제품 선택부터 설치 상담까지,
+              <br />
+              싱크모아가 꼼꼼하게 안내합니다.
+            </p>
           </div>
-
-          <div className="summary-row">
-            <span>기본 설치</span>
-            <strong>
-              {formatPrice(installPrice)}
-            </strong>
-          </div>
-
-          <div className="summary-row">
-            <span>올스텐 배수구</span>
-            <strong>
-              {formatPrice(drainPrice)}
-            </strong>
-          </div>
-
-          <div className="summary-row">
-            <span>상판 타공</span>
-            <strong>
-              {formatPrice(cuttingPrice)}
-            </strong>
-          </div>
-
-          <div className="summary-row">
-            <span>6WAY 수전 제품</span>
-            <strong>
-              {formatPrice(faucetPrice)}
-            </strong>
-          </div>
-
-          <div className="summary-total">
-            <span>예상 총금액</span>
-
-            <strong>
-              {product
-                ? formatPrice(total)
-                : "견적 문의"}
-            </strong>
-          </div>
-
-          <button
-            type="button"
-            className="sms"
-            onClick={openConfirmation}
-          >
-            주문 내용 확인 후 문자 문의
-            <span>↗</span>
-          </button>
-
-          <p className="notice">
-            주문 내용을 확인한 뒤 문자 앱으로
-            이동합니다. 문자 앱에서 고객이
-            직접 전송해야 문의가 접수됩니다.
-            <br />
-            표시된 금액은 예상금액이며,
-            배송비, 상판 재질, 타공 가능 여부 및
-            현장 상태에 따라 최종 견적이
-            달라질 수 있습니다.
-          </p>
-        </section>
-
-        <Link href="/" className="back">
-          ← 싱크모아 메인으로 돌아가기
-        </Link>
+        </aside>
       </div>
 
+      <Link href="/" className="return-link">
+        ← 싱크모아 메인으로 돌아가기
+      </Link>
+
+      {/* CONFIRMATION */}
       {confirmOpen && (
-        <div className="confirm-overlay">
+        <div
+          className="confirm-overlay"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) {
+              setConfirmOpen(false);
+            }
+          }}
+        >
           <div
             className="confirm-dialog"
             role="dialog"
             aria-modal="true"
             aria-labelledby="confirm-title"
           >
-            <span className="eyebrow">
+            <button
+              type="button"
+              className="dialog-close"
+              aria-label="닫기"
+              onClick={() =>
+                setConfirmOpen(false)
+              }
+            >
+              ×
+            </button>
+
+            <span className="section-number">
               FINAL ORDER REVIEW
             </span>
 
@@ -1551,104 +1003,79 @@ export default function OrderPage() {
               주문 내용 최종 확인
             </h2>
 
-            <p className="confirm-intro">
+            <p className="dialog-intro">
               아래 내용을 확인해주세요.
-              확인 후 문자 앱으로 이동하며,
-              문자를 직접 전송해야 상담이 접수됩니다.
+              문자 앱에서 직접 전송해야
+              상담이 접수됩니다.
             </p>
 
-            <div className="confirm-row">
-              <span>브랜드</span>
-              <strong>{brandName}</strong>
-            </div>
-
-            <div className="confirm-row">
-              <span>제품</span>
-              <strong>{product?.name}</strong>
-            </div>
-
-            <div className="confirm-row">
-              <span>구매 방식</span>
-              <strong>
-                {installation
+            {[
+              ["브랜드", brandName],
+              ["제품", product?.name ?? ""],
+              [
+                "구매 방식",
+                installation
                   ? "제품 + 설치"
-                  : "제품만 구매"}
-              </strong>
-            </div>
+                  : "제품만 구매",
+              ],
+              [
+                "올스텐 배수구",
+                drain ? "선택" : "미선택",
+              ],
+              ...(installation
+                ? [
+                    [
+                      "상판 타공",
+                      cutting ? "선택" : "미선택",
+                    ],
+                    [
+                      "6WAY 수전",
+                      faucet ? "선택" : "미선택",
+                    ],
+                  ]
+                : []),
+              ["성함", name.trim()],
+              ["연락처", formatPhone(phone)],
+              [addressLabel, address.trim()],
+              ...(installation
+                ? [
+                    [
+                      "기존 상판 타공",
+                      existingCutout,
+                    ],
+                    [
+                      "희망 설치 날짜",
+                      preferredDate ||
+                        "일정 상담 희망",
+                    ],
+                  ]
+                : []),
+              [
+                "요청사항",
+                request.trim() || "없음",
+              ],
+            ].map(([label, value]) => (
+              <div
+                className="review-row"
+                key={label}
+              >
+                <span>{label}</span>
+                <strong>{value}</strong>
+              </div>
+            ))}
 
-            <div className="confirm-row">
-              <span>올스텐 배수구</span>
-              <strong>
-                {drain ? "선택" : "미선택"}
-              </strong>
-            </div>
-
-            {installation && (
-              <>
-                <div className="confirm-row">
-                  <span>상판 타공</span>
-                  <strong>
-                    {cutting ? "선택" : "미선택"}
-                  </strong>
-                </div>
-
-                <div className="confirm-row">
-                  <span>6WAY 수전 제품</span>
-                  <strong>
-                    {faucet ? "선택" : "미선택"}
-                  </strong>
-                </div>
-              </>
-            )}
-
-            <div className="confirm-row">
-              <span>성함</span>
-              <strong>{name.trim()}</strong>
-            </div>
-
-            <div className="confirm-row">
-              <span>연락처</span>
-              <strong>{formatPhone(phone)}</strong>
-            </div>
-
-            <div className="confirm-row">
-              <span>{addressLabel}</span>
-              <strong>{address.trim()}</strong>
-            </div>
-
-            {installation && (
-              <>
-                <div className="confirm-row">
-                  <span>기존 상판 타공</span>
-                  <strong>{existingCutout}</strong>
-                </div>
-
-                <div className="confirm-row">
-                  <span>희망 설치 날짜</span>
-                  <strong>
-                    {preferredDate ||
-                      "일정 상담 희망"}
-                  </strong>
-                </div>
-              </>
-            )}
-
-            <div className="confirm-row">
-              <span>추가 요청사항</span>
-              <strong>
-                {request.trim() || "없음"}
-              </strong>
-            </div>
-
-            <div className="confirm-total">
+            <div className="review-total">
               <span>예상 총금액</span>
-              <strong>{formatPrice(total)}</strong>
+
+              <strong>
+                {formatPrice(total)}
+              </strong>
             </div>
 
-            <div className="confirm-actions">
+            <div className="dialog-actions">
               <button
                 type="button"
-                className="confirm-cancel"
+                className="edit-button"
                 onClick={() =>
                   setConfirmOpen(false)
                 }
@@ -1658,15 +1085,15 @@ export default function OrderPage() {
 
               <button
                 type="button"
-                className="confirm-send"
+                className="send-button"
                 onClick={sendSMS}
               >
                 문자 앱 열기 ↗
               </button>
             </div>
 
-            <p className="confirm-notice">
-              상담 문자 수신 번호: 010-9413-4686
+            <p className="dialog-foot">
+              문자 수신 번호: 010-9413-4686
               <br />
               실제 결제나 주문 확정이 아닌
               상담 요청 단계입니다.
@@ -1674,6 +1101,833 @@ export default function OrderPage() {
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        .order-page {
+          --ink: #19262b;
+          --gold: #c4b49a;
+          --ivory: #f7f5f0;
+          min-height: 100vh;
+          background: var(--ivory);
+          color: var(--ink);
+          font-family: Arial,
+            "Apple SD Gothic Neo",
+            "Malgun Gothic", sans-serif;
+          word-break: keep-all;
+        }
+
+        .order-page *,
+        .order-page *::before,
+        .order-page *::after {
+          box-sizing: border-box;
+        }
+
+        .order-page a {
+          text-decoration: none;
+        }
+
+        .order-page input,
+        .order-page select,
+        .order-page textarea,
+        .order-page button {
+          font-family: inherit;
+        }
+
+        .order-hero {
+          background: #19262b;
+          color: white;
+          padding: 80px 20px 115px;
+          text-align: center;
+        }
+
+        .hero-inner {
+          max-width: 800px;
+          margin: 0 auto;
+        }
+
+        .hero-eyebrow,
+        .section-number,
+        .summary-eyebrow {
+          display: block;
+          color: #a99577;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.2em;
+        }
+
+        .order-hero h1 {
+          font-size: clamp(35px, 5vw, 54px);
+          line-height: 1.35;
+          letter-spacing: -0.055em;
+          font-weight: 400;
+          margin: 22px 0;
+        }
+
+        .order-hero p {
+          color: #cbd1cf;
+          font-size: 14px;
+          line-height: 1.9;
+          margin: 0;
+        }
+
+        .steps {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 15px;
+          margin-top: 35px;
+          font-size: 12px;
+          color: #d6d9d6;
+        }
+
+        .steps span {
+          white-space: nowrap;
+        }
+
+        .steps b {
+          color: #c4b49a;
+          margin-right: 5px;
+        }
+
+        .steps i {
+          width: 25px;
+          height: 1px;
+          background: #6b7473;
+        }
+
+        .order-container {
+          max-width: 1200px;
+          padding: 0 20px;
+          margin: -45px auto 0;
+          position: relative;
+          z-index: 2;
+          display: grid;
+          grid-template-columns:
+            minmax(0, 1fr) 350px;
+          gap: 22px;
+          align-items: start;
+        }
+
+        .form-column {
+          min-width: 0;
+        }
+
+        .panel {
+          background: white;
+          border: 1px solid #e7e1d8;
+          padding: 38px;
+          margin-bottom: 18px;
+        }
+
+        .section-heading {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 30px;
+        }
+
+        .section-heading h2 {
+          font-size: 27px;
+          font-weight: 600;
+          letter-spacing: -0.045em;
+          margin: 13px 0 0;
+        }
+
+        .section-icon {
+          color: #e3d9c8;
+          font-size: 35px;
+          font-weight: 300;
+        }
+
+        .two-cols {
+          display: grid;
+          grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+          gap: 15px;
+        }
+
+        .field {
+          margin-bottom: 20px;
+          min-width: 0;
+        }
+
+        .field label {
+          display: block;
+          font-size: 12px;
+          font-weight: 700;
+          margin-bottom: 10px;
+        }
+
+        .field em {
+          color: #aa9270;
+          font-style: normal;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+          width: 100%;
+          min-width: 0;
+          padding: 15px;
+          border: 1px solid #ddd8cf;
+          border-radius: 4px;
+          background: #fff;
+          color: #19262b;
+          font-size: 13px;
+          outline: none;
+        }
+
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+          border-color: #a99577;
+        }
+
+        .field select:disabled {
+          background: #f5f4f1;
+          color: #999;
+        }
+
+        .field textarea {
+          resize: vertical;
+          line-height: 1.8;
+        }
+
+        .field-help {
+          color: #858580;
+          font-size: 11px;
+          line-height: 1.8;
+          margin: 8px 0 0;
+        }
+
+        .selected-product {
+          display: grid;
+          grid-template-columns:
+            minmax(0, 1fr) auto;
+          gap: 16px;
+          background: #f8f6f2;
+          border: 1px solid #e8e1d5;
+          padding: 22px;
+          margin-top: 5px;
+        }
+
+        .selected-label {
+          color: #9b8667;
+          font-size: 10px;
+          letter-spacing: 0.15em;
+          font-weight: 700;
+        }
+
+        .selected-info h3 {
+          font-size: 17px;
+          margin: 9px 0;
+        }
+
+        .selected-info p {
+          color: #888;
+          font-size: 11px;
+          margin: 0;
+        }
+
+        .selected-price {
+          color: #19262b;
+          font-size: 22px;
+          white-space: nowrap;
+        }
+
+        .product-spec {
+          grid-column: 1 / -1;
+          border-top: 1px solid #e4ded4;
+          padding-top: 15px;
+          display: flex;
+          gap: 30px;
+        }
+
+        .product-spec span {
+          color: #888;
+          font-size: 11px;
+        }
+
+        .product-spec strong {
+          display: block;
+          color: #19262b;
+          font-size: 12px;
+          margin-top: 7px;
+        }
+
+        .empty-product {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          background: #faf9f6;
+          border: 1px dashed #dcd5ca;
+          padding: 22px;
+        }
+
+        .empty-symbol {
+          font-size: 25px;
+          color: #b9a585;
+        }
+
+        .empty-product strong {
+          font-size: 13px;
+        }
+
+        .empty-product p {
+          font-size: 11px;
+          color: #888;
+          line-height: 1.7;
+          margin: 7px 0 0;
+        }
+
+        .section-note {
+          font-size: 11px;
+          color: #898985;
+          line-height: 1.9;
+          margin: 20px 0 0;
+        }
+
+        .subheading {
+          font-size: 15px;
+          font-weight: 700;
+          margin: 0 0 15px;
+        }
+
+        .choice-grid {
+          display: grid;
+          grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+          gap: 12px;
+          margin-bottom: 32px;
+        }
+
+        .choice {
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          min-height: 150px;
+          border: 1px solid #e2ddd4;
+          padding: 20px;
+          cursor: pointer;
+        }
+
+        .choice.active {
+          border-color: #a99577;
+          background: #faf8f4;
+        }
+
+        .choice-top {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .choice-top input,
+        .option-line input {
+          accent-color: #a99577;
+          width: 17px;
+          height: 17px;
+          flex-shrink: 0;
+          margin: 0;
+        }
+
+        .choice-top strong {
+          font-size: 14px;
+        }
+
+        .choice-price {
+          color: #967f5c;
+          font-size: 18px;
+          font-weight: 700;
+        }
+
+        .choice small {
+          color: #858580;
+          font-size: 11px;
+          line-height: 1.7;
+        }
+
+        .option-title-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          margin-bottom: 12px;
+        }
+
+        .option-title-row .subheading {
+          margin: 0;
+        }
+
+        .option-title-row > span {
+          color: #999;
+          font-size: 11px;
+        }
+
+        .option-line {
+          display: flex;
+          align-items: center;
+          gap: 13px;
+          padding: 17px 13px;
+          border-bottom: 1px solid #eae6df;
+          cursor: pointer;
+        }
+
+        .option-line.checked {
+          background: #faf8f4;
+        }
+
+        .option-line.disabled {
+          opacity: 0.45;
+          cursor: not-allowed;
+        }
+
+        .option-copy {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          flex: 1;
+          min-width: 0;
+        }
+
+        .option-copy strong {
+          font-size: 13px;
+        }
+
+        .option-copy small {
+          color: #888;
+          font-size: 11px;
+          line-height: 1.5;
+        }
+
+        .option-line > b {
+          color: #927b5a;
+          font-size: 13px;
+          white-space: nowrap;
+        }
+
+        .install-extra {
+          padding: 23px;
+          background: #faf8f4;
+          border: 1px solid #e7e1d8;
+          margin: 10px 0 23px;
+        }
+
+        .install-extra .subheading {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .install-extra .subheading span {
+          color: #a18e72;
+          font-size: 11px;
+          font-weight: 400;
+        }
+
+        .install-extra > p {
+          color: #888;
+          font-size: 11px;
+          line-height: 1.8;
+          margin: 0 0 22px;
+        }
+
+        .summary-column {
+          position: sticky;
+          top: 20px;
+        }
+
+        .summary-box {
+          background: #19262b;
+          color: white;
+          padding: 30px;
+        }
+
+        .summary-eyebrow {
+          color: #c4b49a;
+        }
+
+        .summary-box h2 {
+          font-size: 24px;
+          font-weight: 500;
+          letter-spacing: -0.04em;
+          margin: 13px 0 25px;
+        }
+
+        .summary-rows > div {
+          display: flex;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 12px 0;
+          border-bottom: 1px solid
+            rgba(255, 255, 255, 0.1);
+          font-size: 12px;
+        }
+
+        .summary-rows span {
+          color: #b9c1c0;
+        }
+
+        .summary-rows strong {
+          color: #fff;
+          text-align: right;
+          font-weight: 500;
+        }
+
+        .total-row {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+          padding: 25px 0;
+        }
+
+        .total-row span {
+          color: #d1d7d5;
+          font-size: 13px;
+        }
+
+        .total-row strong {
+          color: #e5d2ad;
+          font-size: 30px;
+          letter-spacing: -0.04em;
+        }
+
+        .submit-order {
+          width: 100%;
+          border: 0;
+          background: #c4b49a;
+          color: #19262b;
+          padding: 18px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+
+        .submit-order:hover {
+          background: #d7c8b0;
+        }
+
+        .submit-order span {
+          font-size: 20px;
+        }
+
+        .summary-notice {
+          color: #b7c0be;
+          font-size: 11px;
+          line-height: 1.9;
+          margin: 18px 0 0;
+        }
+
+        .service-note {
+          padding: 25px 10px;
+          text-align: center;
+        }
+
+        .service-note strong {
+          color: #a18e72;
+          font-size: 10px;
+          letter-spacing: 0.15em;
+        }
+
+        .service-note p {
+          color: #858580;
+          font-size: 12px;
+          line-height: 1.9;
+        }
+
+        .return-link {
+          display: block;
+          text-align: center;
+          padding: 35px 20px 80px;
+          color: #777;
+          font-size: 12px;
+        }
+
+        .confirm-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 18px;
+          background: rgba(8, 16, 20, 0.78);
+        }
+
+        .confirm-dialog {
+          position: relative;
+          width: 100%;
+          max-width: 520px;
+          max-height: calc(100dvh - 36px);
+          overflow-y: auto;
+          background: #fff;
+          padding: 35px;
+          color: #19262b;
+        }
+
+        .dialog-close {
+          position: absolute;
+          top: 13px;
+          right: 18px;
+          border: 0;
+          background: transparent;
+          color: #687170;
+          font-size: 28px;
+          cursor: pointer;
+        }
+
+        .confirm-dialog h2 {
+          font-size: 25px;
+          letter-spacing: -0.04em;
+          margin: 12px 0;
+        }
+
+        .dialog-intro {
+          font-size: 12px;
+          line-height: 1.8;
+          color: #777;
+          margin: 0 0 20px;
+        }
+
+        .review-row {
+          display: flex;
+          justify-content: space-between;
+          gap: 15px;
+          border-bottom: 1px solid #eae5dd;
+          padding: 11px 0;
+          font-size: 12px;
+          line-height: 1.6;
+        }
+
+        .review-row span {
+          flex-shrink: 0;
+          color: #858580;
+        }
+
+        .review-row strong {
+          text-align: right;
+          overflow-wrap: anywhere;
+          font-weight: 600;
+        }
+
+        .review-total {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+          padding: 23px 0;
+        }
+
+        .review-total span {
+          font-size: 13px;
+        }
+
+        .review-total strong {
+          font-size: 25px;
+          color: #927b5a;
+        }
+
+        .dialog-actions {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 9px;
+        }
+
+        .dialog-actions button {
+          padding: 15px 8px;
+          border: 1px solid #19262b;
+          font-size: 12px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+
+        .edit-button {
+          background: white;
+          color: #19262b;
+        }
+
+        .send-button {
+          background: #19262b;
+          color: white;
+        }
+
+        .dialog-foot {
+          font-size: 11px;
+          line-height: 1.9;
+          color: #898b88;
+          margin: 15px 0 0;
+        }
+
+        @media (max-width: 950px) {
+          .order-container {
+            grid-template-columns: minmax(0, 1fr);
+          }
+
+          .summary-column {
+            position: static;
+          }
+
+          .service-note {
+            display: none;
+          }
+
+          .summary-box {
+            padding: 30px;
+          }
+
+          .total-row {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+          }
+
+          .total-row strong {
+            font-size: 29px;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .order-hero {
+            padding: 61px 20px 88px;
+          }
+
+          .order-hero h1 {
+            font-size: 36px;
+          }
+
+          .order-hero p {
+            font-size: 13px;
+          }
+
+          .steps {
+            gap: 8px;
+            margin-top: 27px;
+            font-size: 10px;
+          }
+
+          .steps i {
+            width: 11px;
+          }
+
+          .steps b {
+            font-size: 10px;
+          }
+
+          .order-container {
+            margin-top: -35px;
+            padding: 0 12px;
+            gap: 0;
+          }
+
+          .panel {
+            padding: 25px 19px;
+            margin-bottom: 12px;
+          }
+
+          .section-heading {
+            margin-bottom: 23px;
+          }
+
+          .section-heading h2 {
+            font-size: 23px;
+          }
+
+          .two-cols {
+            grid-template-columns: 1fr;
+            gap: 0;
+          }
+
+          .field {
+            margin-bottom: 17px;
+          }
+
+          .choice-grid {
+            gap: 8px;
+          }
+
+          .choice {
+            padding: 15px 12px;
+            min-height: 151px;
+          }
+
+          .choice-top strong {
+            font-size: 12px;
+          }
+
+          .choice-price {
+            font-size: 15px;
+          }
+
+          .choice small {
+            font-size: 10px;
+          }
+
+          .option-line {
+            gap: 9px;
+          }
+
+          .option-copy strong,
+          .option-line > b {
+            font-size: 12px;
+          }
+
+          .option-copy small {
+            font-size: 10px;
+          }
+
+          .selected-product {
+            grid-template-columns: 1fr;
+          }
+
+          .selected-price {
+            font-size: 21px;
+          }
+
+          .product-spec {
+            grid-column: 1;
+          }
+
+          .install-extra {
+            padding: 16px 13px;
+          }
+
+          .install-extra .subheading {
+            display: block;
+          }
+
+          .install-extra .subheading span {
+            display: block;
+            text-align: left;
+            margin-top: 7px;
+          }
+
+          .summary-box {
+            padding: 27px 22px;
+          }
+
+          .total-row {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .return-link {
+            padding-bottom: 60px;
+          }
+
+          .confirm-dialog {
+            padding: 25px 19px;
+          }
+
+          .review-total strong {
+            font-size: 23px;
+          }
+        }
+      `}</style>
     </main>
   );
 }
