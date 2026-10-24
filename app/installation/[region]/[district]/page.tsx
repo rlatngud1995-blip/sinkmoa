@@ -1,646 +1,614 @@
-
-"use client";
-
-import { useEffect, useState } from "react";
-import Image from "next/image";
+import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+
 import {
   INSTALLATION_REGIONS,
-} from "./data/installation-regions";
+  getAllInstallationPaths,
+  getInstallationLocation,
+} from "../../../data/installation-regions";
 
-/* =========================================
-   SINKMOA 메인 홈페이지
+const SITE = "https://www.sinkmoa.com";
 
-   기존 기능 유지:
-   - BEFORE / AFTER 자동 슬라이드
-   - 브랜드별 상품
-   - 설치 서비스
-   - 주문 및 견적 문의
-   - 모바일 메뉴
+type PageProps = {
+  params: Promise<{
+    region: string;
+    district: string;
+  }>;
+};
 
-   추가 기능:
-   - 서울·경기·인천·충남·충북 지역 탭
-   - 지역별 시·군·구 페이지 연결
-   - 헤더/푸터 지역 메뉴
-========================================= */
+export const dynamicParams = false;
 
-const slides = [
-  {
-    image: "/IMG_0305.jpeg",
-    label: "BEFORE",
-    korean: "교체 전",
-    description: "기존 싱크볼",
-    position: "center center",
-  },
-  {
-    image: "/IMG_0395.jpeg",
-    label: "AFTER",
-    korean: "교체 완료",
-    description: "프리미엄 사각 싱크볼",
-    position: "center center",
-  },
-];
+export function generateStaticParams() {
+  return getAllInstallationPaths();
+}
 
-const brands = [
-  {
-    name: "REGENS",
-    korean: "리젠스",
-    image: "/IMG_1772.jpeg",
-    slug: "regens",
-    number: "01",
-  },
-  {
-    name: "BELLAGO",
-    korean: "벨라고",
-    image: "/IMG_1757.jpeg",
-    slug: "bellago",
-    number: "02",
-  },
-  {
-    name: "ARTISAN",
-    korean: "아티잔",
-    image: "/IMG_1771.jpeg",
-    slug: "artisan",
-    number: "03",
-  },
-  {
-    name: "BAEKJO",
-    korean: "백조",
-    image: "/IMG_1642.jpeg",
-    slug: "baekjo",
-    number: "04",
-  },
-];
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { region, district } = await params;
 
-const navigation = [
-  {
-    label: "브랜드별 상품",
-    href: "/#brands",
-  },
-  {
-    label: "설치 서비스",
-    href: "/#service",
-  },
-  {
-    label: "설치 가능 지역",
-    href: "/#regions",
-  },
-  {
-    label: "주문·견적 문의",
-    href: "/order",
-  },
-];
-
-const REGION_ORDER = [
-  "seoul",
-  "gyeonggi",
-  "incheon",
-  "chungnam",
-  "chungbuk",
-] as const;
-
-export default function Home() {
-  const [current, setCurrent] = useState(0);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  const [selectedRegion, setSelectedRegion] =
-    useState<string>("seoul");
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setCurrent(
-        (prev) => (prev + 1) % slides.length
-      );
-    }, 4500);
-
-    return () => window.clearInterval(timer);
-  }, []);
-
-  const activeRegion =
-    INSTALLATION_REGIONS[selectedRegion];
-
-  const totalDistricts = REGION_ORDER.reduce(
-    (sum, slug) =>
-      sum +
-      INSTALLATION_REGIONS[slug].districts.length,
-    0
+  const location = getInstallationLocation(
+    region,
+    district
   );
 
-  return (
-    <main className="sinkmoa-home">
-      {/* ==============================
-          헤더
-      ============================== */}
+  if (!location) {
+    return {
+      title: "지역을 찾을 수 없습니다 | 싱크모아",
+    };
+  }
 
-      <header className="site-header">
+  const title =
+    `${location.fullName} 싱크볼 교체·설치 | 싱크모아`;
+
+  const description =
+    `${location.fullName} 싱크볼 교체 및 설치 상담. ` +
+    `백조, 리젠스, 벨라고, 아티잔 사각싱크볼 판매 및 ` +
+    `기존 싱크볼 철거, 상판 타공, 수전·배수구 연결 안내. ` +
+    `기본 설치비 170,000원.`;
+
+  const url =
+    `${SITE}/installation/${region}/${district}`;
+
+  return {
+    title,
+    description,
+
+    alternates: {
+      canonical: url,
+    },
+
+    openGraph: {
+      title,
+      description,
+      url,
+      siteName: "싱크모아",
+      locale: "ko_KR",
+      type: "website",
+    },
+
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
+
+const PRODUCTS = [
+  {
+    brand: "백조",
+    model: "고니 8630",
+    price: 390000,
+    cutout: "780 × 400mm",
+    slug: "baekjo",
+  },
+  {
+    brand: "리젠스",
+    model: "8603 엠보",
+    price: 420000,
+    cutout: "780 × 400mm",
+    slug: "regens",
+  },
+  {
+    brand: "벨라고",
+    model: "BLE-858 벨리타 엠보",
+    price: 440000,
+    cutout: "794 × 404mm",
+    slug: "bellago",
+  },
+  {
+    brand: "아티잔",
+    model: "DU858BLR",
+    price: 420000,
+    cutout: "794 × 400mm",
+    slug: "artisan",
+  },
+];
+
+const STEPS = [
+  {
+    number: "01",
+    title: "기존 타공 확인",
+    description:
+      "기존 싱크볼과 상판 타공 치수를 확인합니다.",
+  },
+  {
+    number: "02",
+    title: "제품 상담",
+    description:
+      "원하시는 싱크볼 모델과 설치 가능 여부를 확인합니다.",
+  },
+  {
+    number: "03",
+    title: "기존 싱크볼 철거",
+    description:
+      "기존 싱크볼과 연결 부속을 분리합니다.",
+  },
+  {
+    number: "04",
+    title: "신규 싱크볼 설치",
+    description:
+      "필요한 상판 작업 후 새 싱크볼을 설치합니다.",
+  },
+  {
+    number: "05",
+    title: "연결 및 점검",
+    description:
+      "수전과 배수구를 연결하고 누수 여부를 확인합니다.",
+  },
+];
+
+function money(value: number) {
+  return `${value.toLocaleString("ko-KR")}원`;
+}
+
+export default async function InstallationPage({
+  params,
+}: PageProps) {
+  const { region, district } = await params;
+
+  const location = getInstallationLocation(
+    region,
+    district
+  );
+
+  if (!location) {
+    notFound();
+  }
+
+  const regionData =
+    INSTALLATION_REGIONS[region];
+
+  if (!regionData) {
+    notFound();
+  }
+
+  const nearby =
+    regionData.districts.filter(
+      (item) => item.slug !== district
+    );
+
+  const faq = [
+    {
+      q: `${location.districtName}에서 싱크볼 설치가 가능한가요?`,
+      a:
+        `${location.fullName} 지역의 싱크볼 교체 및 설치 상담을 접수하고 있습니다. ` +
+        `실제 방문 가능 여부와 일정은 주소 확인 후 안내드립니다.`,
+    },
+    {
+      q: "기본 설치비는 얼마인가요?",
+      a:
+        "기본 설치비는 170,000원이며 기존 싱크볼 철거와 기존 수전 및 배수구 연결 시공이 포함됩니다.",
+    },
+    {
+      q: "기존 타공 크기가 달라도 설치할 수 있나요?",
+      a:
+        "기존 상판 타공 치수와 신규 싱크볼 규격을 확인한 후 상판 타공 여부를 안내드립니다. 기본 상판 타공 옵션은 50,000원입니다.",
+    },
+    {
+      q: "어떤 브랜드를 설치할 수 있나요?",
+      a:
+        "백조, 리젠스, 벨라고, 아티잔 사각싱크볼 제품을 안내하고 있습니다.",
+    },
+  ];
+
+  const canonicalUrl =
+    `${SITE}/installation/${region}/${district}`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+
+    name:
+      `${location.fullName} 싱크볼 교체 및 설치`,
+
+    serviceType:
+      "싱크볼 교체 및 설치",
+
+    provider: {
+      "@type": "Organization",
+      name: "싱크모아",
+      url: SITE,
+    },
+
+    areaServed: {
+      "@type": "AdministrativeArea",
+      name: location.fullName,
+    },
+
+    url: canonicalUrl,
+  };
+
+  return (
+    <main className="installation-page">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(
+            /</g,
+            "\\u003c"
+          ),
+        }}
+      />
+
+      {/* HEADER */}
+
+      <header className="header">
         <div className="header-inner">
           <Link href="/" className="logo">
             SINKMOA
           </Link>
 
-          <nav
-            className="desktop-nav"
-            aria-label="메인 메뉴"
-          >
-            {navigation.map((item) => (
-              <Link
-                href={item.href}
-                key={item.href}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          <nav>
+            <Link href="/">
+              홈
+            </Link>
 
-          <button
-            type="button"
-            className="menu-button"
-            aria-label={
-              menuOpen ? "메뉴 닫기" : "메뉴 열기"
-            }
-            aria-expanded={menuOpen}
-            aria-controls="mobile-navigation"
-            onClick={() =>
-              setMenuOpen((prev) => !prev)
-            }
-          >
-            <span />
-            <span />
-            <span />
-          </button>
+            <Link href="/#regions">
+              설치 지역
+            </Link>
+
+            <Link
+              href="/order"
+              className="order-link"
+            >
+              주문 문의
+            </Link>
+          </nav>
         </div>
-
-        {menuOpen && (
-          <nav
-            id="mobile-navigation"
-            className="mobile-nav"
-            aria-label="모바일 메뉴"
-          >
-            {navigation.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMenuOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        )}
       </header>
 
-      {/* ==============================
-          BEFORE / AFTER 메인 사진
-      ============================== */}
+      {/* HERO */}
 
       <section className="hero">
-        {slides.map((slide, index) => (
-          <div
-            key={slide.label}
-            className={`hero-slide ${
-              current === index ? "active" : ""
-            }`}
-            aria-hidden={current !== index}
-          >
-            <Image
-              src={slide.image}
-              alt={`${slide.label} 싱크볼 시공 사진`}
-              fill
-              priority={index === 0}
-              sizes="100vw"
-              className="hero-photo"
-              style={{
-                objectPosition: slide.position,
-              }}
-            />
-          </div>
-        ))}
-
-        <div className="hero-overlay" />
-
-        <div className="hero-photo-top">
-          <p>SINKMOA REAL INSTALLATION</p>
-
-          <div className="hero-photo-badge">
-            <span className="badge-dot" />
-            <strong>
-              {slides[current].label}
-            </strong>
-            <span className="badge-divider" />
-            <span>
-              {slides[current].korean}
-            </span>
-          </div>
-        </div>
-
-        <div className="hero-photo-bottom">
-          <div className="photo-caption">
-            <p>REAL KITCHEN TRANSFORMATION</p>
-
-            <h1>
-              {slides[current].description}
-            </h1>
-          </div>
-
-          <div className="slide-controls">
-            {slides.map((slide, index) => (
-              <button
-                key={slide.label}
-                type="button"
-                className={
-                  current === index
-                    ? "selected"
-                    : ""
-                }
-                onClick={() =>
-                  setCurrent(index)
-                }
-                aria-label={`${slide.label} 사진 보기`}
-                aria-pressed={current === index}
-              >
-                <span className="control-line" />
-                <span className="control-label">
-                  {slide.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ==============================
-          메인 소개 및 버튼
-      ============================== */}
-
-      <section className="hero-intro">
-        <p className="section-label">
-          SINKMOA PREMIUM INSTALLATION
-        </p>
-
-        <h2>
-          싱크볼 하나로,
-          <br />
-          달라지는 주방.
-        </h2>
-
-        <div className="gold-line" />
-
-        <p className="hero-intro-description">
-          오래된 싱크볼의 새로운 변화.
-          <br />
-          제품 선택부터 설치 상담까지,
-          <br />
-          싱크모아가 함께합니다.
-        </p>
-
-        <div className="hero-intro-actions">
-          <Link
-            href="/#brands"
-            className="hero-primary"
-          >
-            브랜드별 상품 보기
-            <span>↗</span>
-          </Link>
-
-          <Link
-            href="/order"
-            className="hero-secondary"
-          >
-            설치 문의하기
-            <span>↗</span>
-          </Link>
-        </div>
-      </section>
-
-      {/* ==============================
-          싱크모아 소개
-      ============================== */}
-
-      <section className="intro-section">
-        <p className="section-label">
-          THE SINKMOA STORY
-        </p>
-
-        <h2>
-          주방이라는 공간에
-          <br />
-          새로운 가치를 더하다.
-        </h2>
-
-        <div className="gold-line" />
-
-        <p className="intro-description">
-          일상의 작은 순간이 머무는 주방.
-          <br />
-          싱크모아는 디자인과 실용성을
-          함께 고려한 싱크볼을 소개합니다.
-          <br />
-          제품 선택부터 설치 상담까지,
-          더 나은 주방을 위한 과정을 함께합니다.
-        </p>
-      </section>
-
-      {/* ==============================
-          브랜드별 상품
-      ============================== */}
-
-      <section
-        className="brands-section"
-        id="brands"
-      >
-        <div className="section-heading">
-          <p className="section-label">
-            CURATED COLLECTION
+        <div className="hero-inner">
+          <p className="eyebrow">
+            SINKMOA INSTALLATION SERVICE
           </p>
 
-          <h2>브랜드별 상품</h2>
-
-          <p>
-            당신의 주방에 어울리는
-            브랜드를 선택하세요.
-          </p>
-        </div>
-
-        <div className="brand-grid">
-          {brands.map((brand) => (
-            <Link
-              href={`/products/${brand.slug}`}
-              className="brand-card"
-              key={brand.slug}
-            >
-              <div className="brand-image">
-                <Image
-                  src={brand.image}
-                  alt={`${brand.korean} 싱크볼`}
-                  fill
-                  sizes="(max-width: 700px) 100vw, 50vw"
-                  className="brand-photo"
-                />
-              </div>
-
-              <div className="brand-info">
-                <div>
-                  <p>
-                    COLLECTION {brand.number}
-                    {" · "}
-                    {brand.korean}
-                  </p>
-
-                  <h3>{brand.name}</h3>
-                </div>
-
-                <span className="brand-arrow">
-                  ↗
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* ==============================
-          설치 서비스
-      ============================== */}
-
-      <section
-        className="service-section"
-        id="service"
-      >
-        <div className="service-image">
-          <Image
-            src="/E7583A13-ED40-4C57-A2F1-3E16709A382D.jpeg"
-            alt="싱크모아 싱크볼 기본 구성품"
-            fill
-            sizes="(max-width: 900px) 100vw, 50vw"
-            className="service-photo"
-          />
-        </div>
-
-        <div className="service-content">
-          <p className="section-label">
-            SINKMOA INSTALLATION
-          </p>
-
-          <h2>
-            좋은 제품의 선택,
+          <h1>
+            {location.fullName}
             <br />
-            그 이상의 완성.
-          </h2>
+            싱크볼 교체 · 설치
+          </h1>
 
           <div className="gold-line" />
 
-          <p className="service-description">
-            싱크볼 제품 선택부터 설치 상담까지.
+          <p className="hero-copy">
+            주방에 어울리는 사각싱크볼 선택부터
             <br />
-            기존 싱크볼의 상판 타공 사이즈와
-            현장 환경을 확인하여
-            적합한 시공 방법을 안내합니다.
-          </p>
-
-          <div className="service-price">
-            <span>기본 설치비</span>
-            <strong>170,000원</strong>
-          </div>
-
-          <p className="service-note">
-            기존 싱크볼 철거, 기존 수전 및
-            배수구 연결 시공 포함
+            기존 싱크볼 철거,
+            신규 설치와 연결 점검까지.
             <br />
-            상판 타공 및 현장 상황에 따라
-            추가 비용이 발생할 수 있습니다.
+            싱크모아에서 제품과 설치를
+            함께 상담하세요.
           </p>
 
           <Link
             href="/order"
             className="gold-button"
           >
-            설치 상담하기
+            주문 및 설치 문의
             <span>↗</span>
           </Link>
+
+          <p className="hero-note">
+            지역별 방문 가능 여부 및 일정은
+            상담 후 확인됩니다.
+          </p>
         </div>
       </section>
 
-      {/* ==============================
-          신규: 지역별 설치 안내
-      ============================== */}
+      {/* 지역 소개 */}
 
-      <section
-        className="regions-section"
-        id="regions"
-      >
-        <div className="regions-container">
+      <section className="intro-section">
+        <div className="content">
+          <div className="intro-grid">
+            <div>
+              <p className="section-label">
+                LOCAL INSTALLATION
+              </p>
+
+              <h2>
+                {location.districtName}
+                <br />
+                싱크볼 설치
+              </h2>
+            </div>
+
+            <div className="intro-copy">
+              <p>
+                싱크볼 교체 시 가장 먼저 확인할
+                부분은 기존 주방 상판의 타공
+                치수와 현장 상태입니다.
+              </p>
+
+              <p>
+                기존 규격과 선택하신 제품을
+                비교해 적합한 설치 방법과
+                필요한 추가 작업을 안내합니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PRODUCT */}
+
+      <section className="products-section">
+        <div className="content">
           <div className="section-heading">
             <p className="section-label">
-              SINKMOA SERVICE AREAS
+              AVAILABLE PRODUCTS
             </p>
 
             <h2>
-              우리 지역 싱크볼
-              <br className="mobile-only" />
-              {" "}설치 안내
+              {location.districtName}
+              <br />
+              싱크볼 제품 안내
             </h2>
 
             <p>
-              서울·경기·인천·충남·충북
-              <br />
-              지역을 선택해 싱크볼 교체 및
-              설치 안내를 확인하세요.
+              백조 · 리젠스 · 벨라고 · 아티잔
+              사각싱크볼을 비교해보세요.
             </p>
           </div>
 
-          <div className="regions-summary">
-            <div>
-              <span>INSTALLATION AREAS</span>
-              <strong>5개 광역 지역</strong>
-            </div>
+          <div className="product-grid">
+            {PRODUCTS.map((product) => (
+              <article
+                key={product.slug}
+                className="product-card"
+              >
+                <p className="brand-name">
+                  {product.brand}
+                </p>
 
-            <div>
-              <span>DISTRICT GUIDES</span>
+                <h3>
+                  {product.model}
+                </h3>
+
+                <p className="inset">
+                  INSET TYPE
+                </p>
+
+                <div className="spec">
+                  <span>
+                    상판 타공 치수
+                  </span>
+
+                  <strong>
+                    {product.cutout}
+                  </strong>
+                </div>
+
+                <div className="product-bottom">
+                  <strong>
+                    {money(product.price)}
+                  </strong>
+
+                  <Link
+                    href={`/products/${product.slug}`}
+                  >
+                    제품 보기 ↗
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <p className="small-note">
+            ※ 표시된 치수는 싱크볼 외경이 아닌
+            상판 타공 기준 치수입니다.
+          </p>
+        </div>
+      </section>
+
+      {/* PRICE */}
+
+      <section className="price-section">
+        <div className="content">
+          <div className="section-heading">
+            <p className="section-label">
+              INSTALLATION PRICE
+            </p>
+
+            <h2>
+              설치비 및
+              <br />
+              추가 옵션
+            </h2>
+          </div>
+
+          <div className="price-list">
+            <div className="price-row">
+              <div>
+                <h3>기본 설치비</h3>
+                <p>
+                  기존 싱크볼 철거 · 기존 수전
+                  및 배수구 연결
+                </p>
+              </div>
+
               <strong>
-                {totalDistricts}개 시·군·구
+                170,000원
               </strong>
             </div>
 
-            <div>
-              <span>INSTALLATION FEE</span>
-              <strong>기본 170,000원</strong>
-            </div>
-          </div>
-
-          <div
-            className="region-tabs"
-            role="tablist"
-            aria-label="설치 안내 지역 선택"
-          >
-            {REGION_ORDER.map((slug) => {
-              const regionData =
-                INSTALLATION_REGIONS[slug];
-
-              const active =
-                selectedRegion === slug;
-
-              return (
-                <button
-                  key={slug}
-                  id={`region-tab-${slug}`}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  aria-controls="region-district-panel"
-                  className={`region-tab ${
-                    active ? "active" : ""
-                  }`}
-                  onClick={() =>
-                    setSelectedRegion(slug)
-                  }
-                >
-                  <span>{regionData.name}</span>
-
-                  <small>
-                    {
-                      regionData.districts
-                        .length
-                    }개 지역
-                  </small>
-                </button>
-              );
-            })}
-          </div>
-
-          <div
-            className="region-panel"
-            id="region-district-panel"
-            role="tabpanel"
-            aria-labelledby={`region-tab-${selectedRegion}`}
-          >
-            <div className="region-panel-heading">
+            <div className="price-row">
               <div>
-                <p>SELECT YOUR DISTRICT</p>
-
                 <h3>
-                  {activeRegion.name} 싱크볼
-                  교체·설치
+                  올스텐 배수구
                 </h3>
-
-                <span>
-                  원하는 지역을 선택하면
-                  해당 지역의 설치 안내
-                  페이지로 이동합니다.
-                </span>
+                <p>
+                  배수구 업그레이드
+                </p>
               </div>
 
-              <span className="region-count">
-                {
-                  activeRegion.districts
-                    .length
-                }
-                <small> AREAS</small>
-              </span>
+              <strong>
+                +20,000원
+              </strong>
             </div>
 
-            <div className="district-grid">
-              {activeRegion.districts.map(
-                (district) => (
-                  <Link
-                    key={`${selectedRegion}-${district.slug}`}
-                    href={`/installation/${selectedRegion}/${district.slug}`}
-                    className="district-link"
-                  >
-                    <span>
-                      {district.name}
-                    </span>
+            <div className="price-row">
+              <div>
+                <h3>
+                  상판 타공
+                </h3>
+                <p>
+                  기존 타공 규격과 다른 경우
+                </p>
+              </div>
 
-                    <span
-                      className="district-arrow"
-                      aria-hidden="true"
-                    >
-                      ↗
-                    </span>
-                  </Link>
-                )
-              )}
-            </div>
-          </div>
-
-          <div className="regions-notice">
-            <div className="regions-notice-icon">
-              i
+              <strong>
+                +50,000원
+              </strong>
             </div>
 
-            <p>
-              서울·경기·인천·충남·충북
-              지역의 싱크볼 설치 상담을
-              접수하고 있습니다.
-              실제 방문 가능 여부와 일정,
-              출장 관련 추가 비용은
-              주소 및 현장 조건 확인 후
-              안내해드립니다.
-            </p>
+            <div className="price-row">
+              <div>
+                <h3>
+                  6WAY 수전
+                </h3>
+                <p>
+                  수전 제품 · 설치비 추가 없음
+                </p>
+              </div>
 
-            <Link href="/order">
-              설치 견적 문의 ↗
-            </Link>
+              <strong>
+                +70,000원
+              </strong>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ==============================
-          주문 문의
-      ============================== */}
+      {/* PROCESS */}
 
-      <section className="order-section">
-        <p className="section-label">
-          YOUR KITCHEN, OUR PRIORITY
+      <section className="process-section">
+        <div className="content">
+          <div className="section-heading">
+            <p className="section-label">
+              INSTALLATION PROCESS
+            </p>
+
+            <h2>
+              싱크볼 교체
+              <br />
+              진행 과정
+            </h2>
+          </div>
+
+          <div className="process-grid">
+            {STEPS.map((step) => (
+              <article
+                key={step.number}
+                className="process-card"
+              >
+                <span>
+                  {step.number}
+                </span>
+
+                <h3>
+                  {step.title}
+                </h3>
+
+                <p>
+                  {step.description}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+
+      <section className="faq-section">
+        <div className="content">
+          <div className="section-heading">
+            <p className="section-label">
+              FREQUENTLY ASKED QUESTIONS
+            </p>
+
+            <h2>
+              {location.districtName}
+              <br />
+              싱크볼 설치 FAQ
+            </h2>
+          </div>
+
+          <div className="faq-list">
+            {faq.map((item) => (
+              <details
+                key={item.q}
+                className="faq-item"
+              >
+                <summary>
+                  {item.q}
+                  <span>+</span>
+                </summary>
+
+                <p>
+                  {item.a}
+                </p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* OTHER REGIONS */}
+
+      <section className="nearby-section">
+        <div className="content">
+          <div className="section-heading">
+            <p className="section-label">
+              SERVICE AREAS
+            </p>
+
+            <h2>
+              {location.regionName}
+              <br />
+              다른 지역
+            </h2>
+          </div>
+
+          <div className="nearby-grid">
+            {nearby.map((item) => (
+              <Link
+                key={item.slug}
+                href={`/installation/${region}/${item.slug}`}
+              >
+                <span>
+                  {item.name}
+                </span>
+
+                <span>
+                  ↗
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+
+      <section className="cta">
+        <p className="eyebrow">
+          SINKMOA
         </p>
 
         <h2>
-          당신의 주방을 위한
+          {location.districtName}
           <br />
-          새로운 선택
+          싱크볼 교체 상담
         </h2>
 
         <p>
-          프리미엄 싱크볼부터 설치 상담까지,
+          제품 선택부터 설치까지
           <br />
           싱크모아에서 편리하게 문의하세요.
         </p>
@@ -654,1200 +622,622 @@ export default function Home() {
         </Link>
       </section>
 
-      {/* ==============================
-          푸터
-      ============================== */}
+      {/* FOOTER */}
 
       <footer className="footer">
-        <div className="footer-inner">
-          <h2>SINKMOA</h2>
+        <div className="content">
+          <h2>
+            SINKMOA
+          </h2>
 
           <p>
             프리미엄 싱크볼 판매 및 설치 전문몰
           </p>
 
-          <nav className="footer-links">
-            {navigation.map((item) => (
-              <Link
-                href={item.href}
-                key={item.href}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          <div className="footer-links">
+            <Link href="/">
+              홈
+            </Link>
 
-          <p className="footer-regions">
-            설치 상담 지역: 서울 · 경기 · 인천 ·
-            충남 · 충북
-          </p>
+            <Link href="/#brands">
+              브랜드별 상품
+            </Link>
 
-          <p className="copyright">
-            © {new Date().getFullYear()} SINKMOA.
-            All Rights Reserved.
-          </p>
+            <Link href="/#regions">
+              설치 가능 지역
+            </Link>
+
+            <Link href="/order">
+              주문·견적 문의
+            </Link>
+          </div>
         </div>
       </footer>
 
-      {/* ==============================
-          전체 스타일
-      ============================== */}
+      <style>{`
+        * {
+          box-sizing: border-box;
+        }
 
-      <style jsx global>{`
-        .sinkmoa-home {
+        body {
+          margin: 0;
+        }
+
+        .installation-page {
           --ink: #19262b;
+          --dark: #111a1e;
           --gold: #c4b49a;
+          --gold-dark: #9a8567;
           --ivory: #f7f5f0;
+          --beige: #eeeae3;
+          --line: #ded7cc;
+
           color: var(--ink);
           background: var(--ivory);
+
           font-family:
             Arial,
             "Apple SD Gothic Neo",
             "Malgun Gothic",
             sans-serif;
+
           word-break: keep-all;
           overflow-x: hidden;
         }
 
-        .sinkmoa-home *,
-        .sinkmoa-home *::before,
-        .sinkmoa-home *::after {
-          box-sizing: border-box;
-        }
-
-        .sinkmoa-home a {
+        .installation-page a {
           text-decoration: none;
         }
 
-        .sinkmoa-home button {
-          font-family: inherit;
-        }
-
-        .sinkmoa-home #brands,
-        .sinkmoa-home #service,
-        .sinkmoa-home #regions {
-          scroll-margin-top: 20px;
-        }
-
-        /* 헤더 */
-
-        .sinkmoa-home .site-header {
-          position: relative;
-          z-index: 30;
-          background: #111a1e;
-          border-bottom: 1px solid
-            rgba(255,255,255,.15);
-        }
-
-        .sinkmoa-home .header-inner {
-          max-width: 1360px;
+        .content {
           width: calc(100% - 80px);
-          height: 94px;
-          margin: auto;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-
-        .sinkmoa-home .logo {
-          color: #fff;
-          font-size: 26px;
-          font-weight: 700;
-          letter-spacing: .22em;
-        }
-
-        .sinkmoa-home .desktop-nav {
-          display: flex;
-          gap: 34px;
-          align-items: center;
-        }
-
-        .sinkmoa-home .desktop-nav a {
-          color: rgba(255,255,255,.9);
-          font-size: 13px;
-          transition: color .2s;
-        }
-
-        .sinkmoa-home .desktop-nav a:hover {
-          color: #c4b49a;
-        }
-
-        .sinkmoa-home .menu-button {
-          display: none;
-          padding: 10px;
-          border: 0;
-          background: transparent;
-          cursor: pointer;
-        }
-
-        .sinkmoa-home .menu-button span {
-          display: block;
-          width: 25px;
-          height: 1px;
-          margin: 6px 0;
-          background: white;
-        }
-
-        .sinkmoa-home .mobile-nav {
-          display: none;
-        }
-
-        /* 메인 사진 */
-
-        .sinkmoa-home .hero {
-          position: relative;
-          height: min(780px, 80svh);
-          min-height: 530px;
-          overflow: hidden;
-          background: #111a1e;
-        }
-
-        .sinkmoa-home .hero-slide {
-          position: absolute;
-          inset: 0;
-          opacity: 0;
-          transition: opacity 1s ease;
-          pointer-events: none;
-        }
-
-        .sinkmoa-home .hero-slide.active {
-          opacity: 1;
-        }
-
-        .sinkmoa-home .hero-photo {
-          object-fit: cover;
-          filter: brightness(1);
-          transform: scale(1);
-          transition: transform 5s linear;
-        }
-
-        .sinkmoa-home .hero-slide.active .hero-photo {
-          transform: scale(1.025);
-        }
-
-        .sinkmoa-home .hero-overlay {
-          position: absolute;
-          inset: 0;
-          z-index: 1;
-          background: linear-gradient(
-            180deg,
-            rgba(7,15,19,.30) 0%,
-            rgba(7,15,19,.04) 35%,
-            rgba(7,15,19,.06) 65%,
-            rgba(7,15,19,.48) 100%
-          );
-          pointer-events: none;
-        }
-
-        .sinkmoa-home .hero-photo-top {
-          position: absolute;
-          z-index: 2;
-          top: 35px;
-          left: 0;
-          right: 0;
-          text-align: center;
-          color: white;
-        }
-
-        .sinkmoa-home .hero-photo-top > p {
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: .24em;
-          margin: 0 0 18px;
-          text-shadow: 0 2px 12px
-            rgba(0,0,0,.55);
-        }
-
-        .sinkmoa-home .hero-photo-badge {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 12px;
-          padding: 12px 20px;
-          border: 1px solid
-            rgba(255,255,255,.75);
-          background: rgba(10,18,22,.48);
-          backdrop-filter: blur(5px);
-          color: white;
-          font-size: 13px;
-        }
-
-        .sinkmoa-home .hero-photo-badge strong {
-          letter-spacing: .2em;
-        }
-
-        .sinkmoa-home .badge-dot {
-          width: 7px;
-          height: 7px;
-          background: #c4b49a;
-          border-radius: 50%;
-        }
-
-        .sinkmoa-home .badge-divider {
-          width: 1px;
-          height: 14px;
-          background: rgba(255,255,255,.5);
-        }
-
-        .sinkmoa-home .hero-photo-bottom {
-          position: absolute;
-          z-index: 2;
-          left: 0;
-          right: 0;
-          bottom: 30px;
-          max-width: 1360px;
-          width: calc(100% - 80px);
-          margin: auto;
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-          gap: 25px;
-        }
-
-        .sinkmoa-home .photo-caption {
-          color: white;
-          text-shadow: 0 2px 15px
-            rgba(0,0,0,.7);
-        }
-
-        .sinkmoa-home .photo-caption p {
-          font-size: 10px;
-          letter-spacing: .22em;
-          color: #e8d4b5;
-          margin: 0 0 10px;
-        }
-
-        .sinkmoa-home .photo-caption h1 {
-          font-size: clamp(24px, 3vw, 40px);
-          font-weight: 400;
-          margin: 0;
-        }
-
-        .sinkmoa-home .slide-controls {
-          display: flex;
-          gap: 16px;
-          flex-shrink: 0;
-        }
-
-        .sinkmoa-home .slide-controls button {
-          border: 0;
-          padding: 0;
-          background: transparent;
-          cursor: pointer;
-          color: rgba(255,255,255,.7);
-          text-align: left;
-        }
-
-        .sinkmoa-home .control-line {
-          display: block;
-          width: 95px;
-          height: 3px;
-          background: rgba(255,255,255,.55);
-          margin-bottom: 9px;
-        }
-
-        .sinkmoa-home .selected .control-line {
-          background: #d9bd92;
-        }
-
-        .sinkmoa-home .selected .control-label {
-          color: #e4c99f;
-        }
-
-        .sinkmoa-home .control-label {
-          font-size: 10px;
-          letter-spacing: .17em;
-        }
-
-        /* 메인 소개 */
-
-        .sinkmoa-home .hero-intro {
-          padding: 105px 24px 115px;
-          background: #19262b;
-          text-align: center;
-          color: white;
-        }
-
-        .sinkmoa-home .section-label {
-          color: #b9a17d;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: .23em;
-          margin: 0 0 22px;
-        }
-
-        .sinkmoa-home .hero-intro h2 {
-          font-size: clamp(38px, 5vw, 65px);
-          line-height: 1.4;
-          font-weight: 400;
-          letter-spacing: -.05em;
-          margin: 0;
-        }
-
-        .sinkmoa-home .gold-line {
-          width: 40px;
-          height: 1px;
-          background: #b6a080;
-          margin: 30px auto;
-        }
-
-        .sinkmoa-home .hero-intro-description {
-          color: #d0d2d1;
-          font-size: 15px;
-          line-height: 2;
-          margin: 0 0 34px;
-        }
-
-        .sinkmoa-home .hero-intro-actions {
-          display: flex;
-          justify-content: center;
-          flex-wrap: wrap;
-          gap: 12px;
-        }
-
-        .sinkmoa-home .hero-primary,
-        .sinkmoa-home .hero-secondary {
-          min-width: 240px;
-          padding: 20px 24px;
-          display: inline-flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 30px;
-          font-size: 13px;
-          font-weight: 700;
-          transition: transform .25s;
-        }
-
-        .sinkmoa-home .hero-primary {
-          background: #c4b49a;
-          color: #19262b;
-        }
-
-        .sinkmoa-home .hero-secondary {
-          background: transparent;
-          color: white;
-          border: 1px solid
-            rgba(255,255,255,.65);
-        }
-
-        .sinkmoa-home .hero-primary:hover,
-        .sinkmoa-home .hero-secondary:hover {
-          transform: translateY(-2px);
-        }
-
-        /* 싱크모아 소개 */
-
-        .sinkmoa-home .intro-section {
-          padding: 130px 24px;
-          text-align: center;
-          background: #f7f5f0;
-        }
-
-        .sinkmoa-home .intro-section h2 {
-          font-size: clamp(34px, 4vw, 55px);
-          line-height: 1.5;
-          font-weight: 400;
-          letter-spacing: -.05em;
-          margin: 0;
-        }
-
-        .sinkmoa-home .intro-description {
-          font-size: 15px;
-          line-height: 2.2;
-          color: #777;
-          margin: 0;
-        }
-
-        /* 브랜드 */
-
-        .sinkmoa-home .brands-section {
-          padding: 110px 24px 130px;
-          background: #eeeae3;
-        }
-
-        .sinkmoa-home .section-heading {
-          text-align: center;
-          margin-bottom: 60px;
-        }
-
-        .sinkmoa-home .section-heading h2 {
-          font-size: clamp(36px, 5vw, 58px);
-          font-weight: 400;
-          letter-spacing: -.05em;
-          margin: 0 0 16px;
-        }
-
-        .sinkmoa-home .section-heading > p:last-child {
-          color: #777;
-          font-size: 14px;
-          line-height: 1.9;
-        }
-
-        .sinkmoa-home .brand-grid {
-          max-width: 1360px;
-          margin: auto;
-          display: grid;
-          grid-template-columns:
-            repeat(2, minmax(0,1fr));
-          gap: 24px;
-        }
-
-        .sinkmoa-home .brand-card {
-          display: block;
-          background: #f7f5f0;
-          color: #19262b;
-          overflow: hidden;
-        }
-
-        .sinkmoa-home .brand-image {
-          position: relative;
-          aspect-ratio: 1.35;
-          background: #e4e4e4;
-          overflow: hidden;
-        }
-
-        .sinkmoa-home .brand-photo {
-          object-fit: contain;
-          transition: transform .4s;
-        }
-
-        .sinkmoa-home .brand-card:hover .brand-photo {
-          transform: scale(1.04);
-        }
-
-        .sinkmoa-home .brand-info {
-          padding: 26px 30px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .sinkmoa-home .brand-info p {
-          font-size: 10px;
-          letter-spacing: .14em;
-          color: #9a8567;
-          margin: 0 0 8px;
-        }
-
-        .sinkmoa-home .brand-info h3 {
-          font-size: 26px;
-          font-weight: 400;
-          letter-spacing: .07em;
-          margin: 0;
-        }
-
-        .sinkmoa-home .brand-arrow {
-          font-size: 24px;
-          color: #9a8567;
-        }
-
-        /* 설치 서비스 */
-
-        .sinkmoa-home .service-section {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          min-height: 600px;
-          background: white;
-        }
-
-        .sinkmoa-home .service-image {
-          position: relative;
-          min-height: 550px;
-          background: #e4e4e4;
-        }
-
-        .sinkmoa-home .service-photo {
-          object-fit: contain;
-        }
-
-        .sinkmoa-home .service-content {
-          padding: 90px max(40px, 8vw);
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: flex-start;
-        }
-
-        .sinkmoa-home .service-content h2 {
-          font-size: clamp(34px, 3.8vw, 53px);
-          font-weight: 400;
-          line-height: 1.45;
-          letter-spacing: -.05em;
-          margin: 0;
-        }
-
-        .sinkmoa-home .service-content .gold-line {
-          margin: 30px 0;
-        }
-
-        .sinkmoa-home .service-description {
-          color: #777;
-          font-size: 15px;
-          line-height: 2;
-          margin: 0 0 30px;
-        }
-
-        .sinkmoa-home .service-price {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 35px;
-          border: 1px solid #ded6c8;
-          padding: 19px 23px;
-          width: min(100%, 400px);
-        }
-
-        .sinkmoa-home .service-price span {
-          font-size: 14px;
-        }
-
-        .sinkmoa-home .service-price strong {
-          color: #a18b69;
-          font-size: 25px;
-        }
-
-        .sinkmoa-home .service-note {
-          color: #777;
-          font-size: 12px;
-          line-height: 1.9;
-          margin: 20px 0 30px;
-        }
-
-        .sinkmoa-home .gold-button {
-          display: inline-flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 40px;
-          padding: 18px 24px;
-          background: #c4b49a;
-          color: #19262b;
-          font-size: 13px;
-          font-weight: 700;
-        }
-
-        /* 지역별 설치 안내 */
-
-        .sinkmoa-home .regions-section {
-          padding: 115px 24px 125px;
-          background: #f7f5f0;
-        }
-
-        .sinkmoa-home .regions-container {
           max-width: 1200px;
           margin: 0 auto;
         }
 
-        .sinkmoa-home .regions-section
-        .section-heading {
-          margin-bottom: 43px;
+        .header {
+          background: var(--dark);
+          border-bottom:
+            1px solid rgba(255,255,255,.12);
         }
 
-        .sinkmoa-home .regions-summary {
+        .header-inner {
+          width: calc(100% - 80px);
+          max-width: 1360px;
+          height: 90px;
+
+          margin: auto;
+
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .logo {
+          color: white;
+          font-size: 24px;
+          font-weight: 700;
+          letter-spacing: .22em;
+        }
+
+        .header nav {
+          display: flex;
+          align-items: center;
+          gap: 25px;
+        }
+
+        .header nav a {
+          color: #eee;
+          font-size: 12px;
+        }
+
+        .header .order-link {
+          padding: 13px 17px;
+          background: var(--gold);
+          color: var(--ink);
+          font-weight: 700;
+        }
+
+        .hero {
+          padding: 115px 24px 120px;
+          background: var(--ink);
+          color: white;
+          text-align: center;
+        }
+
+        .hero-inner {
+          max-width: 900px;
+          margin: auto;
+        }
+
+        .eyebrow,
+        .section-label {
+          margin: 0 0 20px;
+          color: #b9a17d;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: .22em;
+        }
+
+        .hero h1 {
+          margin: 0;
+          font-size:
+            clamp(42px,6vw,72px);
+          line-height: 1.35;
+          font-weight: 400;
+          letter-spacing: -.055em;
+        }
+
+        .gold-line {
+          width: 42px;
+          height: 1px;
+          margin: 30px auto;
+          background: var(--gold);
+        }
+
+        .hero-copy {
+          color: #d2d7d5;
+          font-size: 15px;
+          line-height: 2;
+        }
+
+        .gold-button {
+          width: min(100%,280px);
+          margin-top: 30px;
+          padding: 19px 22px;
+
+          display: inline-flex;
+          justify-content: space-between;
+          align-items: center;
+
+          background: var(--gold);
+          color: var(--ink);
+
+          font-size: 13px;
+          font-weight: 700;
+        }
+
+        .hero-note {
+          margin-top: 18px;
+          color: #9fa9a6;
+          font-size: 11px;
+        }
+
+        .intro-section {
+          padding: 105px 0;
+          background: white;
+        }
+
+        .intro-grid {
           display: grid;
           grid-template-columns:
-            repeat(3, minmax(0,1fr));
-          gap: 1px;
-          background: #ddd5c9;
-          border: 1px solid #ddd5c9;
-          margin-bottom: 35px;
+            .85fr 1.15fr;
+          gap: 90px;
+          align-items: center;
         }
 
-        .sinkmoa-home .regions-summary > div {
-          background: #fff;
-          padding: 27px 20px;
+        .intro-section h2,
+        .section-heading h2 {
+          margin: 0;
+          font-size:
+            clamp(35px,4vw,53px);
+          line-height: 1.4;
+          font-weight: 400;
+          letter-spacing: -.05em;
+        }
+
+        .intro-copy {
+          padding-left: 55px;
+          border-left: 1px solid var(--line);
+        }
+
+        .intro-copy p {
+          margin: 0 0 20px;
+          color: #777;
+          font-size: 14px;
+          line-height: 2;
+        }
+
+        .products-section,
+        .process-section,
+        .nearby-section {
+          padding: 110px 0;
+          background: var(--ivory);
+        }
+
+        .section-heading {
+          margin-bottom: 50px;
           text-align: center;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
         }
 
-        .sinkmoa-home .regions-summary span {
-          color: #a18b69;
-          font-size: 10px;
+        .section-heading > p:last-child {
+          margin-top: 18px;
+          color: #777;
+          font-size: 13px;
+        }
+
+        .product-grid {
+          display: grid;
+          grid-template-columns:
+            repeat(2, minmax(0,1fr));
+          gap: 18px;
+        }
+
+        .product-card {
+          padding: 34px;
+          background: white;
+          border: 1px solid #e2dbd0;
+        }
+
+        .brand-name {
+          margin: 0 0 17px;
+          color: var(--gold-dark);
+          font-size: 11px;
           font-weight: 700;
           letter-spacing: .13em;
         }
 
-        .sinkmoa-home .regions-summary strong {
-          color: #19262b;
-          font-size: 19px;
-          font-weight: 600;
+        .product-card h3 {
+          margin: 0 0 12px;
+          font-size: 27px;
+          font-weight: 500;
         }
 
-        .sinkmoa-home .region-tabs {
-          display: grid;
-          grid-template-columns:
-            repeat(5, minmax(0,1fr));
-          gap: 8px;
-          margin-bottom: 15px;
+        .inset {
+          margin: 0 0 25px;
+          color: #aaa;
+          font-size: 10px;
+          letter-spacing: .15em;
         }
 
-        .sinkmoa-home .region-tab {
+        .spec {
+          padding: 18px 0;
+
           display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          gap: 8px;
-          min-height: 86px;
-          border: 1px solid #ddd5c9;
-          background: #fff;
-          color: #19262b;
-          cursor: pointer;
-          transition:
-            background .2s,
-            border-color .2s,
-            color .2s;
+          justify-content: space-between;
+          gap: 15px;
+
+          border-top: 1px solid #eee9e1;
+          border-bottom: 1px solid #eee9e1;
+
+          font-size: 12px;
         }
 
-        .sinkmoa-home .region-tab span {
-          font-size: 18px;
-          font-weight: 600;
+        .spec span {
+          color: #777;
         }
 
-        .sinkmoa-home .region-tab small {
+        .product-bottom {
+          margin-top: 28px;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          gap: 20px;
+        }
+
+        .product-bottom > strong {
+          font-size: 23px;
+        }
+
+        .product-bottom a {
+          color: var(--gold-dark);
+          font-size: 12px;
+          font-weight: 700;
+        }
+
+        .small-note {
+          margin-top: 20px;
           color: #888;
+          text-align: center;
           font-size: 11px;
         }
 
-        .sinkmoa-home .region-tab.active {
-          background: #19262b;
-          border-color: #19262b;
-          color: #fff;
-        }
-
-        .sinkmoa-home .region-tab.active small {
-          color: #c4b49a;
-        }
-
-        .sinkmoa-home .region-tab:hover:not(.active) {
-          border-color: #b9a17d;
-          background: #f1ede6;
-        }
-
-        .sinkmoa-home .region-panel {
+        .price-section {
+          padding: 110px 0;
           background: white;
-          border: 1px solid #e2dacf;
-          padding: 35px;
         }
 
-        .sinkmoa-home .region-panel-heading {
+        .price-list {
+          max-width: 850px;
+          margin: auto;
+          border-top: 1px solid var(--line);
+        }
+
+        .price-row {
+          min-height: 110px;
+          padding: 23px 0;
+
           display: flex;
-          align-items: flex-start;
+          align-items: center;
           justify-content: space-between;
-          gap: 20px;
-          padding-bottom: 25px;
-          margin-bottom: 25px;
-          border-bottom: 1px solid #e9e3d9;
+          gap: 30px;
+
+          border-bottom: 1px solid var(--line);
         }
 
-        .sinkmoa-home .region-panel-heading p {
-          margin: 0 0 10px;
-          color: #a18b69;
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: .18em;
+        .price-row h3 {
+          margin: 0 0 8px;
+          font-size: 15px;
         }
 
-        .sinkmoa-home .region-panel-heading h3 {
-          margin: 0 0 11px;
-          font-size: 25px;
-          font-weight: 600;
-          letter-spacing: -.04em;
-        }
-
-        .sinkmoa-home .region-panel-heading
-        div > span {
+        .price-row p {
+          margin: 0;
           color: #888;
+          font-size: 12px;
+        }
+
+        .price-row > strong {
+          color: var(--gold-dark);
+          font-size: 20px;
+        }
+
+        .process-section {
+          background: var(--beige);
+        }
+
+        .process-grid {
+          display: grid;
+          grid-template-columns:
+            repeat(5,minmax(0,1fr));
+          gap: 10px;
+        }
+
+        .process-card {
+          padding: 25px 20px;
+          background: var(--ivory);
+          border: 1px solid #ddd6cb;
+        }
+
+        .process-card > span {
+          color: var(--gold);
+          font-size: 28px;
+        }
+
+        .process-card h3 {
+          margin: 30px 0 12px;
+          font-size: 14px;
+        }
+
+        .process-card p {
+          margin: 0;
+          color: #777;
           font-size: 12px;
           line-height: 1.8;
         }
 
-        .sinkmoa-home .region-count {
-          color: #b9a17d;
-          font-size: 34px;
-          font-weight: 400;
-          white-space: nowrap;
+        .faq-section {
+          padding: 110px 0;
+          background: white;
         }
 
-        .sinkmoa-home .region-count small {
-          font-size: 10px;
-          letter-spacing: .1em;
+        .faq-list {
+          max-width: 900px;
+          margin: auto;
+          border-top: 1px solid var(--line);
         }
 
-        .sinkmoa-home .district-grid {
-          display: grid;
-          grid-template-columns:
-            repeat(4, minmax(0,1fr));
-          gap: 10px;
+        .faq-item {
+          border-bottom: 1px solid var(--line);
         }
 
-        .sinkmoa-home .district-link {
+        .faq-item summary {
+          padding: 24px 4px;
           display: flex;
-          align-items: center;
           justify-content: space-between;
-          gap: 10px;
-          min-width: 0;
-          padding: 16px;
-          border: 1px solid #e9e3d9;
-          background: #faf9f6;
-          color: #19262b;
-          font-size: 13px;
-          font-weight: 600;
-          transition:
-            border-color .2s,
-            background .2s,
-            transform .2s;
-        }
-
-        .sinkmoa-home .district-link:hover {
-          border-color: #b9a17d;
-          background: #f2ede5;
-          transform: translateY(-2px);
-        }
-
-        .sinkmoa-home .district-arrow {
-          color: #a18b69;
-          font-size: 17px;
-          flex-shrink: 0;
-        }
-
-        .sinkmoa-home .regions-notice {
-          display: flex;
-          align-items: center;
-          gap: 17px;
-          margin-top: 19px;
-          padding: 24px 28px;
-          background: #eae4d9;
-        }
-
-        .sinkmoa-home .regions-notice-icon {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 30px;
-          height: 30px;
-          flex-shrink: 0;
-          border: 1px solid #a18b69;
-          border-radius: 50%;
-          color: #927b5a;
+          gap: 20px;
+          cursor: pointer;
+          list-style: none;
           font-size: 14px;
-          font-weight: 700;
+          font-weight: 600;
         }
 
-        .sinkmoa-home .regions-notice p {
-          flex: 1;
-          margin: 0;
-          color: #625e57;
-          font-size: 12px;
-          line-height: 1.9;
-        }
-
-        .sinkmoa-home .regions-notice a {
-          flex-shrink: 0;
-          background: #19262b;
-          color: white;
-          padding: 15px 19px;
-          font-size: 12px;
-          font-weight: 700;
-        }
-
-        .sinkmoa-home .mobile-only {
+        .faq-item summary::-webkit-details-marker {
           display: none;
         }
 
-        /* 주문 문의 */
+        .faq-item summary span {
+          color: var(--gold-dark);
+          font-size: 22px;
+        }
 
-        .sinkmoa-home .order-section {
-          background: #19262b;
+        .faq-item p {
+          margin: 0;
+          padding: 0 40px 27px 4px;
+          color: #777;
+          font-size: 13px;
+          line-height: 2;
+        }
+
+        .nearby-grid {
+          display: grid;
+          grid-template-columns:
+            repeat(4,minmax(0,1fr));
+          gap: 8px;
+        }
+
+        .nearby-grid a {
+          min-height: 58px;
+          padding: 15px;
+
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          background: white;
+          border: 1px solid var(--line);
+
+          color: var(--ink);
+          font-size: 12px;
+          font-weight: 600;
+        }
+
+        .nearby-grid a span:last-child {
+          color: var(--gold-dark);
+        }
+
+        .cta {
+          padding: 105px 24px;
+          background: var(--ink);
           color: white;
           text-align: center;
-          padding: 120px 24px;
         }
 
-        .sinkmoa-home .order-section h2 {
-          font-size: clamp(36px, 5vw, 60px);
+        .cta h2 {
+          margin: 0;
+          font-size:
+            clamp(38px,5vw,59px);
           line-height: 1.45;
           font-weight: 400;
-          margin: 0;
+          letter-spacing: -.05em;
         }
 
-        .sinkmoa-home .order-section
-        > p:not(.section-label) {
-          color: #c4cbca;
+        .cta > p:not(.eyebrow) {
+          margin: 24px 0 0;
+          color: #c7cecc;
+          font-size: 14px;
           line-height: 2;
-          margin: 25px 0 35px;
         }
 
-        /* 푸터 */
-
-        .sinkmoa-home .footer {
-          background: #111a1e;
+        .footer {
+          padding: 60px 0;
+          background: var(--dark);
           color: white;
-          padding: 65px 24px;
         }
 
-        .sinkmoa-home .footer-inner {
-          max-width: 1360px;
-          margin: auto;
-        }
-
-        .sinkmoa-home .footer h2 {
+        .footer h2 {
+          margin: 0 0 13px;
+          font-size: 24px;
           letter-spacing: .22em;
-          font-size: 25px;
-          margin: 0 0 14px;
         }
 
-        .sinkmoa-home .footer p {
-          color: #b3b7b7;
-          font-size: 13px;
+        .footer p {
+          color: #abb3b1;
+          font-size: 12px;
         }
 
-        .sinkmoa-home .footer-links {
+        .footer-links {
+          margin-top: 28px;
           display: flex;
           flex-wrap: wrap;
-          gap: 20px;
-          margin: 30px 0;
+          gap: 22px;
         }
 
-        .sinkmoa-home .footer-links a {
-          color: #e4e4e4;
+        .footer-links a {
+          color: #e5e5e5;
           font-size: 12px;
         }
-
-        .sinkmoa-home .footer-regions {
-          margin-bottom: 24px;
-          font-size: 12px;
-        }
-
-        .sinkmoa-home .copyright {
-          padding-top: 22px;
-          border-top: 1px solid
-            rgba(255,255,255,.12);
-        }
-
-        /* 태블릿 */
 
         @media (max-width: 900px) {
-          .sinkmoa-home .desktop-nav {
-            display: none;
+          .intro-grid {
+            grid-template-columns: 1fr;
+            gap: 40px;
           }
 
-          .sinkmoa-home .menu-button {
-            display: block;
+          .intro-copy {
+            padding-left: 0;
+            border-left: 0;
           }
 
-          .sinkmoa-home .mobile-nav {
-            display: flex;
-            flex-direction: column;
-            padding: 12px 30px 22px;
-            background: #111a1e;
+          .process-grid {
+            grid-template-columns:
+              repeat(2,minmax(0,1fr));
           }
 
-          .sinkmoa-home .mobile-nav a {
-            color: white;
-            font-size: 14px;
-            padding: 16px 0;
-            border-bottom: 1px solid
-              rgba(255,255,255,.12);
+          .nearby-grid {
+            grid-template-columns:
+              repeat(3,minmax(0,1fr));
+          }
+        }
+
+        @media (max-width: 600px) {
+          .content,
+          .header-inner {
+            width: calc(100% - 36px);
           }
 
-          .sinkmoa-home .service-section {
+          .header-inner {
+            height: 78px;
+          }
+
+          .logo {
+            font-size: 20px;
+          }
+
+          .header nav {
+            gap: 11px;
+          }
+
+          .header nav a {
+            font-size: 10px;
+          }
+
+          .header .order-link {
+            padding: 10px 11px;
+          }
+
+          .hero {
+            padding: 80px 18px 85px;
+          }
+
+          .hero h1 {
+            font-size: 40px;
+          }
+
+          .hero-copy {
+            font-size: 13px;
+          }
+
+          .intro-section,
+          .products-section,
+          .price-section,
+          .process-section,
+          .faq-section,
+          .nearby-section {
+            padding: 82px 0;
+          }
+
+          .intro-section h2,
+          .section-heading h2 {
+            font-size: 37px;
+          }
+
+          .product-grid {
             grid-template-columns: 1fr;
           }
 
-          .sinkmoa-home .service-image {
-            min-height: 400px;
+          .product-card {
+            padding: 26px 22px;
           }
 
-          .sinkmoa-home .service-content {
-            padding: 65px 30px;
+          .product-bottom > strong {
+            font-size: 20px;
           }
 
-          .sinkmoa-home .district-grid {
-            grid-template-columns:
-              repeat(3, minmax(0,1fr));
-          }
-
-          .sinkmoa-home .regions-notice {
-            flex-wrap: wrap;
-          }
-
-          .sinkmoa-home .regions-notice a {
-            margin-left: 47px;
-          }
-        }
-
-        /* 모바일 */
-
-        @media (max-width: 600px) {
-          .sinkmoa-home .header-inner {
-            width: calc(100% - 44px);
-            height: 82px;
-          }
-
-          .sinkmoa-home .logo {
-            font-size: 22px;
-          }
-
-          .sinkmoa-home .hero {
-            height: 72svh;
-            min-height: 480px;
-            max-height: 720px;
-          }
-
-          .sinkmoa-home .hero-photo {
-            object-fit: contain;
-            object-position: center;
-          }
-
-          .sinkmoa-home .hero-overlay {
-            background: linear-gradient(
-              180deg,
-              rgba(7,15,19,.30) 0%,
-              transparent 27%,
-              transparent 68%,
-              rgba(7,15,19,.58) 100%
-            );
-          }
-
-          .sinkmoa-home .hero-photo-top {
-            top: 20px;
-          }
-
-          .sinkmoa-home .hero-photo-top > p {
-            font-size: 9px;
-            margin-bottom: 12px;
-          }
-
-          .sinkmoa-home .hero-photo-badge {
-            padding: 10px 15px;
-            font-size: 12px;
-          }
-
-          .sinkmoa-home .hero-photo-bottom {
-            width: calc(100% - 36px);
-            bottom: 20px;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 18px;
-          }
-
-          .sinkmoa-home .photo-caption h1 {
-            font-size: 25px;
-          }
-
-          .sinkmoa-home .slide-controls {
+          .price-row {
             gap: 14px;
           }
 
-          .sinkmoa-home .control-line {
-            width: 90px;
+          .price-row > strong {
+            font-size: 17px;
+            white-space: nowrap;
           }
 
-          .sinkmoa-home .hero-intro {
-            padding: 80px 22px 90px;
-          }
-
-          .sinkmoa-home .hero-intro h2 {
-            font-size: 39px;
-          }
-
-          .sinkmoa-home .hero-intro-description {
-            font-size: 13px;
-          }
-
-          .sinkmoa-home .hero-intro-actions {
-            flex-direction: column;
-          }
-
-          .sinkmoa-home .hero-primary,
-          .sinkmoa-home .hero-secondary {
-            width: 100%;
-          }
-
-          .sinkmoa-home .intro-section {
-            padding: 95px 22px;
-          }
-
-          .sinkmoa-home .intro-description {
-            font-size: 13px;
-          }
-
-          .sinkmoa-home .brands-section {
-            padding: 85px 18px 100px;
-          }
-
-          .sinkmoa-home .brand-grid {
+          .process-grid {
             grid-template-columns: 1fr;
-            gap: 18px;
           }
 
-          .sinkmoa-home .brand-image {
-            aspect-ratio: 1.45;
-          }
-
-          .sinkmoa-home .brand-info {
-            padding: 20px 22px;
-          }
-
-          .sinkmoa-home .brand-info h3 {
-            font-size: 23px;
-          }
-
-          .sinkmoa-home .service-image {
-            min-height: 330px;
-          }
-
-          .sinkmoa-home .service-content {
-            padding: 65px 24px;
-          }
-
-          .sinkmoa-home .service-price strong {
-            font-size: 22px;
-          }
-
-          /* 모바일 지역별 안내 */
-
-          .sinkmoa-home .regions-section {
-            padding: 85px 16px 95px;
-          }
-
-          .sinkmoa-home .regions-section
-          .section-heading {
-            margin-bottom: 30px;
-          }
-
-          .sinkmoa-home .mobile-only {
-            display: block;
-          }
-
-          .sinkmoa-home .regions-summary {
-            grid-template-columns: 1fr 1fr;
-            margin-bottom: 24px;
-          }
-
-          .sinkmoa-home .regions-summary > div {
-            padding: 21px 9px;
-            gap: 10px;
-          }
-
-          .sinkmoa-home .regions-summary
-          > div:last-child {
-            grid-column: 1 / -1;
-          }
-
-          .sinkmoa-home .regions-summary span {
-            font-size: 9px;
-          }
-
-          .sinkmoa-home .regions-summary strong {
-            font-size: 15px;
-          }
-
-          .sinkmoa-home .region-tabs {
+          .nearby-grid {
             grid-template-columns:
-              repeat(5, minmax(0,1fr));
-            gap: 4px;
+              repeat(2,minmax(0,1fr));
           }
 
-          .sinkmoa-home .region-tab {
-            min-height: 70px;
-            gap: 7px;
-          }
-
-          .sinkmoa-home .region-tab span {
-            font-size: 13px;
-          }
-
-          .sinkmoa-home .region-tab small {
-            font-size: 9px;
-          }
-
-          .sinkmoa-home .region-panel {
-            padding: 22px 15px;
-          }
-
-          .sinkmoa-home .region-panel-heading {
-            gap: 10px;
-            padding-bottom: 20px;
-            margin-bottom: 20px;
-          }
-
-          .sinkmoa-home .region-panel-heading h3 {
-            font-size: 19px;
-          }
-
-          .sinkmoa-home .region-panel-heading
-          div > span {
+          .nearby-grid a {
+            padding: 14px 11px;
             font-size: 11px;
           }
 
-          .sinkmoa-home .region-count {
-            font-size: 25px;
-          }
-
-          .sinkmoa-home .district-grid {
-            grid-template-columns:
-              repeat(2, minmax(0,1fr));
-            gap: 8px;
-          }
-
-          .sinkmoa-home .district-link {
-            padding: 15px 12px;
-            font-size: 12px;
-          }
-
-          .sinkmoa-home .regions-notice {
-            align-items: flex-start;
-            padding: 20px 16px;
-            gap: 12px;
-          }
-
-          .sinkmoa-home .regions-notice p {
-            flex-basis: calc(100% - 50px);
-            font-size: 11px;
-          }
-
-          .sinkmoa-home .regions-notice a {
-            margin-left: 42px;
-            padding: 14px 18px;
-          }
-
-          .sinkmoa-home .order-section {
-            padding: 95px 22px;
-          }
-        }
-
-        @media (max-width: 360px) {
-          .sinkmoa-home .region-tab span {
-            font-size: 12px;
-          }
-
-          .sinkmoa-home .region-tab small {
-            font-size: 8px;
-          }
-
-          .sinkmoa-home .district-link {
-            padding: 13px 9px;
-            font-size: 11px;
-          }
-        }
-
-        @media (
-          prefers-reduced-motion: reduce
-        ) {
-          .sinkmoa-home .hero-photo {
-            transition: none;
-            transform: none !important;
-          }
-
-          .sinkmoa-home .hero-slide {
-            transition: none;
-          }
-
-          .sinkmoa-home .district-link,
-          .sinkmoa-home .region-tab {
-            transition: none;
+          .cta {
+            padding: 85px 18px;
           }
         }
       `}</style>
