@@ -32,28 +32,28 @@ const brands = [
   {
     name: "REGENS",
     korean: "리젠스",
-    image: "/brand-regens.jpg",
+    image: "/IMG_1772.jpeg",
     slug: "regens",
     number: "01",
   },
   {
     name: "BELLAGO",
     korean: "벨라고",
-    image: "/brand-bellago.jpg",
+    image: "/IMG_1757.jpeg",
     slug: "bellago",
     number: "02",
   },
   {
     name: "ARTISAN",
     korean: "아티잔",
-    image: "/brand-artisan.jpg",
+    image: "/IMG_1771.jpeg",
     slug: "artisan",
     number: "03",
   },
   {
     name: "BAEKJO",
     korean: "백조",
-    image: "/brand-baekjo.jpg",
+    image: "/IMG_1773.jpeg",
     slug: "baekjo",
     number: "04",
   },
@@ -413,37 +413,24 @@ export default function Home() {
 
         .sinkmoa-home .brand-image {
           aspect-ratio: 1.5 / 1;
-          background: linear-gradient(
-            135deg,
-            #d8d1c6,
-            #ece6dc
-          );
+          background: #ffffff;
           position: relative;
           overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .sinkmoa-home .brand-image img {
           display: block;
           width: 100%;
           height: 100%;
-          object-fit: cover;
+          object-fit: contain;
           transition: transform .6s;
         }
 
         .sinkmoa-home .brand-card:hover .brand-image img {
           transform: scale(1.035);
-        }
-
-        .sinkmoa-home .brand-image::after {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            to top,
-            rgba(15,25,28,.12),
-            transparent 55%
-          );
-          pointer-events: none;
         }
 
         .sinkmoa-home .brand-info {
