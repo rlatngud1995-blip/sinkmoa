@@ -1,4 +1,3 @@
-
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
@@ -10,6 +9,7 @@ import "./globals.css";
    - 네이버 / 구글 검색 정보
    - Open Graph
    - Twitter / X 카드
+   - 네이버 서치어드바이저 소유확인
 ========================================= */
 
 const SITE_URL = "https://www.sinkmoa.com";
@@ -119,6 +119,14 @@ export const metadata: Metadata = {
   },
 
   category: "shopping",
+
+  /* 네이버 서치어드바이저 소유확인 */
+  verification: {
+    other: {
+      "naver-site-verification":
+        "4d823493f880ec039ca7080c800bb83b93331c20",
+    },
+  },
 };
 
 export const viewport: Viewport = {
