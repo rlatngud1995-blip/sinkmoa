@@ -1,4 +1,3 @@
-
 export type District = {
   slug: string;
   name: string;
@@ -142,13 +141,17 @@ export function getInstallationLocation(
 ) {
   const region = INSTALLATION_REGIONS[regionSlug];
 
-  if (!region) return null;
+  if (!region) {
+    return null;
+  }
 
   const district = region.districts.find(
     (item) => item.slug === districtSlug
   );
 
-  if (!district) return null;
+  if (!district) {
+    return null;
+  }
 
   return {
     regionSlug,
@@ -160,11 +163,12 @@ export function getInstallationLocation(
 }
 
 export function getAllInstallationPaths() {
-  return Object.entries(INSTALLATION_REGIONS).flatMap(
-    ([region, value]) =>
-      value.districts.map((district) => ({
-        region,
-        district: district.slug,
-      }))
+  return Object.entries(
+    INSTALLATION_REGIONS
+  ).flatMap(([region, value]) =>
+    value.districts.map((district) => ({
+      region,
+      district: district.slug,
+    }))
   );
 }
