@@ -8,30 +8,28 @@ import Link from "next/link";
 /* =========================================
    SINKMOA 메인 홈페이지
 
-   BEFORE / AFTER 자동 슬라이드
-   실제 시공 사진 적용
+   BEFORE / AFTER 시공 사진
+   실제 GitHub 업로드 파일
 
-   BEFORE: IMG_0305.jpeg
-   AFTER : IMG_0395.jpeg
+   BEFORE: /IMG_0305.jpeg
+   AFTER : /IMG_0395.jpeg
+
+   설치 서비스 구성품 사진 복구
 ========================================= */
 
 const slides = [
   {
     image: "/IMG_0305.jpeg",
     label: "BEFORE",
-    eyebrow: "SINKMOA REAL INSTALLATION",
-    title: "주방의 변화,\n그 시작을 만나보세요.",
-    description:
-      "오래된 싱크볼의 새로운 변화.\n싱크모아의 실제 시공 사례입니다.",
+    korean: "교체 전",
+    description: "기존 싱크볼",
     position: "center center",
   },
   {
     image: "/IMG_0395.jpeg",
     label: "AFTER",
-    eyebrow: "SINKMOA PREMIUM INSTALLATION",
-    title: "싱크볼 하나로,\n달라지는 주방.",
-    description:
-      "프리미엄 사각 싱크볼 교체 완료.\n제품 선택부터 설치까지, 싱크모아.",
+    korean: "교체 완료",
+    description: "프리미엄 사각 싱크볼",
     position: "center center",
   },
 ];
@@ -89,7 +87,7 @@ export default function Home() {
     <main className="sinkmoa-home">
 
       {/* ==============================
-          상단 헤더
+          헤더
       ============================== */}
 
       <header className="site-header">
@@ -164,54 +162,31 @@ export default function Home() {
 
         <div className="hero-overlay" />
 
-        <div className="hero-content" key={current}>
-          <p className="hero-eyebrow">
-            {slides[current].eyebrow}
-          </p>
+        <div className="hero-photo-top">
+          <p>SINKMOA REAL INSTALLATION</p>
 
-          <div
-            className={`hero-status ${
-              current === 1 ? "after" : ""
-            }`}
-          >
-            <span className="status-dot" />
-            {slides[current].label}
-            <span className="status-divider" />
-            {current === 0 ? "교체 전" : "교체 완료"}
-          </div>
-
-          <h1>
-            {slides[current].title
-              .split("\n")
-              .map((line, index) => (
-                <span key={index}>{line}</span>
-              ))}
-          </h1>
-
-          <p className="hero-description">
-            {slides[current].description}
-          </p>
-
-          <div className="hero-actions">
-            <Link href="/#brands" className="hero-primary">
-              브랜드별 상품 보기
-              <span>↗</span>
-            </Link>
-
-            <Link href="/order" className="hero-secondary">
-              설치 문의하기
-              <span>↗</span>
-            </Link>
+          <div className="hero-photo-badge">
+            <span className="badge-dot" />
+            <strong>{slides[current].label}</strong>
+            <span className="badge-divider" />
+            <span>{slides[current].korean}</span>
           </div>
         </div>
 
-        <div className="hero-bottom">
+        <div className="hero-photo-bottom">
+          <div className="photo-caption">
+            <p>REAL KITCHEN TRANSFORMATION</p>
+            <h1>{slides[current].description}</h1>
+          </div>
+
           <div className="slide-controls">
             {slides.map((slide, index) => (
               <button
                 key={slide.label}
                 type="button"
-                className={current === index ? "selected" : ""}
+                className={
+                  current === index ? "selected" : ""
+                }
                 onClick={() => setCurrent(index)}
                 aria-label={`${slide.label} 사진 보기`}
                 aria-pressed={current === index}
@@ -223,11 +198,44 @@ export default function Home() {
               </button>
             ))}
           </div>
+        </div>
+      </section>
 
-          <div className="hero-counter">
-            0{current + 1}
-            <span> / 0{slides.length}</span>
-          </div>
+      {/* ==============================
+          메인 소개 및 버튼
+      ============================== */}
+
+      <section className="hero-intro">
+        <p className="section-label">
+          SINKMOA PREMIUM INSTALLATION
+        </p>
+
+        <h2>
+          싱크볼 하나로,
+          <br />
+          달라지는 주방.
+        </h2>
+
+        <div className="gold-line" />
+
+        <p className="hero-intro-description">
+          오래된 싱크볼의 새로운 변화.
+          <br />
+          제품 선택부터 설치 상담까지,
+          <br />
+          싱크모아가 함께합니다.
+        </p>
+
+        <div className="hero-intro-actions">
+          <Link href="/#brands" className="hero-primary">
+            브랜드별 상품 보기
+            <span>↗</span>
+          </Link>
+
+          <Link href="/order" className="hero-secondary">
+            설치 문의하기
+            <span>↗</span>
+          </Link>
         </div>
       </section>
 
@@ -309,14 +317,14 @@ export default function Home() {
       </section>
 
       {/* ==============================
-          설치 서비스
+          설치 서비스 - 구성품 사진 복구
       ============================== */}
 
       <section className="service-section" id="service">
         <div className="service-image">
           <Image
-            src="/IMG_0395.jpeg"
-            alt="싱크모아 싱크볼 설치 완료 사례"
+            src="/E7583A13-ED40-4C57-A2F1-3E16709A382D.jpeg"
+            alt="싱크모아 싱크볼 기본 구성품"
             fill
             sizes="(max-width: 900px) 100vw, 50vw"
             className="service-photo"
@@ -453,14 +461,10 @@ export default function Home() {
         /* 헤더 */
 
         .sinkmoa-home .site-header {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
+          position: relative;
           z-index: 30;
-          background: rgba(10, 18, 22, .55);
-          border-bottom: 1px solid rgba(255,255,255,.18);
-          backdrop-filter: blur(10px);
+          background: #111a1e;
+          border-bottom: 1px solid rgba(255,255,255,.15);
         }
 
         .sinkmoa-home .header-inner {
@@ -511,24 +515,21 @@ export default function Home() {
           display: none;
         }
 
-        /* 메인 전후 슬라이드 */
+        /* 메인 사진 */
 
         .sinkmoa-home .hero {
           position: relative;
-          min-height: 720px;
-          height: 100svh;
-          max-height: 1050px;
-          display: flex;
-          align-items: center;
+          height: min(780px, 80svh);
+          min-height: 530px;
           overflow: hidden;
-          background: #10191d;
+          background: #111a1e;
         }
 
         .sinkmoa-home .hero-slide {
           position: absolute;
           inset: 0;
           opacity: 0;
-          transition: opacity 1.2s ease;
+          transition: opacity 1s ease;
           pointer-events: none;
         }
 
@@ -538,175 +539,131 @@ export default function Home() {
 
         .sinkmoa-home .hero-photo {
           object-fit: cover;
-          filter: brightness(.72);
-          transform: scale(1.04);
+          filter: brightness(1);
+          transform: scale(1);
           transition: transform 5s linear;
         }
 
         .sinkmoa-home .hero-slide.active .hero-photo {
-          transform: scale(1.1);
+          transform: scale(1.025);
         }
 
         .sinkmoa-home .hero-overlay {
           position: absolute;
           inset: 0;
           z-index: 1;
-          background:
-            linear-gradient(
-              90deg,
-              rgba(7, 15, 19, .88) 0%,
-              rgba(7, 15, 19, .62) 48%,
-              rgba(7, 15, 19, .22) 100%
-            ),
-            linear-gradient(
-              0deg,
-              rgba(7,15,19,.45),
-              transparent 45%
-            );
+          background: linear-gradient(
+            180deg,
+            rgba(7,15,19,.30) 0%,
+            rgba(7,15,19,.04) 35%,
+            rgba(7,15,19,.06) 65%,
+            rgba(7,15,19,.48) 100%
+          );
           pointer-events: none;
         }
 
-        .sinkmoa-home .hero-content {
-          position: relative;
-          z-index: 2;
-          max-width: 1360px;
-          width: calc(100% - 80px);
-          margin: auto;
-          padding-top: 80px;
-          color: white;
-          animation: heroAppear .8s ease both;
-        }
-
-        .sinkmoa-home .hero-eyebrow {
-          color: #e1c8a3;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: .25em;
-          margin: 0 0 22px;
-        }
-
-        .sinkmoa-home .hero-status {
-          display: inline-flex;
-          align-items: center;
-          gap: 11px;
-          border: 1px solid rgba(255,255,255,.5);
-          padding: 10px 16px;
-          color: white;
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: .12em;
-          margin-bottom: 26px;
-          background: rgba(0,0,0,.22);
-        }
-
-        .sinkmoa-home .hero-status.after {
-          border-color: #c4b49a;
-          color: #e4c99f;
-        }
-
-        .sinkmoa-home .status-dot {
-          width: 7px;
-          height: 7px;
-          border-radius: 50%;
-          background: currentColor;
-        }
-
-        .sinkmoa-home .status-divider {
-          width: 1px;
-          height: 13px;
-          background: rgba(255,255,255,.4);
-        }
-
-        .sinkmoa-home .hero h1 {
-          font-size: clamp(44px, 6vw, 88px);
-          font-weight: 400;
-          letter-spacing: -.06em;
-          line-height: 1.25;
-          margin: 0;
-          text-shadow: 0 4px 25px rgba(0,0,0,.3);
-        }
-
-        .sinkmoa-home .hero h1 span {
-          display: block;
-        }
-
-        .sinkmoa-home .hero-description {
-          white-space: pre-line;
-          color: rgba(255,255,255,.9);
-          font-size: 16px;
-          line-height: 2;
-          margin: 32px 0 38px;
-        }
-
-        .sinkmoa-home .hero-actions {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
-        }
-
-        .sinkmoa-home .hero-primary,
-        .sinkmoa-home .hero-secondary {
-          min-width: 225px;
-          padding: 19px 24px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 30px;
-          font-size: 13px;
-          font-weight: 700;
-          transition: background .25s, transform .25s;
-        }
-
-        .sinkmoa-home .hero-primary {
-          color: #19262b;
-          background: #c4b49a;
-        }
-
-        .sinkmoa-home .hero-secondary {
-          color: white;
-          background: rgba(0,0,0,.18);
-          border: 1px solid rgba(255,255,255,.7);
-        }
-
-        .sinkmoa-home .hero-primary:hover,
-        .sinkmoa-home .hero-secondary:hover {
-          transform: translateY(-2px);
-        }
-
-        .sinkmoa-home .hero-bottom {
+        .sinkmoa-home .hero-photo-top {
           position: absolute;
-          z-index: 3;
+          z-index: 2;
+          top: 35px;
           left: 0;
           right: 0;
-          bottom: 42px;
-          width: calc(100% - 80px);
+          text-align: center;
+          color: white;
+        }
+
+        .sinkmoa-home .hero-photo-top > p {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: .24em;
+          margin: 0 0 18px;
+          text-shadow: 0 2px 12px rgba(0,0,0,.55);
+        }
+
+        .sinkmoa-home .hero-photo-badge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          padding: 12px 20px;
+          border: 1px solid rgba(255,255,255,.75);
+          background: rgba(10,18,22,.48);
+          backdrop-filter: blur(5px);
+          color: white;
+          font-size: 13px;
+        }
+
+        .sinkmoa-home .hero-photo-badge strong {
+          letter-spacing: .2em;
+        }
+
+        .sinkmoa-home .badge-dot {
+          width: 7px;
+          height: 7px;
+          background: #c4b49a;
+          border-radius: 50%;
+        }
+
+        .sinkmoa-home .badge-divider {
+          width: 1px;
+          height: 14px;
+          background: rgba(255,255,255,.5);
+        }
+
+        .sinkmoa-home .hero-photo-bottom {
+          position: absolute;
+          z-index: 2;
+          left: 0;
+          right: 0;
+          bottom: 30px;
           max-width: 1360px;
+          width: calc(100% - 80px);
           margin: auto;
           display: flex;
           justify-content: space-between;
-          align-items: end;
+          align-items: flex-end;
+          gap: 25px;
+        }
+
+        .sinkmoa-home .photo-caption {
+          color: white;
+          text-shadow: 0 2px 15px rgba(0,0,0,.7);
+        }
+
+        .sinkmoa-home .photo-caption p {
+          font-size: 10px;
+          letter-spacing: .22em;
+          color: #e8d4b5;
+          margin: 0 0 10px;
+        }
+
+        .sinkmoa-home .photo-caption h1 {
+          font-size: clamp(24px, 3vw, 40px);
+          font-weight: 400;
+          margin: 0;
         }
 
         .sinkmoa-home .slide-controls {
           display: flex;
-          gap: 20px;
+          gap: 16px;
+          flex-shrink: 0;
         }
 
         .sinkmoa-home .slide-controls button {
           border: 0;
+          padding: 0;
           background: transparent;
           cursor: pointer;
-          padding: 0;
+          color: rgba(255,255,255,.7);
           text-align: left;
-          color: rgba(255,255,255,.55);
         }
 
         .sinkmoa-home .control-line {
           display: block;
-          width: 90px;
+          width: 95px;
           height: 3px;
-          background: rgba(255,255,255,.4);
-          margin-bottom: 10px;
+          background: rgba(255,255,255,.55);
+          margin-bottom: 9px;
         }
 
         .sinkmoa-home .selected .control-line {
@@ -719,50 +676,30 @@ export default function Home() {
 
         .sinkmoa-home .control-label {
           font-size: 10px;
-          letter-spacing: .18em;
+          letter-spacing: .17em;
         }
 
-        .sinkmoa-home .hero-counter {
-          color: #fff;
-          font-size: 14px;
-          letter-spacing: .15em;
-        }
+        /* 메인 소개 */
 
-        .sinkmoa-home .hero-counter span {
-          color: rgba(255,255,255,.55);
-        }
-
-        @keyframes heroAppear {
-          from {
-            opacity: 0;
-            transform: translateY(18px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        /* 소개 */
-
-        .sinkmoa-home .intro-section {
-          padding: 140px 24px;
-          background: #f7f5f0;
+        .sinkmoa-home .hero-intro {
+          padding: 105px 24px 115px;
+          background: #19262b;
           text-align: center;
+          color: white;
         }
 
         .sinkmoa-home .section-label {
-          color: #a18b69;
+          color: #b9a17d;
           font-size: 11px;
           font-weight: 700;
-          letter-spacing: .24em;
+          letter-spacing: .23em;
           margin: 0 0 22px;
         }
 
-        .sinkmoa-home .intro-section h2 {
-          font-size: clamp(34px, 4vw, 55px);
+        .sinkmoa-home .hero-intro h2 {
+          font-size: clamp(38px, 5vw, 65px);
+          line-height: 1.4;
           font-weight: 400;
-          line-height: 1.5;
           letter-spacing: -.05em;
           margin: 0;
         }
@@ -771,7 +708,66 @@ export default function Home() {
           width: 40px;
           height: 1px;
           background: #b6a080;
-          margin: 32px auto;
+          margin: 30px auto;
+        }
+
+        .sinkmoa-home .hero-intro-description {
+          color: #d0d2d1;
+          font-size: 15px;
+          line-height: 2;
+          margin: 0 0 34px;
+        }
+
+        .sinkmoa-home .hero-intro-actions {
+          display: flex;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+
+        .sinkmoa-home .hero-primary,
+        .sinkmoa-home .hero-secondary {
+          min-width: 240px;
+          padding: 20px 24px;
+          display: inline-flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 30px;
+          font-size: 13px;
+          font-weight: 700;
+          transition: transform .25s;
+        }
+
+        .sinkmoa-home .hero-primary {
+          background: #c4b49a;
+          color: #19262b;
+        }
+
+        .sinkmoa-home .hero-secondary {
+          background: transparent;
+          color: white;
+          border: 1px solid rgba(255,255,255,.65);
+        }
+
+        .sinkmoa-home .hero-primary:hover,
+        .sinkmoa-home .hero-secondary:hover {
+          transform: translateY(-2px);
+        }
+
+        /* 싱크모아 소개 */
+
+        .sinkmoa-home .intro-section {
+          padding: 130px 24px;
+          text-align: center;
+          background: #f7f5f0;
+        }
+
+        .sinkmoa-home .intro-section h2 {
+          font-size: clamp(34px, 4vw, 55px);
+          line-height: 1.5;
+          font-weight: 400;
+          letter-spacing: -.05em;
+          margin: 0;
         }
 
         .sinkmoa-home .intro-description {
@@ -823,7 +819,7 @@ export default function Home() {
         .sinkmoa-home .brand-image {
           position: relative;
           aspect-ratio: 1.35;
-          background: #ddd;
+          background: #e4e4e4;
           overflow: hidden;
         }
 
@@ -839,8 +835,8 @@ export default function Home() {
         .sinkmoa-home .brand-info {
           padding: 26px 30px;
           display: flex;
-          align-items: center;
           justify-content: space-between;
+          align-items: center;
         }
 
         .sinkmoa-home .brand-info p {
@@ -868,18 +864,17 @@ export default function Home() {
           display: grid;
           grid-template-columns: 1fr 1fr;
           min-height: 600px;
-          background: #fff;
+          background: white;
         }
 
         .sinkmoa-home .service-image {
           position: relative;
           min-height: 550px;
-          background: #ddd;
+          background: #e4e4e4;
         }
 
         .sinkmoa-home .service-photo {
-          object-fit: cover;
-          object-position: center;
+          object-fit: contain;
         }
 
         .sinkmoa-home .service-content {
@@ -947,7 +942,7 @@ export default function Home() {
           font-weight: 700;
         }
 
-        /* 문의 */
+        /* 주문 문의 */
 
         .sinkmoa-home .order-section {
           background: #19262b;
@@ -1010,7 +1005,7 @@ export default function Home() {
           border-top: 1px solid rgba(255,255,255,.12);
         }
 
-        /* 모바일 */
+        /* 태블릿 */
 
         @media (max-width: 900px) {
           .sinkmoa-home .desktop-nav {
@@ -1024,7 +1019,6 @@ export default function Home() {
           .sinkmoa-home .mobile-nav {
             display: flex;
             flex-direction: column;
-            gap: 0;
             padding: 12px 30px 22px;
             background: #111a1e;
           }
@@ -1049,6 +1043,8 @@ export default function Home() {
           }
         }
 
+        /* 모바일 */
+
         @media (max-width: 600px) {
           .sinkmoa-home .header-inner {
             width: calc(100% - 44px);
@@ -1060,73 +1056,79 @@ export default function Home() {
           }
 
           .sinkmoa-home .hero {
-            min-height: 680px;
-            height: 100svh;
-            max-height: 920px;
+            height: 72svh;
+            min-height: 480px;
+            max-height: 720px;
           }
 
           .sinkmoa-home .hero-photo {
-            object-fit: cover;
+            object-fit: contain;
             object-position: center;
           }
 
           .sinkmoa-home .hero-overlay {
-            background:
-              linear-gradient(
-                180deg,
-                rgba(9,16,20,.56) 0%,
-                rgba(9,16,20,.64) 38%,
-                rgba(9,16,20,.76) 100%
-              );
+            background: linear-gradient(
+              180deg,
+              rgba(7,15,19,.30) 0%,
+              transparent 27%,
+              transparent 68%,
+              rgba(7,15,19,.58) 100%
+            );
           }
 
-          .sinkmoa-home .hero-content {
-            width: calc(100% - 44px);
-            padding-top: 60px;
-            text-align: center;
+          .sinkmoa-home .hero-photo-top {
+            top: 20px;
           }
 
-          .sinkmoa-home .hero-eyebrow {
+          .sinkmoa-home .hero-photo-top > p {
             font-size: 9px;
-            letter-spacing: .18em;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
           }
 
-          .sinkmoa-home .hero-status {
-            font-size: 11px;
-            margin-bottom: 23px;
+          .sinkmoa-home .hero-photo-badge {
+            padding: 10px 15px;
+            font-size: 12px;
           }
 
-          .sinkmoa-home .hero h1 {
-            font-size: clamp(36px, 10vw, 55px);
-            line-height: 1.35;
-          }
-
-          .sinkmoa-home .hero-description {
-            font-size: 13px;
-            line-height: 1.9;
-            margin: 25px 0 30px;
-          }
-
-          .sinkmoa-home .hero-actions {
+          .sinkmoa-home .hero-photo-bottom {
+            width: calc(100% - 36px);
+            bottom: 20px;
             flex-direction: column;
-            align-items: stretch;
+            align-items: flex-start;
+            gap: 18px;
+          }
+
+          .sinkmoa-home .photo-caption h1 {
+            font-size: 25px;
+          }
+
+          .sinkmoa-home .slide-controls {
+            gap: 14px;
+          }
+
+          .sinkmoa-home .control-line {
+            width: 90px;
+          }
+
+          .sinkmoa-home .hero-intro {
+            padding: 80px 22px 90px;
+          }
+
+          .sinkmoa-home .hero-intro h2 {
+            font-size: 39px;
+          }
+
+          .sinkmoa-home .hero-intro-description {
+            font-size: 13px;
+          }
+
+          .sinkmoa-home .hero-intro-actions {
+            flex-direction: column;
           }
 
           .sinkmoa-home .hero-primary,
           .sinkmoa-home .hero-secondary {
             width: 100%;
-            min-width: 0;
-            padding: 18px 22px;
-          }
-
-          .sinkmoa-home .hero-bottom {
-            width: calc(100% - 44px);
-            bottom: 30px;
-          }
-
-          .sinkmoa-home .control-line {
-            width: 75px;
           }
 
           .sinkmoa-home .intro-section {
@@ -1176,9 +1178,12 @@ export default function Home() {
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .sinkmoa-home .hero-photo,
-          .sinkmoa-home .hero-content {
-            animation: none;
+          .sinkmoa-home .hero-photo {
+            transition: none;
+            transform: none !important;
+          }
+
+          .sinkmoa-home .hero-slide {
             transition: none;
           }
         }
