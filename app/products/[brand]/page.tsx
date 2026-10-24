@@ -19,7 +19,7 @@ import {
    적용 내용
    - 기존 상품 및 가격 유지
    - 리젠스 실제 상품 사진
-   - 백조 실제 상품 사진
+   - 백조 실제 상품 사진 교체
    - 벨라고/아티잔 사진 준비 상태 유지
    - 시공사례 사진 4장
    - 상판 타공 작업 사진 1장
@@ -32,16 +32,15 @@ type Props = {
 };
 
 /* =========================================
-   업로드한 실제 상품 사진
-
-   public 폴더 파일명을 그대로 사용
+   실제 상품 사진
+   public 폴더 파일명 그대로 사용
 ========================================= */
 
 const PRODUCT_IMAGES: Partial<
   Record<BrandSlug, string>
 > = {
   regens: "/IMG_0299.png",
-  baekjo: "/IMG_1642.png",
+  baekjo: "/IMG_1642.jpeg",
 };
 
 /* =========================================
@@ -68,8 +67,7 @@ const INSTALLATION_IMAGES = [
       "설치된 싱크볼과 수전의 사용 모습입니다.",
   },
   {
-    src:
-      "/53EE260C-F4EF-4593-8354-F5E29F65BDDD.png",
+    src: "/53EE260C-F4EF-4593-8354-F5E29F65BDDD.png",
     title: "사각 싱크볼 설치 완료",
     description:
       "사각 싱크볼과 수전 설치 완료 사례입니다.",
@@ -180,8 +178,7 @@ export async function generateMetadata({
     )
   ) {
     return {
-      title:
-        "상품을 찾을 수 없습니다 | 싱크모아",
+      title: "상품을 찾을 수 없습니다 | 싱크모아",
     };
   }
 
