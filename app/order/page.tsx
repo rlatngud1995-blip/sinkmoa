@@ -1,15 +1,22 @@
 
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import SiteHeader from "../components/SiteHeader";
+
 import {
   BRANDS,
   PRODUCTS,
   formatPrice,
   type BrandSlug,
 } from "../data/products";
+
+/* =========================================
+   싱크모아 주문 페이지
+   제품 사진 + 주문 기능 통합
+========================================= */
 
 const PHONE = "01094134686";
 
@@ -19,6 +26,23 @@ const PRICE = {
   cutting: 50000,
   faucet: 70000,
 };
+
+/* =========================================
+   브랜드별 실제 제품 사진
+
+   public 폴더 기준
+========================================= */
+
+const PRODUCT_IMAGES: Record<string, string> = {
+  baekjo: "/IMG_1642.jpeg",
+  regens: "/IMG_1772.jpeg",
+  bellago: "/IMG_1757.jpeg",
+  artisan: "/IMG_1771.jpeg",
+};
+
+function getProductImage(brand: string) {
+  return PRODUCT_IMAGES[brand] ?? "";
+}
 
 function onlyDigits(value: string) {
   return value.replace(/\D/g, "");
@@ -91,6 +115,8 @@ export default function OrderPage() {
   const [confirmOpen, setConfirmOpen] =
     useState(false);
 
+  /* URL에서 브랜드/제품 자동 선택 */
+
   useEffect(() => {
     const params = new URLSearchParams(
       window.location.search
@@ -143,6 +169,10 @@ export default function OrderPage() {
     };
   }, [confirmOpen]);
 
+  /* =========================================
+     상품 및 가격 계산
+  ========================================= */
+
   const availableProducts = PRODUCTS.filter(
     (item) => item.brand === brand
   );
@@ -150,6 +180,10 @@ export default function OrderPage() {
   const product = PRODUCTS.find(
     (item) => item.id === productId
   );
+
+  const productImage = product
+    ? getProductImage(product.brand)
+    : "";
 
   const productPrice = product?.price ?? 0;
 
@@ -206,6 +240,10 @@ export default function OrderPage() {
       setPreferredDate("");
     }
   }
+
+  /* =========================================
+     주문 입력 검사
+  ========================================= */
 
   function validateOrder() {
     if (!brand) {
@@ -269,6 +307,10 @@ export default function OrderPage() {
 
     setConfirmOpen(true);
   }
+
+  /* =========================================
+     문자 문의 내용
+  ========================================= */
 
   function buildMessage() {
     const lines = [
@@ -357,7 +399,8 @@ export default function OrderPage() {
     <main className="order-page">
       <SiteHeader />
 
-      {/* HERO */}
+      {/* 상단 히어로 */}
+
       <section className="order-hero">
         <div className="hero-inner">
           <span className="hero-eyebrow">
@@ -380,11 +423,15 @@ export default function OrderPage() {
             <span>
               <b>01</b> 제품 선택
             </span>
+
             <i />
+
             <span>
               <b>02</b> 옵션 선택
             </span>
+
             <i />
+
             <span>
               <b>03</b> 문의 접수
             </span>
@@ -395,6 +442,7 @@ export default function OrderPage() {
       <div className="order-container">
         <div className="form-column">
           {/* STEP 01 */}
+
           <section className="panel">
             <div className="section-heading">
               <div>
@@ -405,7 +453,9 @@ export default function OrderPage() {
                 <h2>싱크볼 제품 선택</h2>
               </div>
 
-              <span className="section-icon">01</span>
+              <span className="section-icon">
+                01
+              </span>
             </div>
 
             <div className="two-cols">
@@ -448,7 +498,10 @@ export default function OrderPage() {
                 <select
                   id="product"
                   value={productId}
-                  disabled={!brand}
+                  disabled={
+                    !brand ||
+                    availableProducts.length === 0
+                  }
                   onChange={(e) => {
                     setProductId(e.target.value);
                     setConfirmOpen(false);
@@ -457,24 +510,44 @@ export default function OrderPage() {
                   <option value="">
                     {!brand
                       ? "브랜드를 먼저 선택해주세요"
-                      : "모델을 선택해주세요"}
+                      : availableProducts.length
+                      ? "모델을 선택해주세요"
+                      : "등록된 모델이 없습니다"}
                   </option>
 
-                  {availableProducts.map((item) => (
-                    <option
-                      key={item.id}
-                      value={item.id}
-                    >
-                      {item.name} ·{" "}
-                      {formatPrice(item.price)}
-                    </option>
-                  ))}
+                  {availableProducts.map(
+                    (item) => (
+                      <option
+                        key={item.id}
+                        value={item.id}
+                      >
+                        {item.name} ·{" "}
+                        {formatPrice(item.price)}
+                      </option>
+                    )
+                  )}
                 </select>
               </div>
             </div>
 
+            {/* 선택 제품 이미지 및 정보 */}
+
             {product ? (
               <div className="selected-product">
+                {productImage && (
+                  <div className="product-photo">
+                    <Image
+                      src={productImage}
+                      alt={`${brandName} ${product.name} 싱크볼 제품 사진`}
+                      fill
+                      sizes="(max-width: 600px) 100vw, 320px"
+                      style={{
+                        objectFit: "contain",
+                      }}
+                    />
+                  </div>
+                )}
+
                 <div className="selected-info">
                   <span className="selected-label">
                     SELECTED PRODUCT
@@ -482,12 +555,14 @@ export default function OrderPage() {
 
                   <h3>{product.name}</h3>
 
-                  <p>{brandName} 공식 모델 정보 기준</p>
-                </div>
+                  <p>
+                    {brandName} · 프리미엄 사각 싱크볼
+                  </p>
 
-                <strong className="selected-price">
-                  {formatPrice(product.price)}
-                </strong>
+                  <strong className="selected-price">
+                    {formatPrice(product.price)}
+                  </strong>
+                </div>
 
                 <div className="product-spec">
                   <span>
@@ -500,13 +575,25 @@ export default function OrderPage() {
 
                   <span>
                     상판 타공 치수
-                    <strong>{cutoutSize}</strong>
+                    <strong>
+                      {cutoutSize}
+                    </strong>
                   </span>
                 </div>
+
+                <Link
+                  href={`/products/${product.brand}`}
+                  className="product-link"
+                >
+                  해당 브랜드 상품 더 보기
+                  <span>↗</span>
+                </Link>
               </div>
             ) : (
               <div className="empty-product">
-                <span className="empty-symbol">◇</span>
+                <span className="empty-symbol">
+                  ◇
+                </span>
 
                 <div>
                   <strong>
@@ -514,21 +601,23 @@ export default function OrderPage() {
                   </strong>
 
                   <p>
-                    모델 선택 시 가격과 타공 치수가
-                    자동으로 표시됩니다.
+                    모델 선택 시 실제 제품 사진,
+                    가격과 타공 치수가 표시됩니다.
                   </p>
                 </div>
               </div>
             )}
 
             <p className="section-note">
-              ※ 표시된 타공 치수는 싱크볼 외경이
-              아닌 상판 타공 기준입니다. 실제 설치
-              가능 여부는 현장 확인 후 안내됩니다.
+              ※ 표시된 타공 치수는 싱크볼
+              외경이 아닌 상판 타공 기준입니다.
+              실제 설치 가능 여부는 현장
+              확인 후 안내됩니다.
             </p>
           </section>
 
           {/* STEP 02 */}
+
           <section className="panel">
             <div className="section-heading">
               <div>
@@ -539,7 +628,9 @@ export default function OrderPage() {
                 <h2>구매 방식 및 옵션</h2>
               </div>
 
-              <span className="section-icon">02</span>
+              <span className="section-icon">
+                02
+              </span>
             </div>
 
             <h3 className="subheading">
@@ -570,7 +661,8 @@ export default function OrderPage() {
                 </span>
 
                 <small>
-                  싱크볼 제품을 택배로 받아보세요.
+                  싱크볼 제품을 택배로
+                  받아보세요.
                 </small>
               </label>
 
@@ -597,7 +689,8 @@ export default function OrderPage() {
                 </span>
 
                 <small>
-                  기존 철거 및 수전·배수구 연결 포함
+                  기존 철거 및 수전·배수구
+                  연결 포함
                 </small>
               </label>
             </div>
@@ -624,7 +717,9 @@ export default function OrderPage() {
               />
 
               <span className="option-copy">
-                <strong>올스텐 배수구</strong>
+                <strong>
+                  올스텐 배수구
+                </strong>
 
                 <small>
                   기본 배수구에서 올스텐으로 변경
@@ -678,10 +773,13 @@ export default function OrderPage() {
               />
 
               <span className="option-copy">
-                <strong>6WAY 수전 제품</strong>
+                <strong>
+                  6WAY 수전 제품
+                </strong>
 
                 <small>
-                  설치 주문 시 수전 교체 시공비 무료
+                  설치 주문 시 수전 교체
+                  시공비 무료
                 </small>
               </span>
 
@@ -689,15 +787,17 @@ export default function OrderPage() {
             </label>
 
             <p className="section-note">
-              기본 배수구는 제품 가격에 포함됩니다.
-              올스텐 배수구는 제품만 구매할 때도
-              선택할 수 있습니다. 상판 타공과
-              6WAY 수전은 설치 주문 시에만
+              기본 배수구는 제품 가격에
+              포함됩니다. 올스텐 배수구는
+              제품만 구매할 때도 선택할 수
+              있습니다. 상판 타공과 6WAY
+              수전은 설치 주문 시에만
               선택 가능합니다.
             </p>
           </section>
 
           {/* STEP 03 */}
+
           <section className="panel">
             <div className="section-heading">
               <div>
@@ -708,7 +808,9 @@ export default function OrderPage() {
                 <h2>고객 정보 입력</h2>
               </div>
 
-              <span className="section-icon">03</span>
+              <span className="section-icon">
+                03
+              </span>
             </div>
 
             <div className="two-cols">
@@ -780,8 +882,9 @@ export default function OrderPage() {
                 </div>
 
                 <p>
-                  기존 상판 타공 치수를 모르셔도
-                  상담 신청이 가능합니다.
+                  기존 상판 타공 치수를
+                  모르셔도 상담 신청이
+                  가능합니다.
                 </p>
 
                 <div className="two-cols">
@@ -872,7 +975,8 @@ export default function OrderPage() {
           </section>
         </div>
 
-        {/* ORDER SUMMARY */}
+        {/* 예상 주문 금액 */}
+
         <aside className="summary-column">
           <section className="summary-box">
             <span className="summary-eyebrow">
@@ -884,6 +988,7 @@ export default function OrderPage() {
             <div className="summary-rows">
               <div>
                 <span>싱크볼 제품</span>
+
                 <strong>
                   {product
                     ? formatPrice(productPrice)
@@ -893,6 +998,7 @@ export default function OrderPage() {
 
               <div>
                 <span>기본 설치</span>
+
                 <strong>
                   {formatPrice(installPrice)}
                 </strong>
@@ -900,6 +1006,7 @@ export default function OrderPage() {
 
               <div>
                 <span>올스텐 배수구</span>
+
                 <strong>
                   {formatPrice(drainPrice)}
                 </strong>
@@ -907,6 +1014,7 @@ export default function OrderPage() {
 
               <div>
                 <span>상판 타공</span>
+
                 <strong>
                   {formatPrice(cuttingPrice)}
                 </strong>
@@ -914,6 +1022,7 @@ export default function OrderPage() {
 
               <div>
                 <span>6WAY 수전 제품</span>
+
                 <strong>
                   {formatPrice(faucetPrice)}
                 </strong>
@@ -945,8 +1054,9 @@ export default function OrderPage() {
               문의가 접수됩니다.
               <br />
               <br />
-              배송비, 현장 상태, 타공 가능 여부에
-              따라 최종 금액이 달라질 수 있습니다.
+              배송비, 현장 상태, 타공 가능
+              여부에 따라 최종 금액이
+              달라질 수 있습니다.
             </p>
           </section>
 
@@ -964,16 +1074,22 @@ export default function OrderPage() {
         </aside>
       </div>
 
-      <Link href="/" className="return-link">
+      <Link
+        href="/"
+        className="return-link"
+      >
         ← 싱크모아 메인으로 돌아가기
       </Link>
 
-      {/* CONFIRMATION */}
+      {/* 최종 확인창 */}
+
       {confirmOpen && (
         <div
           className="confirm-overlay"
           onMouseDown={(e) => {
-            if (e.target === e.currentTarget) {
+            if (
+              e.target === e.currentTarget
+            ) {
               setConfirmOpen(false);
             }
           }}
@@ -1026,17 +1142,27 @@ export default function OrderPage() {
                 ? [
                     [
                       "상판 타공",
-                      cutting ? "선택" : "미선택",
+                      cutting
+                        ? "선택"
+                        : "미선택",
                     ],
                     [
                       "6WAY 수전",
-                      faucet ? "선택" : "미선택",
+                      faucet
+                        ? "선택"
+                        : "미선택",
                     ],
                   ]
                 : []),
               ["성함", name.trim()],
-              ["연락처", formatPhone(phone)],
-              [addressLabel, address.trim()],
+              [
+                "연락처",
+                formatPhone(phone),
+              ],
+              [
+                addressLabel,
+                address.trim(),
+              ],
               ...(installation
                 ? [
                     [
@@ -1093,7 +1219,8 @@ export default function OrderPage() {
             </div>
 
             <p className="dialog-foot">
-              문자 수신 번호: 010-9413-4686
+              문자 수신 번호:
+              010-9413-4686
               <br />
               실제 결제나 주문 확정이 아닌
               상담 요청 단계입니다.
@@ -1101,6 +1228,8 @@ export default function OrderPage() {
           </div>
         </div>
       )}
+
+      {/* 디자인 */}
 
       <style jsx>{`
         .order-page {
@@ -1112,7 +1241,8 @@ export default function OrderPage() {
           color: var(--ink);
           font-family: Arial,
             "Apple SD Gothic Neo",
-            "Malgun Gothic", sans-serif;
+            "Malgun Gothic",
+            sans-serif;
           word-break: keep-all;
         }
 
@@ -1156,7 +1286,11 @@ export default function OrderPage() {
         }
 
         .order-hero h1 {
-          font-size: clamp(35px, 5vw, 54px);
+          font-size: clamp(
+            35px,
+            5vw,
+            54px
+          );
           line-height: 1.35;
           letter-spacing: -0.055em;
           font-weight: 400;
@@ -1221,7 +1355,8 @@ export default function OrderPage() {
 
         .section-heading {
           display: flex;
-          justify-content: space-between;
+          justify-content:
+            space-between;
           align-items: flex-start;
           margin-bottom: 30px;
         }
@@ -1242,7 +1377,10 @@ export default function OrderPage() {
         .two-cols {
           display: grid;
           grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+            repeat(
+              2,
+              minmax(0, 1fr)
+            );
           gap: 15px;
         }
 
@@ -1300,15 +1438,33 @@ export default function OrderPage() {
           margin: 8px 0 0;
         }
 
+        /* 제품 사진 영역 */
+
         .selected-product {
           display: grid;
           grid-template-columns:
-            minmax(0, 1fr) auto;
-          gap: 16px;
+            180px minmax(0, 1fr);
+          gap: 20px;
           background: #f8f6f2;
           border: 1px solid #e8e1d5;
-          padding: 22px;
+          padding: 20px;
           margin-top: 5px;
+        }
+
+        .product-photo {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 1 / 1;
+          background: #fff;
+          border: 1px solid #e9e5df;
+          overflow: hidden;
+        }
+
+        .selected-info {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          min-width: 0;
         }
 
         .selected-label {
@@ -1319,26 +1475,28 @@ export default function OrderPage() {
         }
 
         .selected-info h3 {
-          font-size: 17px;
-          margin: 9px 0;
+          font-size: 18px;
+          line-height: 1.5;
+          margin: 12px 0 6px;
         }
 
         .selected-info p {
           color: #888;
           font-size: 11px;
+          line-height: 1.7;
           margin: 0;
         }
 
         .selected-price {
           color: #19262b;
-          font-size: 22px;
-          white-space: nowrap;
+          font-size: 23px;
+          margin-top: 16px;
         }
 
         .product-spec {
           grid-column: 1 / -1;
           border-top: 1px solid #e4ded4;
-          padding-top: 15px;
+          padding-top: 16px;
           display: flex;
           gap: 30px;
         }
@@ -1353,6 +1511,25 @@ export default function OrderPage() {
           color: #19262b;
           font-size: 12px;
           margin-top: 7px;
+        }
+
+        .product-link {
+          grid-column: 1 / -1;
+          display: flex;
+          justify-content:
+            space-between;
+          align-items: center;
+          padding: 13px 15px;
+          background: #fff;
+          border: 1px solid #e5ded2;
+          color: #19262b;
+          font-size: 12px;
+          font-weight: 600;
+        }
+
+        .product-link span {
+          font-size: 17px;
+          color: #a99577;
         }
 
         .empty-product {
@@ -1396,7 +1573,10 @@ export default function OrderPage() {
         .choice-grid {
           display: grid;
           grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+            repeat(
+              2,
+              minmax(0, 1fr)
+            );
           gap: 12px;
           margin-bottom: 32px;
         }
@@ -1450,7 +1630,8 @@ export default function OrderPage() {
         .option-title-row {
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          justify-content:
+            space-between;
           gap: 10px;
           margin-bottom: 12px;
         }
@@ -1515,7 +1696,8 @@ export default function OrderPage() {
 
         .install-extra .subheading {
           display: flex;
-          justify-content: space-between;
+          justify-content:
+            space-between;
           align-items: center;
         }
 
@@ -1556,11 +1738,17 @@ export default function OrderPage() {
 
         .summary-rows > div {
           display: flex;
-          justify-content: space-between;
+          justify-content:
+            space-between;
           gap: 12px;
           padding: 12px 0;
           border-bottom: 1px solid
-            rgba(255, 255, 255, 0.1);
+            rgba(
+              255,
+              255,
+              255,
+              0.1
+            );
           font-size: 12px;
         }
 
@@ -1600,7 +1788,8 @@ export default function OrderPage() {
           color: #19262b;
           padding: 18px;
           display: flex;
-          justify-content: space-between;
+          justify-content:
+            space-between;
           align-items: center;
           gap: 10px;
           font-size: 13px;
@@ -1656,14 +1845,21 @@ export default function OrderPage() {
           align-items: center;
           justify-content: center;
           padding: 18px;
-          background: rgba(8, 16, 20, 0.78);
+          background: rgba(
+            8,
+            16,
+            20,
+            0.78
+          );
         }
 
         .confirm-dialog {
           position: relative;
           width: 100%;
           max-width: 520px;
-          max-height: calc(100dvh - 36px);
+          max-height: calc(
+            100dvh - 36px
+          );
           overflow-y: auto;
           background: #fff;
           padding: 35px;
@@ -1696,7 +1892,8 @@ export default function OrderPage() {
 
         .review-row {
           display: flex;
-          justify-content: space-between;
+          justify-content:
+            space-between;
           gap: 15px;
           border-bottom: 1px solid #eae5dd;
           padding: 11px 0;
@@ -1717,7 +1914,8 @@ export default function OrderPage() {
 
         .review-total {
           display: flex;
-          justify-content: space-between;
+          justify-content:
+            space-between;
           align-items: center;
           gap: 12px;
           padding: 23px 0;
@@ -1734,7 +1932,8 @@ export default function OrderPage() {
 
         .dialog-actions {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns:
+            1fr 1fr;
           gap: 9px;
         }
 
@@ -1765,7 +1964,8 @@ export default function OrderPage() {
 
         @media (max-width: 950px) {
           .order-container {
-            grid-template-columns: minmax(0, 1fr);
+            grid-template-columns:
+              minmax(0, 1fr);
           }
 
           .summary-column {
@@ -1783,7 +1983,8 @@ export default function OrderPage() {
           .total-row {
             flex-direction: row;
             align-items: center;
-            justify-content: space-between;
+            justify-content:
+              space-between;
           }
 
           .total-row strong {
@@ -1838,12 +2039,46 @@ export default function OrderPage() {
           }
 
           .two-cols {
-            grid-template-columns: 1fr;
+            grid-template-columns:
+              1fr;
             gap: 0;
           }
 
           .field {
             margin-bottom: 17px;
+          }
+
+          /* 모바일 제품 사진 */
+
+          .selected-product {
+            grid-template-columns: 1fr;
+            gap: 15px;
+            padding: 15px;
+          }
+
+          .product-photo {
+            aspect-ratio: 4 / 3;
+          }
+
+          .selected-info {
+            padding: 2px;
+          }
+
+          .selected-info h3 {
+            font-size: 17px;
+          }
+
+          .selected-price {
+            font-size: 22px;
+          }
+
+          .product-spec {
+            grid-column: 1;
+            gap: 22px;
+          }
+
+          .product-link {
+            grid-column: 1;
           }
 
           .choice-grid {
@@ -1878,18 +2113,6 @@ export default function OrderPage() {
 
           .option-copy small {
             font-size: 10px;
-          }
-
-          .selected-product {
-            grid-template-columns: 1fr;
-          }
-
-          .selected-price {
-            font-size: 21px;
-          }
-
-          .product-spec {
-            grid-column: 1;
           }
 
           .install-extra {
