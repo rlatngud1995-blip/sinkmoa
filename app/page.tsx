@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+
 import {
   INSTALLATION_REGIONS,
 } from "./data/installation-regions";
@@ -16,7 +17,8 @@ import {
    - 지역별 설치 안내
    - 주문 및 견적 문의
    - 모바일 메뉴
-   - 30,000원 할인 쿠폰 팝업
+   - 30,000원 할인 쿠폰
+   - 모바일 전체 비율 최적화
 ========================================= */
 
 const slides = [
@@ -98,14 +100,21 @@ const COUPON_STORAGE_KEY =
   "sinkmoa-coupon-hide-until";
 
 export default function Home() {
-  const [current, setCurrent] = useState(0);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [current, setCurrent] =
+    useState(0);
 
-  const [selectedRegion, setSelectedRegion] =
-    useState<string>("seoul");
-
-  const [couponOpen, setCouponOpen] =
+  const [menuOpen, setMenuOpen] =
     useState(false);
+
+  const [
+    selectedRegion,
+    setSelectedRegion,
+  ] = useState<string>("seoul");
+
+  const [
+    couponOpen,
+    setCouponOpen,
+  ] = useState(false);
 
   /* =========================================
      메인 슬라이드
@@ -114,15 +123,17 @@ export default function Home() {
   useEffect(() => {
     const timer = window.setInterval(() => {
       setCurrent(
-        (prev) => (prev + 1) % slides.length
+        (prev) =>
+          (prev + 1) % slides.length
       );
     }, 4500);
 
-    return () => window.clearInterval(timer);
+    return () =>
+      window.clearInterval(timer);
   }, []);
 
   /* =========================================
-     쿠폰 팝업
+     쿠폰
   ========================================= */
 
   useEffect(() => {
@@ -182,7 +193,9 @@ export default function Home() {
   }
 
   const activeRegion =
-    INSTALLATION_REGIONS[selectedRegion];
+    INSTALLATION_REGIONS[
+      selectedRegion
+    ];
 
   const totalDistricts =
     REGION_ORDER.reduce(
@@ -197,7 +210,7 @@ export default function Home() {
     <main className="sinkmoa-home">
 
       {/* =====================================
-          쿠폰 팝업
+          3만원 할인 쿠폰
       ===================================== */}
 
       {couponOpen && (
@@ -233,7 +246,9 @@ export default function Home() {
               </p>
 
               <h2 id="coupon-title">
-                <strong>30,000</strong>
+                <strong>
+                  30,000
+                </strong>
                 <span>원 할인</span>
               </h2>
 
@@ -264,16 +279,18 @@ export default function Home() {
               </Link>
 
               <p className="coupon-notice">
-                ※ 현장 추가 작업비 및 일부
-                출장 관련 비용에는 할인이
-                적용되지 않을 수 있습니다.
+                ※ 현장 추가 작업비 및
+                일부 출장 관련 비용에는
+                할인이 적용되지 않을 수 있습니다.
               </p>
 
               <div className="coupon-actions">
 
                 <button
                   type="button"
-                  onClick={hideCouponToday}
+                  onClick={
+                    hideCouponToday
+                  }
                 >
                   오늘 하루 보지 않기
                 </button>
@@ -294,40 +311,39 @@ export default function Home() {
       )}
 
       {/* =====================================
-          헤더
+          HEADER
       ===================================== */}
 
       <header className="site-header">
+
         <div className="header-inner">
 
-          <Link href="/" className="logo">
+          <Link
+            href="/"
+            className="logo"
+          >
             SINKMOA
           </Link>
 
-          <nav
-            className="desktop-nav"
-            aria-label="메인 메뉴"
-          >
-            {navigation.map((item) => (
-              <Link
-                href={item.href}
-                key={item.href}
-              >
-                {item.label}
-              </Link>
-            ))}
+          <nav className="desktop-nav">
+
+            {navigation.map(
+              (item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                >
+                  {item.label}
+                </Link>
+              )
+            )}
+
           </nav>
 
           <button
             type="button"
             className="menu-button"
-            aria-label={
-              menuOpen
-                ? "메뉴 닫기"
-                : "메뉴 열기"
-            }
-            aria-expanded={menuOpen}
-            aria-controls="mobile-navigation"
+            aria-label="메뉴 열기"
             onClick={() =>
               setMenuOpen(
                 (prev) => !prev
@@ -342,59 +358,58 @@ export default function Home() {
         </div>
 
         {menuOpen && (
-          <nav
-            id="mobile-navigation"
-            className="mobile-nav"
-            aria-label="모바일 메뉴"
-          >
-            {navigation.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() =>
-                  setMenuOpen(false)
-                }
-              >
-                {item.label}
-              </Link>
-            ))}
+          <nav className="mobile-nav">
+
+            {navigation.map(
+              (item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() =>
+                    setMenuOpen(false)
+                  }
+                >
+                  {item.label}
+                </Link>
+              )
+            )}
+
           </nav>
         )}
 
       </header>
 
       {/* =====================================
-          BEFORE / AFTER 메인 사진
+          BEFORE / AFTER
       ===================================== */}
 
       <section className="hero">
 
-        {slides.map((slide, index) => (
-          <div
-            key={slide.label}
-            className={`hero-slide ${
-              current === index
-                ? "active"
-                : ""
-            }`}
-            aria-hidden={
-              current !== index
-            }
-          >
-            <Image
-              src={slide.image}
-              alt={`${slide.label} 싱크볼 시공 사진`}
-              fill
-              priority={index === 0}
-              sizes="100vw"
-              className="hero-photo"
-              style={{
-                objectPosition:
-                  slide.position,
-              }}
-            />
-          </div>
-        ))}
+        {slides.map(
+          (slide, index) => (
+            <div
+              key={slide.label}
+              className={`hero-slide ${
+                current === index
+                  ? "active"
+                  : ""
+              }`}
+            >
+              <Image
+                src={slide.image}
+                alt={`${slide.label} 싱크볼 시공 사진`}
+                fill
+                priority={index === 0}
+                sizes="100vw"
+                className="hero-photo"
+                style={{
+                  objectPosition:
+                    slide.position,
+                }}
+              />
+            </div>
+          )
+        )}
 
         <div className="hero-overlay" />
 
@@ -427,11 +442,15 @@ export default function Home() {
           <div className="photo-caption">
 
             <p>
-              REAL KITCHEN TRANSFORMATION
+              REAL KITCHEN
+              TRANSFORMATION
             </p>
 
             <h1>
-              {slides[current].description}
+              {
+                slides[current]
+                  .description
+              }
             </h1>
 
           </div>
@@ -450,10 +469,6 @@ export default function Home() {
                   }
                   onClick={() =>
                     setCurrent(index)
-                  }
-                  aria-label={`${slide.label} 사진 보기`}
-                  aria-pressed={
-                    current === index
                   }
                 >
                   <span className="control-line" />
@@ -520,7 +535,7 @@ export default function Home() {
       </section>
 
       {/* =====================================
-          싱크모아 소개
+          소개
       ===================================== */}
 
       <section className="intro-section">
@@ -578,52 +593,52 @@ export default function Home() {
 
         <div className="brand-grid">
 
-          {brands.map((brand) => (
+          {brands.map(
+            (brand) => (
+              <Link
+                href={`/products/${brand.slug}`}
+                className="brand-card"
+                key={brand.slug}
+              >
 
-            <Link
-              href={`/products/${brand.slug}`}
-              className="brand-card"
-              key={brand.slug}
-            >
+                <div className="brand-image">
 
-              <div className="brand-image">
-
-                <Image
-                  src={brand.image}
-                  alt={`${brand.korean} 싱크볼`}
-                  fill
-                  sizes="(max-width: 700px) 100vw, 50vw"
-                  className="brand-photo"
-                />
-
-              </div>
-
-              <div className="brand-info">
-
-                <div>
-
-                  <p>
-                    COLLECTION{" "}
-                    {brand.number}
-                    {" · "}
-                    {brand.korean}
-                  </p>
-
-                  <h3>
-                    {brand.name}
-                  </h3>
+                  <Image
+                    src={brand.image}
+                    alt={`${brand.korean} 싱크볼`}
+                    fill
+                    sizes="(max-width: 700px) 100vw, 50vw"
+                    className="brand-photo"
+                  />
 
                 </div>
 
-                <span className="brand-arrow">
-                  ↗
-                </span>
+                <div className="brand-info">
 
-              </div>
+                  <div>
 
-            </Link>
+                    <p>
+                      COLLECTION{" "}
+                      {brand.number}
+                      {" · "}
+                      {brand.korean}
+                    </p>
 
-          ))}
+                    <h3>
+                      {brand.name}
+                    </h3>
+
+                  </div>
+
+                  <span className="brand-arrow">
+                    ↗
+                  </span>
+
+                </div>
+
+              </Link>
+            )
+          )}
 
         </div>
 
@@ -638,15 +653,19 @@ export default function Home() {
         id="service"
       >
 
-        <div className="service-image">
+        <div className="service-visual">
 
-          <Image
-            src="/E7583A13-ED40-4C57-A2F1-3E16709A382D.jpeg"
-            alt="싱크모아 싱크볼 기본 구성품"
-            fill
-            sizes="(max-width: 900px) 100vw, 50vw"
-            className="service-photo"
-          />
+          <div className="service-image-frame">
+
+            <Image
+              src="/E7583A13-ED40-4C57-A2F1-3E16709A382D.jpeg"
+              alt="싱크모아 싱크볼 기본 구성품"
+              fill
+              sizes="(max-width: 900px) 90vw, 50vw"
+              className="service-photo"
+            />
+
+          </div>
 
         </div>
 
@@ -665,9 +684,10 @@ export default function Home() {
           <div className="gold-line" />
 
           <p className="service-description">
-            싱크볼 제품 선택부터 설치 상담까지.
+            싱크볼 제품 선택부터
+            설치 상담까지.
             <br />
-            기존 싱크볼의 상판 타공 사이즈와
+            기존 상판 타공 사이즈와
             현장 환경을 확인하여
             적합한 시공 방법을 안내합니다.
           </p>
@@ -686,7 +706,7 @@ export default function Home() {
 
           <p className="service-note">
             기존 싱크볼 철거,
-            기존 수전 및 배수구 연결 시공 포함
+            기존 수전 및 배수구 연결 포함
             <br />
             상판 타공 및 현장 상황에 따라
             추가 비용이 발생할 수 있습니다.
@@ -705,7 +725,7 @@ export default function Home() {
       </section>
 
       {/* =====================================
-          지역별 설치 안내
+          지역
       ===================================== */}
 
       <section
@@ -722,17 +742,16 @@ export default function Home() {
             </p>
 
             <h2>
-              우리 지역 싱크볼
+              우리 지역
               <br className="mobile-only" />
               {" "}
-              설치 안내
+              싱크볼 설치 안내
             </h2>
 
             <p>
               서울·경기·인천·충남·충북
               <br />
-              지역을 선택해 싱크볼
-              교체 및 설치 안내를
+              지역을 선택해 설치 안내를
               확인하세요.
             </p>
 
@@ -754,7 +773,7 @@ export default function Home() {
                 DISTRICT GUIDES
               </span>
               <strong>
-                {totalDistricts}개 시·군·구
+                {totalDistricts}개 지역
               </strong>
             </div>
 
@@ -769,17 +788,14 @@ export default function Home() {
 
           </div>
 
-          <div
-            className="region-tabs"
-            role="tablist"
-            aria-label="설치 안내 지역 선택"
-          >
+          <div className="region-tabs">
 
             {REGION_ORDER.map(
               (slug) => {
-
                 const regionData =
-                  INSTALLATION_REGIONS[slug];
+                  INSTALLATION_REGIONS[
+                    slug
+                  ];
 
                 const active =
                   selectedRegion === slug;
@@ -787,11 +803,7 @@ export default function Home() {
                 return (
                   <button
                     key={slug}
-                    id={`region-tab-${slug}`}
                     type="button"
-                    role="tab"
-                    aria-selected={active}
-                    aria-controls="region-district-panel"
                     className={`region-tab ${
                       active
                         ? "active"
@@ -803,7 +815,6 @@ export default function Home() {
                       )
                     }
                   >
-
                     <span>
                       {regionData.name}
                     </span>
@@ -814,9 +825,8 @@ export default function Home() {
                           .districts
                           .length
                       }
-                      개 지역
+                      개
                     </small>
-
                   </button>
                 );
               }
@@ -824,12 +834,7 @@ export default function Home() {
 
           </div>
 
-          <div
-            className="region-panel"
-            id="region-district-panel"
-            role="tabpanel"
-            aria-labelledby={`region-tab-${selectedRegion}`}
-          >
+          <div className="region-panel">
 
             <div className="region-panel-heading">
 
@@ -846,24 +851,17 @@ export default function Home() {
                 </h3>
 
                 <span>
-                  원하는 지역을 선택하면
-                  해당 지역의 설치 안내
-                  페이지로 이동합니다.
+                  원하는 지역을 선택하세요.
                 </span>
 
               </div>
 
-              <span className="region-count">
+              <strong className="region-count">
                 {
                   activeRegion
-                    .districts
-                    .length
+                    .districts.length
                 }
-
-                <small>
-                  {" "}AREAS
-                </small>
-              </span>
+              </strong>
 
             </div>
 
@@ -871,23 +869,21 @@ export default function Home() {
 
               {activeRegion.districts.map(
                 (district) => (
-
                   <Link
-                    key={`${selectedRegion}-${district.slug}`}
+                    key={
+                      district.slug
+                    }
                     href={`/installation/${selectedRegion}/${district.slug}`}
                     className="district-link"
                   >
-
                     <span>
                       {district.name}
                     </span>
 
-                    <span className="district-arrow">
+                    <span>
                       ↗
                     </span>
-
                   </Link>
-
                 )
               )}
 
@@ -902,17 +898,14 @@ export default function Home() {
             </div>
 
             <p>
-              서울·경기·인천·충남·충북
-              지역의 싱크볼 설치 상담을
-              접수하고 있습니다.
               실제 방문 가능 여부와 일정,
               출장 관련 추가 비용은
               주소 및 현장 조건 확인 후
-              안내해드립니다.
+              안내드립니다.
             </p>
 
             <Link href="/order">
-              설치 견적 문의 ↗
+              견적 문의 ↗
             </Link>
 
           </div>
@@ -922,7 +915,7 @@ export default function Home() {
       </section>
 
       {/* =====================================
-          주문 문의
+          주문
       ===================================== */}
 
       <section className="order-section">
@@ -938,9 +931,11 @@ export default function Home() {
         </h2>
 
         <p>
-          프리미엄 싱크볼부터 설치 상담까지,
+          프리미엄 싱크볼부터
+          설치 상담까지,
           <br />
-          싱크모아에서 편리하게 문의하세요.
+          싱크모아에서 편리하게
+          문의하세요.
         </p>
 
         <Link
@@ -966,22 +961,22 @@ export default function Home() {
           </h2>
 
           <p>
-            프리미엄 싱크볼 판매 및
-            설치 전문몰
+            프리미엄 싱크볼
+            판매 및 설치 전문몰
           </p>
 
           <nav className="footer-links">
 
-            {navigation.map((item) => (
-
-              <Link
-                href={item.href}
-                key={item.href}
-              >
-                {item.label}
-              </Link>
-
-            ))}
+            {navigation.map(
+              (item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                >
+                  {item.label}
+                </Link>
+              )
+            )}
 
           </nav>
 
@@ -991,8 +986,10 @@ export default function Home() {
           </p>
 
           <p className="copyright">
-            © {new Date().getFullYear()}{" "}
-            SINKMOA. All Rights Reserved.
+            ©{" "}
+            {new Date().getFullYear()}
+            {" "}SINKMOA.
+            All Rights Reserved.
           </p>
 
         </div>
@@ -1005,13 +1002,17 @@ export default function Home() {
 
       <style jsx global>{`
 
+        body {
+          margin: 0;
+        }
+
         .sinkmoa-home {
           --ink: #19262b;
           --gold: #c4b49a;
           --ivory: #f7f5f0;
 
-          color: var(--ink);
           background: var(--ivory);
+          color: var(--ink);
 
           font-family:
             Arial,
@@ -1033,89 +1034,74 @@ export default function Home() {
           text-decoration: none;
         }
 
-        .sinkmoa-home button {
-          font-family: inherit;
-        }
+        /* ===============================
+           COUPON
+        =============================== */
 
-        /* =====================================
-           쿠폰 팝업
-        ===================================== */
-
+        .sinkmoa-home
         .coupon-overlay {
           position: fixed;
           inset: 0;
           z-index: 9999;
 
           display: flex;
-          align-items: center;
           justify-content: center;
+          align-items: center;
 
-          padding: 20px;
+          padding: 18px;
 
           background:
-            rgba(8, 15, 18, .68);
+            rgba(8,15,18,.65);
 
           backdrop-filter:
-            blur(5px);
+            blur(4px);
         }
 
+        .sinkmoa-home
         .coupon-popup {
           position: relative;
 
-          width: min(
-            100%,
-            480px
-          );
+          width: min(100%,450px);
 
           overflow: hidden;
 
-          background: #fff;
+          border-radius: 20px;
 
-          border-radius: 22px;
+          background: white;
 
           box-shadow:
             0 24px 80px
-            rgba(0,0,0,.28);
+            rgba(0,0,0,.3);
         }
 
+        .sinkmoa-home
         .coupon-close {
           position: absolute;
-          z-index: 3;
+          z-index: 2;
 
-          top: 17px;
-          right: 17px;
+          top: 14px;
+          right: 14px;
 
-          width: 42px;
-          height: 42px;
+          width: 38px;
+          height: 38px;
 
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          padding: 0;
-
-          border: 1px solid
-            rgba(255,255,255,.25);
-
+          border: 0;
           border-radius: 50%;
 
           background:
-            rgba(0,0,0,.28);
+            rgba(0,0,0,.30);
 
           color: white;
 
-          font-size: 29px;
-          font-weight: 300;
-
-          line-height: 1;
+          font-size: 25px;
 
           cursor: pointer;
         }
 
+        .sinkmoa-home
         .coupon-top {
           padding:
-            55px 35px
-            43px;
+            44px 28px 33px;
 
           background:
             linear-gradient(
@@ -1129,165 +1115,163 @@ export default function Home() {
           text-align: center;
         }
 
+        .sinkmoa-home
         .coupon-brand {
-          margin: 0 0 18px;
+          margin: 0 0 15px;
 
-          color: #fff;
-
-          font-size: 16px;
+          font-size: 14px;
           font-weight: 700;
 
           letter-spacing: .22em;
         }
 
+        .sinkmoa-home
         .coupon-badge {
           display: inline-block;
 
-          padding: 9px 13px;
+          padding: 7px 11px;
 
           border:
             1px solid
-            rgba(196,180,154,.6);
+            rgba(196,180,154,.55);
 
           color: #c4b49a;
 
-          font-size: 9px;
+          font-size: 8px;
           font-weight: 700;
 
-          letter-spacing: .17em;
+          letter-spacing: .16em;
         }
 
+        .sinkmoa-home
         .coupon-small-title {
           margin:
-            28px 0 9px;
+            22px 0 8px;
 
-          color: #d9dddb;
+          color: #d5dad8;
 
-          font-size: 14px;
-          font-weight: 600;
+          font-size: 12px;
         }
 
+        .sinkmoa-home
         .coupon-top h2 {
           margin: 0;
 
           display: flex;
-          align-items: baseline;
           justify-content: center;
-          gap: 7px;
+          align-items: baseline;
 
-          line-height: 1;
+          gap: 6px;
         }
 
+        .sinkmoa-home
         .coupon-top h2 strong {
           color: #d8bd93;
 
-          font-size: 62px;
-          font-weight: 700;
+          font-size: 52px;
 
           letter-spacing: -.05em;
         }
 
+        .sinkmoa-home
         .coupon-top h2 span {
-          color: white;
-
-          font-size: 27px;
-          font-weight: 600;
-
-          letter-spacing: -.04em;
+          font-size: 22px;
         }
 
+        .sinkmoa-home
         .coupon-line {
-          width: 36px;
+          width: 34px;
           height: 1px;
 
           margin:
-            27px auto 23px;
+            22px auto 18px;
 
-          background:
-            #c4b49a;
+          background: #c4b49a;
         }
 
+        .sinkmoa-home
         .coupon-description {
           margin: 0;
 
           color: #cdd3d1;
 
-          font-size: 12px;
-          line-height: 1.9;
+          font-size: 11px;
+          line-height: 1.8;
         }
 
+        .sinkmoa-home
         .coupon-bottom {
           padding:
-            26px 27px 0;
-
-          background: white;
+            22px 22px 0;
         }
 
+        .sinkmoa-home
         .coupon-button {
-          width: 100%;
-
-          padding: 18px 20px;
+          padding: 16px 17px;
 
           display: flex;
           justify-content: space-between;
-          align-items: center;
 
           background: #c4b49a;
 
           color: #19262b;
 
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 700;
         }
 
+        .sinkmoa-home
         .coupon-notice {
           margin:
-            14px 5px 20px;
+            12px 3px 16px;
 
           color: #999;
 
-          font-size: 10px;
+          font-size: 9px;
           line-height: 1.7;
 
           text-align: center;
         }
 
+        .sinkmoa-home
         .coupon-actions {
           margin:
-            0 -27px;
+            0 -22px;
 
           display: grid;
+
           grid-template-columns:
             1fr 1fr;
 
           border-top:
-            1px solid #e8e4dd;
+            1px solid #eee8df;
         }
 
+        .sinkmoa-home
         .coupon-actions button {
-          padding: 18px 10px;
+          padding: 15px 8px;
 
           border: 0;
 
           background: white;
 
-          color: #626866;
+          color: #666;
 
-          font-size: 12px;
-
-          cursor: pointer;
+          font-size: 11px;
         }
 
-        .coupon-actions button +
-        button {
+        .sinkmoa-home
+        .coupon-actions
+        button + button {
           border-left:
-            1px solid #e8e4dd;
+            1px solid #eee8df;
         }
 
-        /* =====================================
+        /* ===============================
            HEADER
-        ===================================== */
+        =============================== */
 
+        .sinkmoa-home
         .site-header {
           position: relative;
           z-index: 30;
@@ -1296,13 +1280,16 @@ export default function Home() {
 
           border-bottom:
             1px solid
-            rgba(255,255,255,.15);
+            rgba(255,255,255,.12);
         }
 
+        .sinkmoa-home
         .header-inner {
+          width:
+            calc(100% - 72px);
+
           max-width: 1360px;
-          width: calc(100% - 80px);
-          height: 94px;
+          height: 86px;
 
           margin: auto;
 
@@ -1311,72 +1298,75 @@ export default function Home() {
           justify-content: space-between;
         }
 
+        .sinkmoa-home
         .logo {
-          color: #fff;
+          color: white;
 
-          font-size: 26px;
+          font-size: 23px;
           font-weight: 700;
 
-          letter-spacing: .22em;
+          letter-spacing: .20em;
         }
 
+        .sinkmoa-home
         .desktop-nav {
           display: flex;
-          gap: 34px;
-          align-items: center;
+          gap: 30px;
         }
 
+        .sinkmoa-home
         .desktop-nav a {
-          color:
-            rgba(255,255,255,.9);
-
-          font-size: 13px;
+          color: #eee;
+          font-size: 12px;
         }
 
+        .sinkmoa-home
         .menu-button {
           display: none;
 
-          padding: 10px;
+          padding: 8px;
 
           border: 0;
 
-          background: transparent;
-
-          cursor: pointer;
+          background: none;
         }
 
+        .sinkmoa-home
         .menu-button span {
           display: block;
 
-          width: 25px;
+          width: 23px;
           height: 1px;
 
-          margin: 6px 0;
+          margin: 5px 0;
 
           background: white;
         }
 
+        .sinkmoa-home
         .mobile-nav {
           display: none;
         }
 
-        /* =====================================
+        /* ===============================
            HERO
-        ===================================== */
+        =============================== */
 
+        .sinkmoa-home
         .hero {
           position: relative;
 
           height:
-            min(780px,80svh);
+            min(700px,74svh);
 
-          min-height: 530px;
+          min-height: 500px;
 
           overflow: hidden;
 
           background: #111a1e;
         }
 
+        .sinkmoa-home
         .hero-slide {
           position: absolute;
           inset: 0;
@@ -1385,48 +1375,40 @@ export default function Home() {
 
           transition:
             opacity 1s ease;
-
-          pointer-events: none;
         }
 
+        .sinkmoa-home
         .hero-slide.active {
           opacity: 1;
         }
 
+        .sinkmoa-home
         .hero-photo {
           object-fit: cover;
-
-          transition:
-            transform 5s linear;
         }
 
-        .hero-slide.active
-        .hero-photo {
-          transform:
-            scale(1.025);
-        }
-
+        .sinkmoa-home
         .hero-overlay {
           position: absolute;
           inset: 0;
-
           z-index: 1;
 
           background:
             linear-gradient(
               180deg,
-              rgba(7,15,19,.30) 0%,
-              rgba(7,15,19,.04) 35%,
-              rgba(7,15,19,.06) 65%,
-              rgba(7,15,19,.48) 100%
+              rgba(8,15,18,.25),
+              rgba(8,15,18,.05) 55%,
+              rgba(8,15,18,.5)
             );
         }
 
+        .sinkmoa-home
         .hero-photo-top {
           position: absolute;
           z-index: 2;
 
-          top: 35px;
+          top: 30px;
+
           left: 0;
           right: 0;
 
@@ -1435,68 +1417,66 @@ export default function Home() {
           color: white;
         }
 
+        .sinkmoa-home
         .hero-photo-top > p {
-          margin:
-            0 0 18px;
+          margin: 0 0 15px;
 
-          font-size: 11px;
-          font-weight: 700;
+          font-size: 10px;
 
-          letter-spacing: .24em;
-        }
-
-        .hero-photo-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 12px;
-
-          padding: 12px 20px;
-
-          border:
-            1px solid
-            rgba(255,255,255,.75);
-
-          background:
-            rgba(10,18,22,.48);
-
-          backdrop-filter:
-            blur(5px);
-
-          font-size: 13px;
-        }
-
-        .hero-photo-badge strong {
           letter-spacing: .2em;
         }
 
+        .sinkmoa-home
+        .hero-photo-badge {
+          padding: 10px 17px;
+
+          display: inline-flex;
+          align-items: center;
+
+          gap: 10px;
+
+          border:
+            1px solid
+            rgba(255,255,255,.7);
+
+          background:
+            rgba(10,18,22,.4);
+
+          font-size: 11px;
+        }
+
+        .sinkmoa-home
         .badge-dot {
-          width: 7px;
-          height: 7px;
+          width: 6px;
+          height: 6px;
 
           border-radius: 50%;
 
           background: #c4b49a;
         }
 
+        .sinkmoa-home
         .badge-divider {
           width: 1px;
-          height: 14px;
+          height: 12px;
 
           background:
             rgba(255,255,255,.5);
         }
 
+        .sinkmoa-home
         .hero-photo-bottom {
           position: absolute;
           z-index: 2;
 
           left: 0;
           right: 0;
-          bottom: 30px;
+          bottom: 26px;
+
+          width:
+            calc(100% - 72px);
 
           max-width: 1360px;
-          width:
-            calc(100% - 80px);
 
           margin: auto;
 
@@ -1504,99 +1484,101 @@ export default function Home() {
           justify-content: space-between;
           align-items: flex-end;
 
-          gap: 25px;
-        }
-
-        .photo-caption {
           color: white;
         }
 
+        .sinkmoa-home
         .photo-caption p {
-          margin: 0 0 10px;
+          margin: 0 0 8px;
 
           color: #e8d4b5;
 
-          font-size: 10px;
+          font-size: 9px;
 
-          letter-spacing: .22em;
+          letter-spacing: .2em;
         }
 
+        .sinkmoa-home
         .photo-caption h1 {
           margin: 0;
 
           font-size:
-            clamp(24px,3vw,40px);
+            clamp(23px,3vw,37px);
 
           font-weight: 400;
         }
 
+        .sinkmoa-home
         .slide-controls {
           display: flex;
-          gap: 16px;
+          gap: 12px;
         }
 
+        .sinkmoa-home
         .slide-controls button {
-          border: 0;
           padding: 0;
 
-          background: transparent;
+          border: 0;
 
-          color:
-            rgba(255,255,255,.7);
+          background: none;
 
-          cursor: pointer;
+          color: white;
         }
 
+        .sinkmoa-home
         .control-line {
           display: block;
 
-          width: 95px;
-          height: 3px;
+          width: 80px;
+          height: 2px;
 
-          margin-bottom: 9px;
+          margin-bottom: 7px;
 
           background:
-            rgba(255,255,255,.55);
+            rgba(255,255,255,.5);
         }
 
+        .sinkmoa-home
         .selected
         .control-line {
           background: #d9bd92;
         }
 
+        .sinkmoa-home
         .control-label {
-          font-size: 10px;
-
-          letter-spacing: .17em;
+          font-size: 9px;
         }
 
-        /* =====================================
-           COMMON
-        ===================================== */
+        /* ===============================
+           공통
+        =============================== */
 
+        .sinkmoa-home
         .section-label {
-          margin: 0 0 22px;
+          margin: 0 0 18px;
 
           color: #b9a17d;
 
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 700;
 
-          letter-spacing: .23em;
+          letter-spacing: .2em;
         }
 
+        .sinkmoa-home
         .gold-line {
-          width: 40px;
+          width: 36px;
           height: 1px;
 
-          margin: 30px auto;
+          margin: 25px auto;
 
           background: #b6a080;
         }
 
+        .sinkmoa-home
         .hero-intro {
           padding:
-            105px 24px 115px;
+            85px 22px 90px;
 
           background: #19262b;
 
@@ -1605,143 +1587,158 @@ export default function Home() {
           text-align: center;
         }
 
-        .hero-intro h2,
-        .intro-section h2,
-        .section-heading h2,
-        .order-section h2 {
-          font-weight: 400;
-          letter-spacing: -.05em;
-        }
-
+        .sinkmoa-home
         .hero-intro h2 {
           margin: 0;
 
           font-size:
-            clamp(38px,5vw,65px);
+            clamp(34px,4.5vw,57px);
 
           line-height: 1.4;
+
+          font-weight: 400;
+
+          letter-spacing: -.05em;
         }
 
+        .sinkmoa-home
         .hero-intro-description {
-          margin: 0 0 34px;
+          margin: 0 0 28px;
 
           color: #d0d2d1;
-
-          font-size: 15px;
-          line-height: 2;
-        }
-
-        .hero-intro-actions {
-          display: flex;
-          justify-content: center;
-          flex-wrap: wrap;
-
-          gap: 12px;
-        }
-
-        .hero-primary,
-        .hero-secondary {
-          min-width: 240px;
-
-          padding: 20px 24px;
-
-          display: inline-flex;
-          justify-content: space-between;
-
-          font-size: 13px;
-          font-weight: 700;
-        }
-
-        .hero-primary {
-          background: #c4b49a;
-          color: #19262b;
-        }
-
-        .hero-secondary {
-          border:
-            1px solid
-            rgba(255,255,255,.65);
-
-          color: white;
-        }
-
-        .intro-section {
-          padding: 130px 24px;
-
-          background: #f7f5f0;
-
-          text-align: center;
-        }
-
-        .intro-section h2 {
-          margin: 0;
-
-          font-size:
-            clamp(34px,4vw,55px);
-
-          line-height: 1.5;
-        }
-
-        .intro-description {
-          margin: 0;
-
-          color: #777;
-
-          font-size: 15px;
-          line-height: 2.2;
-        }
-
-        /* =====================================
-           BRANDS
-        ===================================== */
-
-        .brands-section {
-          padding:
-            110px 24px 130px;
-
-          background: #eeeae3;
-        }
-
-        .section-heading {
-          margin-bottom: 60px;
-
-          text-align: center;
-        }
-
-        .section-heading h2 {
-          margin:
-            0 0 16px;
-
-          font-size:
-            clamp(36px,5vw,58px);
-        }
-
-        .section-heading > p:last-child {
-          color: #777;
 
           font-size: 14px;
           line-height: 1.9;
         }
 
+        .sinkmoa-home
+        .hero-intro-actions {
+          display: flex;
+          justify-content: center;
+
+          gap: 10px;
+        }
+
+        .sinkmoa-home
+        .hero-primary,
+        .sinkmoa-home
+        .hero-secondary {
+          min-width: 215px;
+
+          padding: 17px 20px;
+
+          display: flex;
+          justify-content: space-between;
+
+          font-size: 12px;
+          font-weight: 700;
+        }
+
+        .sinkmoa-home
+        .hero-primary {
+          background: #c4b49a;
+          color: #19262b;
+        }
+
+        .sinkmoa-home
+        .hero-secondary {
+          border:
+            1px solid
+            rgba(255,255,255,.6);
+
+          color: white;
+        }
+
+        /* ===============================
+           INTRO
+        =============================== */
+
+        .sinkmoa-home
+        .intro-section {
+          padding: 100px 22px;
+
+          text-align: center;
+        }
+
+        .sinkmoa-home
+        .intro-section h2 {
+          margin: 0;
+
+          font-size:
+            clamp(31px,4vw,49px);
+
+          line-height: 1.45;
+
+          font-weight: 400;
+
+          letter-spacing: -.05em;
+        }
+
+        .sinkmoa-home
+        .intro-description {
+          margin: 0;
+
+          color: #777;
+
+          font-size: 14px;
+          line-height: 2;
+        }
+
+        /* ===============================
+           BRAND
+        =============================== */
+
+        .sinkmoa-home
+        .brands-section {
+          padding:
+            90px 22px 100px;
+
+          background: #eeeae3;
+        }
+
+        .sinkmoa-home
+        .section-heading {
+          margin-bottom: 45px;
+
+          text-align: center;
+        }
+
+        .sinkmoa-home
+        .section-heading h2 {
+          margin: 0 0 12px;
+
+          font-size:
+            clamp(32px,4.5vw,50px);
+
+          font-weight: 400;
+
+          letter-spacing: -.05em;
+        }
+
+        .sinkmoa-home
+        .section-heading
+        > p:last-child {
+          color: #777;
+
+          font-size: 13px;
+          line-height: 1.8;
+        }
+
+        .sinkmoa-home
         .brand-grid {
-          max-width: 1360px;
+          max-width: 1240px;
 
           margin: auto;
 
           display: grid;
-
           grid-template-columns:
-            repeat(
-              2,
-              minmax(0,1fr)
-            );
+            repeat(2,1fr);
 
-          gap: 24px;
+          gap: 18px;
         }
 
+        .sinkmoa-home
         .brand-card {
-          display: block;
-
           overflow: hidden;
 
           background: #f7f5f0;
@@ -1749,69 +1746,62 @@ export default function Home() {
           color: #19262b;
         }
 
+        .sinkmoa-home
         .brand-image {
           position: relative;
 
-          aspect-ratio: 1.35;
+          aspect-ratio: 1.5;
 
-          overflow: hidden;
-
-          background: #e4e4e4;
+          background: white;
         }
 
+        .sinkmoa-home
         .brand-photo {
           object-fit: contain;
 
-          transition:
-            transform .4s;
+          padding: 10px;
         }
 
-        .brand-card:hover
-        .brand-photo {
-          transform:
-            scale(1.04);
-        }
-
+        .sinkmoa-home
         .brand-info {
-          padding: 26px 30px;
+          padding: 20px 24px;
 
           display: flex;
           justify-content: space-between;
           align-items: center;
         }
 
+        .sinkmoa-home
         .brand-info p {
-          margin: 0 0 8px;
+          margin: 0 0 6px;
 
           color: #9a8567;
 
-          font-size: 10px;
-
-          letter-spacing: .14em;
+          font-size: 9px;
         }
 
+        .sinkmoa-home
         .brand-info h3 {
           margin: 0;
 
-          font-size: 26px;
+          font-size: 22px;
           font-weight: 400;
 
-          letter-spacing: .07em;
+          letter-spacing: .06em;
         }
 
+        .sinkmoa-home
         .brand-arrow {
           color: #9a8567;
-
-          font-size: 24px;
+          font-size: 20px;
         }
 
-        /* =====================================
+        /* ===============================
            SERVICE
-        ===================================== */
+        =============================== */
 
+        .sinkmoa-home
         .service-section {
-          min-height: 600px;
-
           display: grid;
 
           grid-template-columns:
@@ -1820,21 +1810,43 @@ export default function Home() {
           background: white;
         }
 
-        .service-image {
+        .sinkmoa-home
+        .service-visual {
+          min-height: 500px;
+
+          display: flex;
+          justify-content: center;
+          align-items: center;
+
+          padding: 45px;
+
+          background: #f8f7f3;
+        }
+
+        .sinkmoa-home
+        .service-image-frame {
           position: relative;
 
-          min-height: 550px;
+          width: min(100%,520px);
 
-          background: #e4e4e4;
+          aspect-ratio: 1.25;
+
+          overflow: hidden;
+
+          background: white;
         }
 
+        .sinkmoa-home
         .service-photo {
           object-fit: contain;
+
+          padding: 35px;
         }
 
+        .sinkmoa-home
         .service-content {
           padding:
-            90px max(40px,8vw);
+            75px max(35px,7vw);
 
           display: flex;
           flex-direction: column;
@@ -1842,37 +1854,41 @@ export default function Home() {
           align-items: flex-start;
         }
 
+        .sinkmoa-home
         .service-content h2 {
           margin: 0;
 
           font-size:
-            clamp(34px,3.8vw,53px);
+            clamp(31px,3.5vw,47px);
+
+          line-height: 1.4;
 
           font-weight: 400;
-          line-height: 1.45;
 
           letter-spacing: -.05em;
         }
 
+        .sinkmoa-home
         .service-content
         .gold-line {
-          margin: 30px 0;
+          margin: 25px 0;
         }
 
+        .sinkmoa-home
         .service-description {
-          margin: 0 0 30px;
+          margin: 0 0 25px;
 
           color: #777;
 
-          font-size: 15px;
-          line-height: 2;
+          font-size: 14px;
+          line-height: 1.9;
         }
 
+        .sinkmoa-home
         .service-price {
-          width:
-            min(100%,400px);
+          width: min(100%,370px);
 
-          padding: 19px 23px;
+          padding: 17px 20px;
 
           display: flex;
           justify-content: space-between;
@@ -1882,130 +1898,155 @@ export default function Home() {
             1px solid #ded6c8;
         }
 
+        .sinkmoa-home
+        .service-price span {
+          font-size: 13px;
+        }
+
+        .sinkmoa-home
         .service-price strong {
           color: #a18b69;
 
-          font-size: 25px;
+          font-size: 21px;
         }
 
+        .sinkmoa-home
         .service-note {
-          margin: 20px 0 30px;
+          margin: 17px 0 25px;
 
           color: #777;
 
-          font-size: 12px;
-          line-height: 1.9;
+          font-size: 11px;
+          line-height: 1.8;
         }
 
+        .sinkmoa-home
         .gold-button {
-          padding: 18px 24px;
+          padding: 16px 21px;
 
           display: inline-flex;
           justify-content: space-between;
 
-          gap: 40px;
+          gap: 32px;
 
           background: #c4b49a;
 
           color: #19262b;
 
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 700;
         }
 
-        /* =====================================
+        /* ===============================
            REGIONS
-        ===================================== */
+        =============================== */
 
+        .sinkmoa-home
         .regions-section {
           padding:
-            115px 24px 125px;
-
-          background: #f7f5f0;
+            90px 22px 100px;
         }
 
+        .sinkmoa-home
         .regions-container {
-          max-width: 1200px;
+          max-width: 1100px;
           margin: auto;
         }
 
+        .sinkmoa-home
         .regions-summary {
           display: grid;
-
           grid-template-columns:
             repeat(3,1fr);
 
           gap: 1px;
 
-          margin-bottom: 35px;
+          margin-bottom: 25px;
 
-          background: #ddd5c9;
+          background: #ded6cb;
         }
 
-        .regions-summary > div {
-          padding: 27px 20px;
+        .sinkmoa-home
+        .regions-summary div {
+          padding: 21px 12px;
 
           display: flex;
           flex-direction: column;
 
-          gap: 12px;
+          gap: 7px;
 
           background: white;
 
           text-align: center;
         }
 
+        .sinkmoa-home
         .regions-summary span {
           color: #a18b69;
-
-          font-size: 10px;
-          font-weight: 700;
+          font-size: 8px;
         }
 
+        .sinkmoa-home
+        .regions-summary strong {
+          font-size: 15px;
+        }
+
+        .sinkmoa-home
         .region-tabs {
           display: grid;
-
           grid-template-columns:
             repeat(5,1fr);
 
-          gap: 8px;
+          gap: 6px;
 
-          margin-bottom: 15px;
+          margin-bottom: 11px;
         }
 
+        .sinkmoa-home
         .region-tab {
-          min-height: 86px;
+          min-height: 72px;
 
           display: flex;
           flex-direction: column;
-          justify-content: center;
           align-items: center;
+          justify-content: center;
 
-          gap: 8px;
+          gap: 5px;
 
           border:
             1px solid #ddd5c9;
 
           background: white;
 
-          cursor: pointer;
+          color: #19262b;
         }
 
+        .sinkmoa-home
         .region-tab.active {
           background: #19262b;
           color: white;
         }
 
-        .region-tab small {
-          color: #888;
+        .sinkmoa-home
+        .region-tab span {
+          font-size: 14px;
+          font-weight: 600;
         }
 
+        .sinkmoa-home
+        .region-tab small {
+          color: #888;
+          font-size: 9px;
+        }
+
+        .sinkmoa-home
         .region-tab.active small {
           color: #c4b49a;
         }
 
+        .sinkmoa-home
         .region-panel {
-          padding: 35px;
+          padding: 27px;
 
           background: white;
 
@@ -2013,9 +2054,10 @@ export default function Home() {
             1px solid #e2dacf;
         }
 
+        .sinkmoa-home
         .region-panel-heading {
-          margin-bottom: 25px;
-          padding-bottom: 25px;
+          padding-bottom: 20px;
+          margin-bottom: 20px;
 
           display: flex;
           justify-content: space-between;
@@ -2024,81 +2066,93 @@ export default function Home() {
             1px solid #e9e3d9;
         }
 
+        .sinkmoa-home
         .region-panel-heading p {
+          margin: 0 0 7px;
+
           color: #a18b69;
 
+          font-size: 8px;
+        }
+
+        .sinkmoa-home
+        .region-panel-heading h3 {
+          margin: 0 0 8px;
+
+          font-size: 20px;
+        }
+
+        .sinkmoa-home
+        .region-panel-heading span {
+          color: #888;
           font-size: 10px;
         }
 
-        .region-panel-heading h3 {
-          margin:
-            0 0 11px;
-
-          font-size: 25px;
-        }
-
-        .region-panel-heading
-        div > span {
-          color: #888;
-
-          font-size: 12px;
-        }
-
+        .sinkmoa-home
         .region-count {
           color: #b9a17d;
 
-          font-size: 34px;
+          font-size: 27px;
         }
 
+        .sinkmoa-home
         .district-grid {
           display: grid;
 
           grid-template-columns:
             repeat(4,1fr);
 
-          gap: 10px;
+          gap: 7px;
         }
 
+        .sinkmoa-home
         .district-link {
-          padding: 16px;
+          padding: 13px;
 
           display: flex;
           justify-content: space-between;
 
-          background: #faf9f6;
-
           border:
             1px solid #e9e3d9;
 
+          background: #faf9f6;
+
           color: #19262b;
 
-          font-size: 13px;
+          font-size: 11px;
           font-weight: 600;
         }
 
-        .district-arrow {
+        .sinkmoa-home
+        .district-link
+        span:last-child {
           color: #a18b69;
         }
 
+        .sinkmoa-home
         .regions-notice {
-          margin-top: 19px;
-          padding: 24px 28px;
+          margin-top: 14px;
+
+          padding: 18px 20px;
 
           display: flex;
           align-items: center;
 
-          gap: 17px;
+          gap: 13px;
 
           background: #eae4d9;
         }
 
+        .sinkmoa-home
         .regions-notice-icon {
-          width: 30px;
-          height: 30px;
+          width: 26px;
+          height: 26px;
 
           display: flex;
           justify-content: center;
           align-items: center;
+
+          flex-shrink: 0;
 
           border:
             1px solid #a18b69;
@@ -2106,38 +2160,46 @@ export default function Home() {
           border-radius: 50%;
 
           color: #927b5a;
+
+          font-size: 11px;
         }
 
+        .sinkmoa-home
         .regions-notice p {
           flex: 1;
 
+          margin: 0;
+
           color: #625e57;
 
-          font-size: 12px;
-          line-height: 1.9;
+          font-size: 10px;
+          line-height: 1.7;
         }
 
+        .sinkmoa-home
         .regions-notice a {
-          padding: 15px 19px;
+          padding: 12px 15px;
 
           background: #19262b;
 
           color: white;
 
-          font-size: 12px;
-          font-weight: 700;
+          font-size: 10px;
         }
 
+        .sinkmoa-home
         .mobile-only {
           display: none;
         }
 
-        /* =====================================
+        /* ===============================
            ORDER
-        ===================================== */
+        =============================== */
 
+        .sinkmoa-home
         .order-section {
-          padding: 120px 24px;
+          padding:
+            90px 22px;
 
           background: #19262b;
 
@@ -2146,108 +2208,131 @@ export default function Home() {
           text-align: center;
         }
 
+        .sinkmoa-home
         .order-section h2 {
           margin: 0;
 
           font-size:
-            clamp(36px,5vw,60px);
+            clamp(32px,4.5vw,52px);
 
-          line-height: 1.45;
+          line-height: 1.4;
+
+          font-weight: 400;
         }
 
+        .sinkmoa-home
         .order-section
         > p:not(.section-label) {
-          margin: 25px 0 35px;
+          margin: 20px 0 27px;
 
           color: #c4cbca;
 
-          line-height: 2;
+          font-size: 13px;
+          line-height: 1.9;
         }
 
-        /* =====================================
+        /* ===============================
            FOOTER
-        ===================================== */
+        =============================== */
 
+        .sinkmoa-home
         .footer {
-          padding: 65px 24px;
+          padding: 50px 22px;
 
           background: #111a1e;
 
           color: white;
         }
 
+        .sinkmoa-home
         .footer-inner {
-          max-width: 1360px;
+          max-width: 1240px;
           margin: auto;
         }
 
+        .sinkmoa-home
         .footer h2 {
-          margin: 0 0 14px;
+          margin: 0 0 11px;
 
-          font-size: 25px;
+          font-size: 21px;
 
-          letter-spacing: .22em;
+          letter-spacing: .2em;
         }
 
+        .sinkmoa-home
         .footer p {
           color: #b3b7b7;
-
-          font-size: 13px;
+          font-size: 11px;
         }
 
+        .sinkmoa-home
         .footer-links {
-          margin: 30px 0;
+          margin: 24px 0;
 
           display: flex;
           flex-wrap: wrap;
 
-          gap: 20px;
+          gap: 17px;
         }
 
+        .sinkmoa-home
         .footer-links a {
           color: #e4e4e4;
-
-          font-size: 12px;
+          font-size: 11px;
         }
 
-        /* =====================================
+        /* ===============================
            TABLET
-        ===================================== */
+        =============================== */
 
         @media (max-width: 900px) {
 
+          .sinkmoa-home
           .desktop-nav {
             display: none;
           }
 
+          .sinkmoa-home
           .menu-button {
             display: block;
           }
 
+          .sinkmoa-home
           .mobile-nav {
             display: flex;
+
             flex-direction: column;
 
             padding:
-              12px 30px 22px;
+              8px 24px 16px;
 
             background: #111a1e;
           }
 
+          .sinkmoa-home
           .mobile-nav a {
-            padding: 16px 0;
+            padding: 13px 0;
 
             color: white;
+
+            font-size: 12px;
 
             border-bottom:
               1px solid
               rgba(255,255,255,.12);
           }
 
+          .sinkmoa-home
           .service-section {
             grid-template-columns: 1fr;
           }
 
+          .sinkmoa-home
+          .service-visual {
+            min-height: 380px;
+          }
+
+          .sinkmoa-home
           .district-grid {
             grid-template-columns:
               repeat(3,1fr);
@@ -2255,201 +2340,434 @@ export default function Home() {
 
         }
 
-        /* =====================================
+        /* ===============================
            MOBILE
-        ===================================== */
+        =============================== */
 
         @media (max-width: 600px) {
 
-          .coupon-overlay {
-            padding: 15px;
-          }
+          /* 헤더 */
 
-          .coupon-popup {
-            width: 100%;
-
-            border-radius: 20px;
-          }
-
-          .coupon-top {
-            padding:
-              45px 22px
-              34px;
-          }
-
-          .coupon-brand {
-            font-size: 14px;
-          }
-
-          .coupon-small-title {
-            margin-top: 24px;
-
-            font-size: 12px;
-          }
-
-          .coupon-top h2 strong {
-            font-size: 52px;
-          }
-
-          .coupon-top h2 span {
-            font-size: 22px;
-          }
-
-          .coupon-description {
-            font-size: 11px;
-          }
-
-          .coupon-bottom {
-            padding:
-              22px 20px 0;
-          }
-
-          .coupon-actions {
-            margin:
-              0 -20px;
-          }
-
-          .coupon-button {
-            font-size: 13px;
-          }
-
+          .sinkmoa-home
           .header-inner {
             width:
-              calc(100% - 44px);
+              calc(100% - 34px);
 
-            height: 82px;
+            height: 68px;
           }
 
+          .sinkmoa-home
           .logo {
-            font-size: 22px;
+            font-size: 18px;
           }
 
+          /* 메인 BEFORE AFTER */
+
+          .sinkmoa-home
           .hero {
-            height: 72svh;
+            height: 61svh;
 
-            min-height: 480px;
+            min-height: 420px;
+            max-height: 570px;
           }
 
+          .sinkmoa-home
           .hero-photo {
             object-fit: contain;
+
+            background: #111a1e;
           }
 
+          .sinkmoa-home
           .hero-photo-top {
-            top: 20px;
+            top: 15px;
           }
 
+          .sinkmoa-home
+          .hero-photo-top > p {
+            margin-bottom: 9px;
+
+            font-size: 8px;
+          }
+
+          .sinkmoa-home
+          .hero-photo-badge {
+            padding: 8px 12px;
+
+            font-size: 10px;
+          }
+
+          .sinkmoa-home
           .hero-photo-bottom {
             width:
-              calc(100% - 36px);
+              calc(100% - 28px);
 
-            bottom: 20px;
+            bottom: 14px;
 
             flex-direction: column;
             align-items: flex-start;
+
+            gap: 12px;
           }
 
+          .sinkmoa-home
+          .photo-caption p {
+            font-size: 8px;
+          }
+
+          .sinkmoa-home
+          .photo-caption h1 {
+            font-size: 21px;
+          }
+
+          .sinkmoa-home
+          .control-line {
+            width: 68px;
+          }
+
+          /* 공통 여백 축소 */
+
+          .sinkmoa-home
           .hero-intro {
             padding:
-              80px 22px 90px;
+              62px 18px 66px;
           }
 
+          .sinkmoa-home
+          .hero-intro h2 {
+            font-size: 32px;
+          }
+
+          .sinkmoa-home
+          .hero-intro-description {
+            font-size: 12px;
+          }
+
+          .sinkmoa-home
           .hero-intro-actions {
             flex-direction: column;
+
+            max-width: 330px;
+
+            margin: auto;
           }
 
+          .sinkmoa-home
           .hero-primary,
+          .sinkmoa-home
           .hero-secondary {
             width: 100%;
+
+            min-width: 0;
+
+            padding: 15px 17px;
           }
 
+          .sinkmoa-home
           .intro-section {
             padding:
-              95px 22px;
+              67px 18px;
           }
 
+          .sinkmoa-home
+          .intro-section h2 {
+            font-size: 30px;
+          }
+
+          .sinkmoa-home
+          .intro-description {
+            font-size: 12px;
+            line-height: 1.9;
+          }
+
+          /* 브랜드 */
+
+          .sinkmoa-home
           .brands-section {
             padding:
-              85px 18px 100px;
+              65px 14px 70px;
           }
 
+          .sinkmoa-home
+          .section-heading {
+            margin-bottom: 30px;
+          }
+
+          .sinkmoa-home
+          .section-heading h2 {
+            font-size: 31px;
+          }
+
+          .sinkmoa-home
+          .section-heading
+          > p:last-child {
+            font-size: 11px;
+          }
+
+          .sinkmoa-home
           .brand-grid {
             grid-template-columns: 1fr;
+
+            gap: 13px;
           }
 
-          .service-image {
-            min-height: 330px;
+          .sinkmoa-home
+          .brand-image {
+            aspect-ratio: 1.7;
           }
 
+          .sinkmoa-home
+          .brand-photo {
+            padding: 16px;
+          }
+
+          .sinkmoa-home
+          .brand-info {
+            padding: 15px 18px;
+          }
+
+          .sinkmoa-home
+          .brand-info h3 {
+            font-size: 19px;
+          }
+
+          /* 핵심 수정:
+             설치 구성품 사진 축소 */
+
+          .sinkmoa-home
+          .service-visual {
+            min-height: 0;
+
+            padding:
+              30px 18px;
+
+            background: #f8f7f3;
+          }
+
+          .sinkmoa-home
+          .service-image-frame {
+            width: min(100%,300px);
+
+            aspect-ratio: 1.25;
+
+            margin: auto;
+
+            background: white;
+          }
+
+          .sinkmoa-home
+          .service-photo {
+            object-fit: contain;
+
+            padding: 32px;
+          }
+
+          .sinkmoa-home
           .service-content {
             padding:
-              65px 24px;
+              55px 20px 60px;
           }
 
+          .sinkmoa-home
+          .service-content h2 {
+            font-size: 30px;
+          }
+
+          .sinkmoa-home
+          .service-description {
+            font-size: 12px;
+          }
+
+          .sinkmoa-home
+          .service-price {
+            padding: 15px 16px;
+          }
+
+          .sinkmoa-home
+          .service-price strong {
+            font-size: 18px;
+          }
+
+          /* 지역 */
+
+          .sinkmoa-home
           .regions-section {
             padding:
-              85px 16px 95px;
+              65px 13px 70px;
           }
 
+          .sinkmoa-home
+          .mobile-only {
+            display: block;
+          }
+
+          .sinkmoa-home
           .regions-summary {
             grid-template-columns:
               1fr 1fr;
+
+            margin-bottom: 18px;
           }
 
+          .sinkmoa-home
+          .regions-summary
+          > div {
+            padding: 16px 8px;
+          }
+
+          .sinkmoa-home
           .regions-summary
           > div:last-child {
             grid-column:
               1 / -1;
           }
 
-          .region-tabs {
-            grid-template-columns:
-              repeat(5,1fr);
-
-            gap: 4px;
-          }
-
-          .region-tab {
-            min-height: 70px;
-          }
-
-          .region-tab span {
+          .sinkmoa-home
+          .regions-summary strong {
             font-size: 13px;
           }
 
+          .sinkmoa-home
+          .region-tabs {
+            gap: 3px;
+          }
+
+          .sinkmoa-home
+          .region-tab {
+            min-height: 58px;
+          }
+
+          .sinkmoa-home
+          .region-tab span {
+            font-size: 11px;
+          }
+
+          .sinkmoa-home
           .region-tab small {
+            font-size: 7px;
+          }
+
+          .sinkmoa-home
+          .region-panel {
+            padding: 17px 12px;
+          }
+
+          .sinkmoa-home
+          .region-panel-heading {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+          }
+
+          .sinkmoa-home
+          .region-panel-heading h3 {
+            font-size: 16px;
+          }
+
+          .sinkmoa-home
+          .region-panel-heading
+          span {
             font-size: 9px;
           }
 
-          .region-panel {
-            padding: 22px 15px;
+          .sinkmoa-home
+          .region-count {
+            font-size: 21px;
           }
 
+          .sinkmoa-home
           .district-grid {
             grid-template-columns:
               repeat(2,1fr);
 
-            gap: 8px;
+            gap: 5px;
           }
 
+          .sinkmoa-home
           .district-link {
+            padding: 11px 9px;
+
+            font-size: 10px;
+          }
+
+          .sinkmoa-home
+          .regions-notice {
             padding: 15px 12px;
 
+            align-items: flex-start;
+
+            flex-wrap: wrap;
+          }
+
+          .sinkmoa-home
+          .regions-notice p {
+            font-size: 9px;
+          }
+
+          .sinkmoa-home
+          .regions-notice a {
+            margin-left: 39px;
+
+            padding: 10px 13px;
+          }
+
+          /* 주문 */
+
+          .sinkmoa-home
+          .order-section {
+            padding:
+              65px 18px;
+          }
+
+          .sinkmoa-home
+          .order-section h2 {
+            font-size: 31px;
+          }
+
+          .sinkmoa-home
+          .order-section
+          > p:not(.section-label) {
             font-size: 12px;
           }
 
-          .regions-notice {
-            flex-wrap: wrap;
+          /* 쿠폰도 조금 축소 */
 
-            padding: 20px 16px;
+          .sinkmoa-home
+          .coupon-overlay {
+            padding: 14px;
           }
 
-          .regions-notice a {
-            margin-left: 42px;
+          .sinkmoa-home
+          .coupon-popup {
+            max-width: 370px;
           }
 
-          .order-section {
+          .sinkmoa-home
+          .coupon-top {
             padding:
-              95px 22px;
+              37px 20px 28px;
+          }
+
+          .sinkmoa-home
+          .coupon-top h2 strong {
+            font-size: 45px;
+          }
+
+          .sinkmoa-home
+          .coupon-top h2 span {
+            font-size: 19px;
+          }
+
+          .sinkmoa-home
+          .coupon-small-title {
+            margin-top: 18px;
+          }
+
+          /* 푸터 */
+
+          .sinkmoa-home
+          .footer {
+            padding:
+              42px 18px;
           }
 
         }
