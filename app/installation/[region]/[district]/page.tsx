@@ -9,7 +9,7 @@ import {
   getInstallationLocation,
 } from "../../../data/installation-regions";
 
-const SITE = "https://www.sinkmoa.com";
+const SITE_URL = "https://www.sinkmoa.com";
 
 type PageProps = {
   params: Promise<{
@@ -18,6 +18,45 @@ type PageProps = {
   }>;
 };
 
+const PRODUCTS = [
+  {
+    brand: "백조",
+    name: "고니 8630",
+    description: "사각싱크볼 · 인셋",
+    price: "390,000원",
+    cutout: "780 × 400mm",
+    image: "/IMG_1642.jpeg",
+    href: "/products/baekjo",
+  },
+  {
+    brand: "리젠스",
+    name: "8603 엠보",
+    description: "사각싱크볼 · 인셋",
+    price: "420,000원",
+    cutout: "780 × 400mm",
+    image: "/IMG_1772.jpeg",
+    href: "/products/regens",
+  },
+  {
+    brand: "벨라고",
+    name: "BLE-858 벨리타 엠보",
+    description: "사각싱크볼 · 인셋",
+    price: "440,000원",
+    cutout: "794 × 404mm",
+    image: "/IMG_1757.jpeg",
+    href: "/products/bellago",
+  },
+  {
+    brand: "아티잔",
+    name: "DU858BLR",
+    description: "사각싱크볼 · 인셋",
+    price: "420,000원",
+    cutout: "794 × 400mm",
+    image: "/IMG_1771.jpeg",
+    href: "/products/artisan",
+  },
+];
+
 export const dynamicParams = false;
 
 export function generateStaticParams() {
@@ -25,7 +64,7 @@ export function generateStaticParams() {
 }
 
 /* =========================================
-   SEO
+   META
 ========================================= */
 
 export async function generateMetadata({
@@ -39,37 +78,47 @@ export async function generateMetadata({
   );
 
   if (!location) {
-    return {
-      title: "지역을 찾을 수 없습니다 | 싱크모아",
-    };
+    return {};
   }
 
-  const title =
-    `${location.fullName} 싱크볼 교체·사각싱크볼 설치 | 싱크모아`;
+  const isGangnam =
+    region === "seoul" &&
+    district === "gangnam";
 
-  const description =
-    `${location.fullName} 싱크볼 교체 및 사각싱크볼 설치 상담. ` +
-    `백조·리젠스·벨라고·아티잔 싱크볼 판매, 기존 싱크볼 철거, ` +
-    `상판 타공, 수전·배수구 연결까지 안내합니다. 기본 설치비 170,000원.`;
+  const title = isGangnam
+    ? "강남 싱크볼 교체 | 사각싱크볼 설치·상판 타공 | 싱크모아"
+    : `${location.fullName} 싱크볼 교체·사각싱크볼 설치 | 싱크모아`;
 
-  const url =
-    `${SITE}/installation/${region}/${district}`;
+  const description = isGangnam
+    ? "강남 싱크볼 교체 및 사각싱크볼 설치 상담. 백조·리젠스·벨라고·아티잔 싱크볼 시공, 기존 싱크볼 철거, 상판 타공·확장, 수전·배수구 연결까지 안내합니다. 기본 설치비 170,000원."
+    : `${location.fullName} 싱크볼 교체 및 사각싱크볼 설치 상담. 백조·리젠스·벨라고·아티잔 싱크볼 판매 및 설치, 기존 싱크볼 철거, 상판 타공, 수전·배수구 연결까지 안내합니다.`;
+
+  const canonical =
+    `${SITE_URL}/installation/${region}/${district}`;
 
   return {
     title,
     description,
 
     alternates: {
-      canonical: url,
+      canonical,
     },
 
     openGraph: {
       title,
       description,
-      url,
+      url: canonical,
       siteName: "싱크모아",
       locale: "ko_KR",
       type: "website",
+      images: [
+        {
+          url: `${SITE_URL}/IMG_0395.jpeg`,
+          width: 1200,
+          height: 630,
+          alt: `${location.fullName} 싱크볼 교체`,
+        },
+      ],
     },
 
     robots: {
@@ -80,127 +129,8 @@ export async function generateMetadata({
 }
 
 /* =========================================
-   상품
+   PAGE
 ========================================= */
-
-const PRODUCTS = [
-  {
-    brand: "백조",
-    model: "고니 8630",
-    price: 390000,
-    cutout: "780 × 400mm",
-    slug: "baekjo",
-    image: "/IMG_1642.jpeg",
-  },
-  {
-    brand: "리젠스",
-    model: "8603 엠보",
-    price: 420000,
-    cutout: "780 × 400mm",
-    slug: "regens",
-    image: "/IMG_1772.jpeg",
-  },
-  {
-    brand: "벨라고",
-    model: "BLE-858 벨리타 엠보",
-    price: 440000,
-    cutout: "794 × 404mm",
-    slug: "bellago",
-    image: "/IMG_1757.jpeg",
-  },
-  {
-    brand: "아티잔",
-    model: "DU858BLR",
-    price: 420000,
-    cutout: "794 × 400mm",
-    slug: "artisan",
-    image: "/IMG_1771.jpeg",
-  },
-];
-
-/* =========================================
-   가능 작업
-========================================= */
-
-const SERVICES = [
-  {
-    number: "01",
-    title: "기존 싱크볼 철거",
-    description:
-      "사용 중인 싱크볼과 기존 연결 부속을 분리한 뒤 새 제품 설치를 준비합니다.",
-  },
-  {
-    number: "02",
-    title: "사각싱크볼 교체",
-    description:
-      "기존 상판 타공 규격을 확인해 설치 가능한 사각싱크볼을 안내합니다.",
-  },
-  {
-    number: "03",
-    title: "상판 타공 · 확장",
-    description:
-      "신규 싱크볼 규격에 맞춰 필요한 경우 기존 상판 타공부를 추가 가공합니다.",
-  },
-  {
-    number: "04",
-    title: "수전 연결",
-    description:
-      "기존 수전을 다시 연결하거나 선택한 6WAY 수전으로 교체 설치할 수 있습니다.",
-  },
-  {
-    number: "05",
-    title: "배수구 연결",
-    description:
-      "기본 배수구 연결부터 올스텐 배수구 업그레이드까지 상담할 수 있습니다.",
-  },
-  {
-    number: "06",
-    title: "설치 후 점검",
-    description:
-      "싱크볼 고정 상태와 수전·배수구 연결 및 누수 여부를 마지막으로 확인합니다.",
-  },
-];
-
-/* =========================================
-   시공 과정
-========================================= */
-
-const STEPS = [
-  {
-    number: "01",
-    title: "현장 정보 확인",
-    description:
-      "기존 싱크볼과 주방 상판 사진, 타공 치수를 확인합니다.",
-  },
-  {
-    number: "02",
-    title: "제품 선택",
-    description:
-      "설치 가능한 브랜드와 모델, 추가 옵션을 상담합니다.",
-  },
-  {
-    number: "03",
-    title: "기존 제품 철거",
-    description:
-      "기존 싱크볼과 연결된 수전·배수 부속을 분리합니다.",
-  },
-  {
-    number: "04",
-    title: "신규 설치",
-    description:
-      "필요 시 상판 작업 후 새로운 싱크볼을 설치합니다.",
-  },
-  {
-    number: "05",
-    title: "연결 및 점검",
-    description:
-      "수전과 배수구를 연결하고 설치 상태를 확인합니다.",
-  },
-];
-
-function money(value: number) {
-  return `${value.toLocaleString("ko-KR")}원`;
-}
 
 export default async function InstallationPage({
   params,
@@ -219,71 +149,102 @@ export default async function InstallationPage({
   const regionData =
     INSTALLATION_REGIONS[region];
 
-  if (!regionData) {
-    notFound();
-  }
+  const isGangnam =
+    region === "seoul" &&
+    district === "gangnam";
 
-  const nearby =
-    regionData.districts.filter(
-      (item) => item.slug !== district
-    );
+  const canonical =
+    `${SITE_URL}/installation/${region}/${district}`;
 
-  const faq = [
-    {
-      q: `${location.districtName} 싱크볼 교체 설치 상담이 가능한가요?`,
-      a:
-        `${location.fullName} 지역 싱크볼 교체 및 사각싱크볼 설치 상담을 접수하고 있습니다. ` +
-        `정확한 방문 가능 여부와 일정은 주소와 현장 정보를 확인한 뒤 안내드립니다.`,
-    },
-    {
-      q: `${location.districtName} 싱크볼 설치비는 얼마인가요?`,
-      a:
-        "기본 설치비는 170,000원입니다. 기존 싱크볼 철거와 기존 수전 및 배수구 연결 작업이 포함됩니다. 추가 타공이나 별도 작업이 필요한 경우 추가 비용이 발생할 수 있습니다.",
-    },
-    {
-      q: "기존 싱크볼보다 새 제품이 큰 경우에도 설치할 수 있나요?",
-      a:
-        "기존 상판 타공 치수보다 신규 제품의 요구 타공 치수가 큰 경우 상판 재질과 여유 공간을 확인한 뒤 타공 또는 확장이 가능합니다. 상판 타공 기본 옵션은 50,000원입니다.",
-    },
-    {
-      q: "인조대리석 상판도 타공할 수 있나요?",
-      a:
-        "현장 상판 재질과 기존 타공 상태를 확인한 뒤 작업 가능 여부를 안내합니다. 상판의 균열이나 구조에 따라 작업이 어려운 경우도 있습니다.",
-    },
-    {
-      q: "싱크볼과 수전을 같이 교체할 수 있나요?",
-      a:
-        "가능합니다. 싱크볼 설치와 함께 6WAY 수전 제품을 선택할 수 있으며 현재 옵션 가격은 70,000원입니다.",
-    },
-    {
-      q: "어떤 싱크볼 브랜드를 선택할 수 있나요?",
-      a:
-        "현재 백조, 리젠스, 벨라고, 아티잔의 인셋 사각싱크볼 제품을 안내하고 있습니다.",
-    },
-  ];
+  const faq = isGangnam
+    ? [
+        {
+          q: "강남 싱크볼 교체 비용은 얼마인가요?",
+          a: "싱크모아 기본 설치비는 170,000원이며 기존 싱크볼 철거와 기존 수전·배수구 연결 작업이 포함됩니다. 제품 가격과 상판 타공, 출장 관련 추가 비용은 현장 조건에 따라 별도로 안내됩니다.",
+        },
+        {
+          q: "강남에서 사각싱크볼 설치가 가능한가요?",
+          a: "네. 기존 상판 타공 치수와 싱크대 구조를 확인한 뒤 백조, 리젠스, 벨라고, 아티잔 등 사각싱크볼 설치 상담이 가능합니다.",
+        },
+        {
+          q: "기존 싱크볼보다 새 싱크볼이 크면 설치할 수 있나요?",
+          a: "상판 재질과 기존 타공 크기를 확인한 뒤 확장이 가능한 경우 상판 타공 작업을 진행할 수 있습니다. 타공 작업은 기본 설치비와 별도입니다.",
+        },
+        {
+          q: "수전과 배수구 연결도 같이 해주나요?",
+          a: "기존 수전과 기존 배수구 연결은 기본 설치비에 포함됩니다. 올스텐 배수구 업그레이드나 6WAY 수전 제품 추가도 상담 가능합니다.",
+        },
+      ]
+    : [
+        {
+          q: `${location.fullName} 싱크볼 교체가 가능한가요?`,
+          a: `네. ${location.fullName} 지역의 싱크볼 교체 및 사각싱크볼 설치 상담을 접수하고 있습니다. 실제 방문 가능 일정은 주소와 현장 조건 확인 후 안내합니다.`,
+        },
+        {
+          q: "기본 설치비에는 어떤 작업이 포함되나요?",
+          a: "기본 설치비 170,000원에는 기존 싱크볼 철거와 기존 수전 및 배수구 연결 작업이 포함됩니다.",
+        },
+        {
+          q: "상판 타공도 가능한가요?",
+          a: "기존 타공 사이즈보다 신규 싱크볼 타공 치수가 큰 경우 현장 확인 후 상판 타공 또는 확장 작업이 가능합니다.",
+        },
+      ];
 
-  const canonicalUrl =
-    `${SITE}/installation/${region}/${district}`;
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "싱크모아",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "싱크볼 설치",
+        item: `${SITE_URL}/#regions`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: `${location.fullName} 싱크볼 교체`,
+        item: canonical,
+      },
+    ],
+  };
 
-  const jsonLd = {
+  const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
-    name:
-      `${location.fullName} 싱크볼 교체 및 사각싱크볼 설치`,
+    name: `${location.fullName} 싱크볼 교체 및 사각싱크볼 설치`,
     serviceType:
-      "싱크볼 교체 및 설치",
+      "싱크볼 교체·사각싱크볼 설치·상판 타공",
     provider: {
       "@type": "Organization",
       name: "싱크모아",
-      url: SITE,
+      url: SITE_URL,
     },
     areaServed: {
       "@type": "AdministrativeArea",
       name: location.fullName,
     },
-    url: canonicalUrl,
-    description:
-      `${location.fullName} 싱크볼 교체, 사각싱크볼 설치, 상판 타공, 수전 및 배수구 연결 상담.`,
+    description: `${location.fullName} 싱크볼 교체, 사각싱크볼 설치, 기존 싱크볼 철거, 상판 타공, 수전 및 배수구 연결 상담.`,
+    url: canonical,
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faq.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.a,
+      },
+    })),
   };
 
   return (
@@ -292,10 +253,30 @@ export default async function InstallationPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(jsonLd).replace(
-            /</g,
-            "\\u003c"
-          ),
+          __html:
+            JSON.stringify(
+              breadcrumbSchema
+            ),
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html:
+            JSON.stringify(
+              serviceSchema
+            ),
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html:
+            JSON.stringify(
+              faqSchema
+            ),
         }}
       />
 
@@ -311,19 +292,23 @@ export default async function InstallationPage({
           </Link>
 
           <nav>
-            <Link href="/">
-              홈
+            <Link href="/#brands">
+              브랜드별 상품
+            </Link>
+
+            <Link href="/#service">
+              설치 서비스
             </Link>
 
             <Link href="/#regions">
-              설치 지역
+              설치 가능 지역
             </Link>
 
             <Link
               href="/order"
-              className="order-link"
+              className="header-order"
             >
-              주문 문의
+              견적 문의
             </Link>
           </nav>
 
@@ -336,253 +321,556 @@ export default async function InstallationPage({
 
       <section className="hero">
 
-        <div className="hero-inner">
+        <div className="hero-image">
+          <Image
+            src="/IMG_0395.jpeg"
+            alt={`${location.fullName} 싱크볼 교체 및 사각싱크볼 설치`}
+            fill
+            priority
+            sizes="100vw"
+          />
+
+          <div className="hero-overlay" />
+        </div>
+
+        <div className="hero-content">
 
           <p className="eyebrow">
-            SINKMOA LOCAL INSTALLATION
+            SINKMOA INSTALLATION
           </p>
 
-          <h1>
-            {location.fullName}
-            <br />
-            싱크볼 교체 · 설치
-          </h1>
+          {isGangnam ? (
+            <>
+              <h1>
+                강남 싱크볼 교체
+                <br />
+                사각싱크볼 설치
+              </h1>
 
-          <div className="gold-line" />
+              <p className="hero-description">
+                강남구 싱크볼 교체부터
+                사각싱크볼 설치,
+                <br />
+                기존 싱크볼 철거와
+                상판 타공까지 상담합니다.
+              </p>
+            </>
+          ) : (
+            <>
+              <h1>
+                {location.fullName}
+                <br />
+                싱크볼 교체·설치
+              </h1>
 
-          <p className="hero-copy">
-            {location.districtName} 사각싱크볼 교체부터
-            <br />
-            기존 싱크볼 철거 · 상판 타공 ·
-            수전 및 배수구 연결까지.
-            <br />
-            제품 선택과 설치를 한 번에 상담하세요.
-          </p>
+              <p className="hero-description">
+                {location.fullName} 싱크볼
+                교체부터 사각싱크볼 설치,
+                <br />
+                기존 싱크볼 철거와
+                상판 타공까지 상담합니다.
+              </p>
+            </>
+          )}
 
-          <Link
-            href="/order"
-            className="gold-button"
-          >
-            {location.districtName} 설치 문의
-            <span>↗</span>
-          </Link>
+          <div className="hero-actions">
 
-          <p className="hero-note">
-            방문 가능 여부와 정확한 일정은
-            주소 확인 후 안내합니다.
-          </p>
+            <Link
+              href="/order"
+              className="primary-button"
+            >
+              설치 견적 문의
+              <span>↗</span>
+            </Link>
+
+            <Link
+              href="#products"
+              className="secondary-button"
+            >
+              싱크볼 제품 보기
+            </Link>
+
+          </div>
 
         </div>
+
       </section>
 
       {/* =====================================
-          지역 소개
+          강남 전용 SEO 소개
       ===================================== */}
 
-      <section className="intro-section">
+      {isGangnam && (
+        <section className="gangnam-intro">
 
-        <div className="content">
+          <div className="content-width">
 
-          <div className="intro-grid">
+            <p className="section-label">
+              GANGNAM SINK REPLACEMENT
+            </p>
+
+            <h2>
+              강남 싱크볼 교체,
+              <br />
+              제품 선택부터 설치까지
+            </h2>
+
+            <p className="intro-copy">
+              강남구에서 오래된 싱크볼을
+              교체하거나 기존 원형·사각
+              싱크볼을 새로운
+              사각싱크볼로 교체할 계획이라면
+              제품 크기만 확인해서는
+              정확한 설치 여부를 판단하기
+              어렵습니다.
+              <br />
+              <br />
+              기존 싱크대 상판의
+              타공 크기와 상판 재질,
+              싱크볼 외경,
+              수전 및 배수구 위치를
+              함께 확인해야 합니다.
+              싱크모아는
+              <strong>
+                {" "}강남 싱크볼 교체
+              </strong>
+              상담 시 기존 현장 사진과
+              타공 치수를 먼저 확인하고,
+              설치 가능한 사각싱크볼과
+              필요한 추가 작업을
+              안내합니다.
+            </p>
+
+            <div className="keyword-cards">
+
+              <div>
+                <span>01</span>
+                <strong>
+                  강남 싱크볼 교체
+                </strong>
+                <p>
+                  기존 싱크볼 철거 후
+                  신규 사각싱크볼 설치
+                </p>
+              </div>
+
+              <div>
+                <span>02</span>
+                <strong>
+                  강남 사각싱크볼 설치
+                </strong>
+                <p>
+                  백조·리젠스·벨라고·
+                  아티잔 제품 상담
+                </p>
+              </div>
+
+              <div>
+                <span>03</span>
+                <strong>
+                  강남 상판 타공
+                </strong>
+                <p>
+                  신규 싱크볼 규격에 맞춘
+                  타공·확장 상담
+                </p>
+              </div>
+
+              <div>
+                <span>04</span>
+                <strong>
+                  수전·배수구 연결
+                </strong>
+                <p>
+                  기존 수전 및 배수구
+                  연결 점검
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+      )}
+
+      {/* =====================================
+          일반 지역 소개
+      ===================================== */}
+
+      {!isGangnam && (
+        <section className="standard-intro">
+
+          <div className="content-width">
+
+            <p className="section-label">
+              LOCAL INSTALLATION
+            </p>
+
+            <h2>
+              {location.fullName}
+              <br />
+              싱크볼 교체 안내
+            </h2>
+
+            <p>
+              {location.fullName} 지역에서
+              기존 싱크볼 교체,
+              사각싱크볼 설치,
+              상판 타공 및
+              수전·배수구 연결 상담을
+              진행합니다.
+              제품 선택 전 기존 상판
+              타공 사이즈와 현장 사진을
+              확인하면 보다 정확한
+              설치 상담이 가능합니다.
+            </p>
+
+          </div>
+
+        </section>
+      )}
+
+      {/* =====================================
+          작업 가능 내용
+      ===================================== */}
+
+      <section className="work-section">
+
+        <div className="content-width">
+
+          <div className="section-heading">
 
             <div>
               <p className="section-label">
-                LOCAL SINK REPLACEMENT
+                INSTALLATION SERVICE
               </p>
 
               <h2>
-                {location.districtName}
+                싱크볼 교체 시
                 <br />
-                싱크볼 교체
+                가능한 작업
               </h2>
             </div>
 
-            <div className="intro-copy">
+            <p>
+              단순 제품 교체뿐 아니라
+              기존 구조 확인부터
+              마감 점검까지
+              설치에 필요한 작업을
+              함께 확인합니다.
+            </p>
 
-              <p>
-                {location.districtName}에서
-                싱크볼 교체를 알아보고 계신다면
-                새 제품을 선택하기 전에
-                기존 주방 상판의 타공 치수를
-                확인하는 것이 중요합니다.
-              </p>
+          </div>
 
-              <p>
-                싱크모아는 기존 싱크볼 규격과
-                상판 상태를 확인하고,
-                백조·리젠스·벨라고·아티잔
-                사각싱크볼 중 설치 가능한 제품을
-                안내합니다.
-              </p>
+          <div className="work-grid">
 
+            <article>
+              <span>01</span>
+              <h3>
+                기존 싱크볼 철거
+              </h3>
               <p>
-                제품 교체뿐 아니라 기존 싱크볼 철거,
-                상판 타공 및 확장,
-                기존 수전과 배수구 연결까지
-                함께 상담할 수 있습니다.
+                기존 싱크볼과 실리콘,
+                연결 상태를 확인한 뒤
+                철거합니다.
               </p>
+            </article>
+
+            <article>
+              <span>02</span>
+              <h3>
+                사각싱크볼 교체
+              </h3>
+              <p>
+                상판 규격에 적합한
+                사각싱크볼을 확인하여
+                설치합니다.
+              </p>
+            </article>
+
+            <article>
+              <span>03</span>
+              <h3>
+                상판 타공·확장
+              </h3>
+              <p>
+                신규 싱크볼 타공 치수가
+                더 큰 경우
+                상판 재질 확인 후
+                타공을 진행합니다.
+              </p>
+            </article>
+
+            <article>
+              <span>04</span>
+              <h3>
+                수전 연결
+              </h3>
+              <p>
+                기존 수전 연결 상태를
+                확인하고 설치 후
+                누수 여부를 점검합니다.
+              </p>
+            </article>
+
+            <article>
+              <span>05</span>
+              <h3>
+                배수구 연결
+              </h3>
+              <p>
+                배수구 및 배수 배관을
+                연결하고 배수 상태를
+                확인합니다.
+              </p>
+            </article>
+
+            <article>
+              <span>06</span>
+              <h3>
+                설치 마감 점검
+              </h3>
+              <p>
+                싱크볼 고정,
+                실리콘 마감,
+                수전·배수 상태를
+                최종 점검합니다.
+              </p>
+            </article>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* =====================================
+          실제 시공 과정
+      ===================================== */}
+
+      <section className="case-section">
+
+        <div className="content-width">
+
+          <p className="section-label">
+            INSTALLATION CASE
+          </p>
+
+          <h2>
+            {isGangnam
+              ? "강남 싱크볼 교체 시공 과정"
+              : `${location.fullName} 싱크볼 교체 과정`}
+          </h2>
+
+          <p className="case-intro">
+            싱크볼 교체는 제품을
+            단순히 끼우는 작업이 아니라
+            기존 상판 타공 치수와
+            배수·수전 위치까지 함께
+            확인해야 합니다.
+          </p>
+
+          <div className="before-after">
+
+            <div className="case-image">
+
+              <Image
+                src="/IMG_0305.jpeg"
+                alt={`${location.fullName} 싱크볼 교체 전`}
+                fill
+                sizes="(max-width: 700px) 100vw, 50vw"
+              />
+
+              <span>
+                BEFORE
+              </span>
+
+            </div>
+
+            <div className="case-image">
+
+              <Image
+                src="/IMG_0395.jpeg"
+                alt={`${location.fullName} 사각싱크볼 설치 후`}
+                fill
+                sizes="(max-width: 700px) 100vw, 50vw"
+              />
+
+              <span>
+                AFTER
+              </span>
 
             </div>
 
           </div>
 
-        </div>
-      </section>
+          <div className="process-grid">
 
-      {/* =====================================
-          설치 가능 작업
-      ===================================== */}
+            <div>
+              <strong>STEP 01</strong>
+              <h3>
+                기존 타공 확인
+              </h3>
+              <p>
+                현재 싱크볼과 상판
+                타공 사이즈를 확인합니다.
+              </p>
+            </div>
 
-      <section className="services-section">
+            <div>
+              <strong>STEP 02</strong>
+              <h3>
+                기존 싱크볼 철거
+              </h3>
+              <p>
+                수전·배수 연결을 확인한 후
+                기존 싱크볼을 철거합니다.
+              </p>
+            </div>
 
-        <div className="content">
+            <div>
+              <strong>STEP 03</strong>
+              <h3>
+                상판 준비
+              </h3>
+              <p>
+                필요한 경우
+                신규 제품 규격에 맞춰
+                상판 타공을 진행합니다.
+              </p>
+            </div>
 
-          <div className="section-heading">
+            <div>
+              <strong>STEP 04</strong>
+              <h3>
+                신규 싱크볼 설치
+              </h3>
+              <p>
+                싱크볼을 고정하고
+                마감 상태를 확인합니다.
+              </p>
+            </div>
 
-            <p className="section-label">
-              INSTALLATION SERVICE
-            </p>
-
-            <h2>
-              {location.districtName}
-              <br />
-              설치 가능 작업
-            </h2>
-
-            <p>
-              싱크볼 교체에 필요한 주요 작업을
-              한 번에 상담할 수 있습니다.
-            </p>
+            <div>
+              <strong>STEP 05</strong>
+              <h3>
+                연결 및 점검
+              </h3>
+              <p>
+                수전·배수구를 연결하고
+                누수와 배수 상태를
+                확인합니다.
+              </p>
+            </div>
 
           </div>
 
-          <div className="service-grid">
-
-            {SERVICES.map((service) => (
-
-              <article
-                key={service.number}
-                className="service-card"
-              >
-
-                <span className="service-number">
-                  {service.number}
-                </span>
-
-                <h3>
-                  {service.title}
-                </h3>
-
-                <p>
-                  {service.description}
-                </p>
-
-              </article>
-
-            ))}
-
-          </div>
-
         </div>
 
       </section>
 
       {/* =====================================
-          PRODUCT
+          PRODUCTS
       ===================================== */}
 
-      <section className="products-section">
+      <section
+        className="products-section"
+        id="products"
+      >
 
-        <div className="content">
+        <div className="content-width">
 
           <div className="section-heading">
 
-            <p className="section-label">
-              AVAILABLE PRODUCTS
-            </p>
+            <div>
+              <p className="section-label">
+                SINK COLLECTION
+              </p>
 
-            <h2>
-              사각싱크볼
-              <br />
-              제품 선택
-            </h2>
+              <h2>
+                설치 상담 가능한
+                <br />
+                사각싱크볼
+              </h2>
+            </div>
 
             <p>
-              현재 싱크모아에서 안내하는
-              인셋 사각싱크볼 제품입니다.
+              제품별 상판 타공 치수가
+              다르므로 기존 싱크볼의
+              타공 사이즈를 먼저
+              확인하는 것이 좋습니다.
             </p>
 
           </div>
 
           <div className="product-grid">
 
-            {PRODUCTS.map((product) => (
-
-              <article
-                key={product.slug}
-                className="product-card"
-              >
-
+            {PRODUCTS.map(
+              (product) => (
                 <Link
-                  href={`/products/${product.slug}`}
-                  className="product-image"
+                  href={product.href}
+                  className="product-card"
+                  key={product.name}
                 >
-                  <Image
-                    src={product.image}
-                    alt={`${product.brand} ${product.model} 사각싱크볼`}
-                    fill
-                    sizes="(max-width: 700px) 50vw, 25vw"
-                  />
-                </Link>
 
-                <div className="product-info">
+                  <div className="product-image">
 
-                  <p className="brand-name">
-                    {product.brand}
-                  </p>
+                    <Image
+                      src={product.image}
+                      alt={`${product.brand} ${product.name} 사각싱크볼`}
+                      fill
+                      sizes="(max-width: 700px) 50vw, 25vw"
+                    />
 
-                  <h3>
-                    {product.model}
-                  </h3>
+                  </div>
 
-                  <div className="spec">
+                  <div className="product-info">
 
                     <span>
-                      상판 타공
+                      {product.brand}
                     </span>
 
-                    <strong>
-                      {product.cutout}
-                    </strong>
+                    <h3>
+                      {product.name}
+                    </h3>
+
+                    <p>
+                      {product.description}
+                    </p>
+
+                    <dl>
+                      <div>
+                        <dt>
+                          제품가
+                        </dt>
+                        <dd>
+                          {product.price}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt>
+                          상판 타공
+                        </dt>
+                        <dd>
+                          {product.cutout}
+                        </dd>
+                      </div>
+                    </dl>
 
                   </div>
 
-                  <div className="product-bottom">
-
-                    <strong>
-                      {money(product.price)}
-                    </strong>
-
-                    <Link
-                      href={`/products/${product.slug}`}
-                    >
-                      자세히 보기 ↗
-                    </Link>
-
-                  </div>
-
-                </div>
-
-              </article>
-
-            ))}
+                </Link>
+              )
+            )}
 
           </div>
 
-          <p className="small-note">
-            ※ 제품에 표기된 치수는 싱크볼 외경이 아닌
-            상판 타공 기준입니다.
-            주문 전 기존 상판 타공 치수를 확인해주세요.
+          <p className="cutout-notice">
+            ※ 표기된 치수는 싱크볼
+            외경이 아니라
+            상판 타공 기준 치수입니다.
           </p>
 
         </div>
@@ -595,119 +883,74 @@ export default async function InstallationPage({
 
       <section className="price-section">
 
-        <div className="content">
+        <div className="content-width">
 
-          <div className="section-heading">
+          <p className="section-label">
+            INSTALLATION PRICE
+          </p>
 
-            <p className="section-label">
-              INSTALLATION PRICE
-            </p>
+          <h2>
+            설치 비용 안내
+          </h2>
 
-            <h2>
-              설치비 및
-              <br />
-              추가 옵션
-            </h2>
+          <div className="price-grid">
 
-            <p>
-              기본 설치부터 필요한 추가 작업까지
-              확인하세요.
-            </p>
-
-          </div>
-
-          <div className="price-list">
-
-            <div className="price-row">
-              <div>
-                <span className="price-label">
-                  BASIC
-                </span>
-
-                <h3>
-                  기본 설치비
-                </h3>
-
-                <p>
-                  기존 싱크볼 철거 ·
-                  기존 수전 및 배수구 연결 포함
-                </p>
-              </div>
+            <div className="main-price">
+              <span>
+                기본 설치비
+              </span>
 
               <strong>
                 170,000원
               </strong>
+
+              <p>
+                기존 싱크볼 철거
+                <br />
+                기존 수전 연결
+                <br />
+                기존 배수구 연결 포함
+              </p>
             </div>
 
-            <div className="price-row">
-              <div>
-                <span className="price-label">
-                  OPTION 01
-                </span>
+            <div className="option-prices">
 
-                <h3>
+              <div>
+                <span>
                   올스텐 배수구
-                </h3>
-
-                <p>
-                  기본 배수구에서
-                  올스텐 배수구로 업그레이드
-                </p>
+                </span>
+                <strong>
+                  +20,000원
+                </strong>
               </div>
 
-              <strong>
-                +20,000원
-              </strong>
-            </div>
-
-            <div className="price-row">
               <div>
-                <span className="price-label">
-                  OPTION 02
-                </span>
-
-                <h3>
+                <span>
                   상판 타공
-                </h3>
-
-                <p>
-                  기존 타공 규격과
-                  신규 제품 규격이 다른 경우
-                </p>
-              </div>
-
-              <strong>
-                +50,000원
-              </strong>
-            </div>
-
-            <div className="price-row">
-              <div>
-                <span className="price-label">
-                  OPTION 03
                 </span>
-
-                <h3>
-                  6WAY 수전
-                </h3>
-
-                <p>
-                  수전 제품 70,000원 ·
-                  싱크볼 설치 시 교체 설치비 추가 없음
-                </p>
+                <strong>
+                  +50,000원
+                </strong>
               </div>
 
-              <strong>
-                +70,000원
-              </strong>
+              <div>
+                <span>
+                  6WAY 수전 제품
+                </span>
+                <strong>
+                  +70,000원
+                </strong>
+              </div>
+
             </div>
 
           </div>
 
-          <p className="price-notice">
-            ※ 현장 상태, 상판 재질,
-            추가 가공 여부에 따라
-            최종 비용이 달라질 수 있습니다.
+          <p className="price-note">
+            현장 조건, 상판 재질,
+            출장 지역 등에 따라
+            추가 비용이 발생할 수 있으며
+            상담 시 사전 안내드립니다.
           </p>
 
         </div>
@@ -715,112 +958,51 @@ export default async function InstallationPage({
       </section>
 
       {/* =====================================
-          PROCESS
-      ===================================== */}
-
-      <section className="process-section">
-
-        <div className="content">
-
-          <div className="section-heading">
-
-            <p className="section-label">
-              INSTALLATION PROCESS
-            </p>
-
-            <h2>
-              상담부터 설치까지
-              <br />
-              이렇게 진행됩니다
-            </h2>
-
-          </div>
-
-          <div className="process-grid">
-
-            {STEPS.map((step) => (
-
-              <article
-                key={step.number}
-                className="process-card"
-              >
-
-                <span>
-                  {step.number}
-                </span>
-
-                <h3>
-                  {step.title}
-                </h3>
-
-                <p>
-                  {step.description}
-                </p>
-
-              </article>
-
-            ))}
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* =====================================
-          CHECK
+          설치 전 확인사항
       ===================================== */}
 
       <section className="check-section">
 
-        <div className="content">
+        <div className="content-width">
 
-          <div className="check-box">
+          <p className="section-label">
+            BEFORE INSTALLATION
+          </p>
+
+          <h2>
+            설치 상담 전
+            <br />
+            확인하면 좋은 것
+          </h2>
+
+          <div className="check-grid">
 
             <div>
-
-              <p className="section-label">
-                BEFORE INSTALLATION
+              <span>01</span>
+              <p>
+                현재 싱크볼 전체 사진
               </p>
-
-              <h2>
-                문의 전
-                <br />
-                확인해주세요
-              </h2>
-
             </div>
 
-            <div className="check-list">
+            <div>
+              <span>02</span>
+              <p>
+                싱크볼 가로·세로 크기
+              </p>
+            </div>
 
-              <div>
-                <span>01</span>
-                <p>
-                  현재 사용 중인 싱크볼 전체 사진
-                </p>
-              </div>
+            <div>
+              <span>03</span>
+              <p>
+                상판 재질 및 타공 상태
+              </p>
+            </div>
 
-              <div>
-                <span>02</span>
-                <p>
-                  기존 상판 타공 가로 × 세로 치수
-                </p>
-              </div>
-
-              <div>
-                <span>03</span>
-                <p>
-                  설치를 희망하는 싱크볼 모델
-                </p>
-              </div>
-
-              <div>
-                <span>04</span>
-                <p>
-                  설치 주소 및 희망 일정
-                </p>
-              </div>
-
+            <div>
+              <span>04</span>
+              <p>
+                설치 지역 및 주소
+              </p>
             </div>
 
           </div>
@@ -835,45 +1017,43 @@ export default async function InstallationPage({
 
       <section className="faq-section">
 
-        <div className="content">
+        <div className="content-width">
 
-          <div className="section-heading">
+          <p className="section-label">
+            FAQ
+          </p>
 
-            <p className="section-label">
-              FREQUENTLY ASKED QUESTIONS
-            </p>
-
-            <h2>
-              {location.districtName}
-              <br />
-              싱크볼 설치 FAQ
-            </h2>
-
-          </div>
+          <h2>
+            {isGangnam
+              ? "강남 싱크볼 교체 자주 묻는 질문"
+              : `${location.fullName} 설치 FAQ`}
+          </h2>
 
           <div className="faq-list">
 
-            {faq.map((item) => (
-
-              <details
-                key={item.q}
+            {faq.map((item, index) => (
+              <div
                 className="faq-item"
+                key={item.q}
               >
 
-                <summary>
-                  {item.q}
+                <span>
+                  {String(
+                    index + 1
+                  ).padStart(2, "0")}
+                </span>
 
-                  <span>
-                    +
-                  </span>
-                </summary>
+                <div>
+                  <h3>
+                    {item.q}
+                  </h3>
 
-                <p>
-                  {item.a}
-                </p>
+                  <p>
+                    {item.a}
+                  </p>
+                </div>
 
-              </details>
-
+              </div>
             ))}
 
           </div>
@@ -883,52 +1063,41 @@ export default async function InstallationPage({
       </section>
 
       {/* =====================================
-          OTHER REGIONS
+          같은 지역 다른 지역구
       ===================================== */}
 
-      <section className="nearby-section">
+      <section className="other-areas">
 
-        <div className="content">
+        <div className="content-width">
 
-          <div className="section-heading">
+          <p className="section-label">
+            OTHER AREAS
+          </p>
 
-            <p className="section-label">
-              OTHER SERVICE AREAS
-            </p>
+          <h2>
+            {location.regionName}
+            {" "}
+            다른 설치 지역
+          </h2>
 
-            <h2>
-              {location.regionName}
-              <br />
-              다른 설치 지역
-            </h2>
+          <div className="area-links">
 
-            <p>
-              같은 지역의 다른 시·군·구
-              설치 안내를 확인할 수 있습니다.
-            </p>
-
-          </div>
-
-          <div className="nearby-grid">
-
-            {nearby.map((item) => (
-
-              <Link
-                key={item.slug}
-                href={`/installation/${region}/${item.slug}`}
-              >
-
-                <span>
+            {regionData.districts
+              .filter(
+                (item) =>
+                  item.slug !== district
+              )
+              .map((item) => (
+                <Link
+                  href={`/installation/${region}/${item.slug}`}
+                  key={item.slug}
+                >
                   {item.name}
-                </span>
-
-                <span>
-                  ↗
-                </span>
-
-              </Link>
-
-            ))}
+                  {" "}
+                  싱크볼 교체
+                  <span>↗</span>
+                </Link>
+              ))}
 
           </div>
 
@@ -942,30 +1111,36 @@ export default async function InstallationPage({
 
       <section className="cta">
 
-        <p className="eyebrow">
-          SINKMOA
-        </p>
+        <div>
 
-        <h2>
-          {location.districtName}
-          <br />
-          싱크볼 교체가 필요하신가요?
-        </h2>
+          <p className="section-label">
+            SINKMOA
+          </p>
 
-        <p>
-          기존 싱크볼 사진과
-          상판 타공 치수를 준비하시면
-          <br />
-          보다 빠르게 설치 상담을 받을 수 있습니다.
-        </p>
+          <h2>
+            {location.fullName}
+            <br />
+            싱크볼 교체 상담
+          </h2>
 
-        <Link
-          href="/order"
-          className="gold-button"
-        >
-          설치 견적 문의
-          <span>↗</span>
-        </Link>
+          <p>
+            설치 예정 장소의 사진과
+            현재 싱크볼 사이즈를
+            보내주시면
+            <br />
+            제품 및 설치 방법을
+            안내해드립니다.
+          </p>
+
+          <Link
+            href="/order"
+            className="cta-button"
+          >
+            설치 견적 문의하기
+            <span>↗</span>
+          </Link>
+
+        </div>
 
       </section>
 
@@ -975,35 +1150,21 @@ export default async function InstallationPage({
 
       <footer className="footer">
 
-        <div className="content">
+        <div className="content-width">
 
-          <h2>
+          <Link href="/" className="footer-logo">
             SINKMOA
-          </h2>
+          </Link>
 
           <p>
-            싱크볼의 선택부터 설치까지, 싱크모아.
+            프리미엄 사각싱크볼
+            판매 및 설치
           </p>
 
-          <div className="footer-links">
-
-            <Link href="/">
-              홈
-            </Link>
-
-            <Link href="/#brands">
-              브랜드별 상품
-            </Link>
-
-            <Link href="/#regions">
-              설치 가능 지역
-            </Link>
-
-            <Link href="/order">
-              주문·견적 문의
-            </Link>
-
-          </div>
+          <p className="footer-area">
+            서울 · 경기 · 인천 ·
+            충남 · 충북 설치 상담
+          </p>
 
         </div>
 
@@ -1019,21 +1180,22 @@ export default async function InstallationPage({
           box-sizing: border-box;
         }
 
+        html {
+          scroll-behavior: smooth;
+        }
+
         body {
           margin: 0;
         }
 
         .installation-page {
           --ink: #19262b;
-          --dark: #111a1e;
           --gold: #c4b49a;
-          --gold-dark: #9a8567;
           --ivory: #f7f5f0;
-          --beige: #eeeae3;
-          --line: #ded7cc;
+          --line: #e7e1d7;
 
-          background: var(--ivory);
           color: var(--ink);
+          background: #fff;
 
           font-family:
             Arial,
@@ -1042,31 +1204,46 @@ export default async function InstallationPage({
             sans-serif;
 
           word-break: keep-all;
-          overflow-x: hidden;
         }
 
         .installation-page a {
           text-decoration: none;
         }
 
-        .content {
-          width: calc(100% - 80px);
-          max-width: 1180px;
-          margin: auto;
+        .content-width {
+          width: min(
+            calc(100% - 48px),
+            1180px
+          );
+
+          margin: 0 auto;
+        }
+
+        .section-label {
+          margin: 0 0 17px;
+
+          color: #aa906c;
+
+          font-size: 10px;
+          font-weight: 700;
+
+          letter-spacing: .2em;
         }
 
         /* HEADER */
 
         .header {
-          background: var(--dark);
-          border-bottom:
-            1px solid rgba(255,255,255,.12);
+          background: #111a1e;
         }
 
         .header-inner {
-          width: calc(100% - 80px);
-          max-width: 1360px;
-          height: 90px;
+          width: min(
+            calc(100% - 48px),
+            1280px
+          );
+
+          height: 76px;
+
           margin: auto;
 
           display: flex;
@@ -1076,815 +1253,1163 @@ export default async function InstallationPage({
 
         .logo {
           color: white;
-          font-size: 24px;
+
+          font-size: 20px;
           font-weight: 700;
+
           letter-spacing: .22em;
         }
 
         .header nav {
           display: flex;
           align-items: center;
-          gap: 25px;
+
+          gap: 27px;
         }
 
         .header nav a {
-          color: #eee;
-          font-size: 12px;
+          color: #ddd;
+
+          font-size: 11px;
         }
 
-        .header .order-link {
-          padding: 13px 17px;
-          background: var(--gold);
-          color: var(--ink);
-          font-weight: 700;
+        .header-order {
+          padding: 11px 16px;
+
+          border:
+            1px solid
+            rgba(255,255,255,.35);
         }
 
         /* HERO */
 
         .hero {
-          padding: 110px 24px 115px;
-          background: var(--ink);
-          color: white;
-          text-align: center;
+          position: relative;
+
+          min-height: 590px;
+
+          display: flex;
+          align-items: center;
+
+          overflow: hidden;
         }
 
-        .hero-inner {
-          max-width: 900px;
+        .hero-image {
+          position: absolute;
+          inset: 0;
+        }
+
+        .hero-image img {
+          object-fit: cover;
+        }
+
+        .hero-overlay {
+          position: absolute;
+          inset: 0;
+
+          background:
+            linear-gradient(
+              90deg,
+              rgba(8,15,18,.85),
+              rgba(8,15,18,.55) 50%,
+              rgba(8,15,18,.16)
+            );
+        }
+
+        .hero-content {
+          position: relative;
+          z-index: 2;
+
+          width: min(
+            calc(100% - 48px),
+            1180px
+          );
+
           margin: auto;
+
+          color: white;
         }
 
-        .eyebrow,
-        .section-label {
-          margin: 0 0 19px;
-          color: #b9a17d;
+        .eyebrow {
+          margin: 0 0 22px;
+
+          color: #d7bd95;
+
           font-size: 10px;
           font-weight: 700;
+
           letter-spacing: .22em;
         }
 
         .hero h1 {
           margin: 0;
+
           font-size:
-            clamp(42px,6vw,70px);
-          line-height: 1.34;
+            clamp(41px,5.3vw,70px);
+
+          line-height: 1.22;
+
           font-weight: 400;
+
           letter-spacing: -.055em;
         }
 
-        .gold-line {
-          width: 42px;
-          height: 1px;
-          margin: 29px auto;
-          background: var(--gold);
+        .hero-description {
+          margin:
+            26px 0 31px;
+
+          color: #e3e5e4;
+
+          font-size: 14px;
+          line-height: 1.9;
         }
 
-        .hero-copy {
-          margin: 0;
-          color: #d2d7d5;
-          font-size: 15px;
-          line-height: 2;
+        .hero-actions {
+          display: flex;
+
+          gap: 10px;
         }
 
-        .gold-button {
-          width: min(100%,290px);
-          margin-top: 31px;
-          padding: 19px 22px;
+        .primary-button,
+        .secondary-button {
+          padding: 16px 19px;
 
           display: inline-flex;
-          justify-content: space-between;
           align-items: center;
+          justify-content: space-between;
 
-          background: var(--gold);
-          color: var(--ink);
+          min-width: 180px;
 
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 700;
         }
 
-        .hero-note {
-          margin: 17px 0 0;
-          color: #9fa9a6;
-          font-size: 11px;
+        .primary-button {
+          background: #c4b49a;
+
+          color: #19262b;
         }
 
-        /* INTRO */
+        .secondary-button {
+          border:
+            1px solid
+            rgba(255,255,255,.6);
 
-        .intro-section {
-          padding: 100px 0;
-          background: white;
+          color: white;
         }
 
-        .intro-grid {
-          display: grid;
-          grid-template-columns:
-            .8fr 1.2fr;
-          gap: 80px;
-          align-items: center;
+        /* GANGNAM INTRO */
+
+        .gangnam-intro,
+        .standard-intro {
+          padding:
+            95px 0;
         }
 
-        .intro-section h2,
-        .section-heading h2,
-        .check-box h2 {
-          margin: 0;
+        .gangnam-intro h2,
+        .standard-intro h2 {
+          margin: 0 0 30px;
 
           font-size:
-            clamp(34px,4vw,51px);
+            clamp(32px,4.3vw,53px);
 
           line-height: 1.4;
+
           font-weight: 400;
 
           letter-spacing: -.05em;
         }
 
-        .intro-copy {
-          padding-left: 50px;
-          border-left:
-            1px solid var(--line);
-        }
+        .intro-copy,
+        .standard-intro
+        .content-width > p:last-child {
+          max-width: 780px;
 
-        .intro-copy p {
-          margin: 0 0 17px;
-          color: #717674;
+          margin: 0;
+
+          color: #666;
+
           font-size: 14px;
-          line-height: 2;
+          line-height: 2.05;
         }
 
-        .intro-copy p:last-child {
-          margin-bottom: 0;
+        .keyword-cards {
+          margin-top: 46px;
+
+          display: grid;
+
+          grid-template-columns:
+            repeat(4,1fr);
+
+          gap: 9px;
         }
 
-        /* COMMON */
+        .keyword-cards div {
+          padding: 24px 20px;
+
+          border:
+            1px solid #e4ded4;
+
+          background: #faf9f6;
+        }
+
+        .keyword-cards span {
+          display: block;
+
+          margin-bottom: 30px;
+
+          color: #ad9572;
+
+          font-size: 10px;
+        }
+
+        .keyword-cards strong {
+          font-size: 16px;
+        }
+
+        .keyword-cards p {
+          margin:
+            10px 0 0;
+
+          color: #777;
+
+          font-size: 11px;
+          line-height: 1.7;
+        }
+
+        /* WORK */
+
+        .work-section {
+          padding:
+            90px 0;
+
+          background: #f7f5f0;
+        }
 
         .section-heading {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+
+          gap: 30px;
+
           margin-bottom: 44px;
-          text-align: center;
         }
 
-        .section-heading > p:last-child {
-          margin: 16px 0 0;
+        .section-heading h2 {
+          margin: 0;
+
+          font-size:
+            clamp(31px,4vw,47px);
+
+          line-height: 1.4;
+
+          font-weight: 400;
+
+          letter-spacing: -.05em;
+        }
+
+        .section-heading > p {
+          max-width: 330px;
+
+          margin: 0;
+
           color: #777;
-          font-size: 13px;
-          line-height: 1.8;
+
+          font-size: 12px;
+          line-height: 1.9;
         }
 
-        /* SERVICE */
-
-        .services-section {
-          padding: 100px 0;
-          background: var(--beige);
-        }
-
-        .service-grid {
+        .work-grid {
           display: grid;
+
           grid-template-columns:
-            repeat(3,minmax(0,1fr));
+            repeat(3,1fr);
+
           gap: 10px;
         }
 
-        .service-card {
-          min-height: 195px;
-          padding: 25px;
+        .work-grid article {
+          min-height: 200px;
 
-          background: #f8f6f1;
-          border: 1px solid #ded6cb;
+          padding: 24px;
+
+          background: white;
+
+          border:
+            1px solid #e5dfd5;
         }
 
-        .service-number {
-          color: var(--gold);
-          font-size: 25px;
-          font-weight: 300;
+        .work-grid article > span {
+          color: #ad9572;
+
+          font-size: 10px;
         }
 
-        .service-card h3 {
-          margin: 25px 0 11px;
-          font-size: 16px;
-          font-weight: 600;
+        .work-grid h3 {
+          margin:
+            37px 0 10px;
+
+          font-size: 17px;
         }
 
-        .service-card p {
+        .work-grid p {
           margin: 0;
+
           color: #777;
-          font-size: 12px;
+
+          font-size: 11px;
           line-height: 1.8;
+        }
+
+        /* CASE */
+
+        .case-section {
+          padding:
+            95px 0;
+        }
+
+        .case-section h2,
+        .products-section h2,
+        .price-section h2,
+        .check-section h2,
+        .faq-section h2,
+        .other-areas h2 {
+          margin: 0;
+
+          font-size:
+            clamp(31px,4vw,48px);
+
+          font-weight: 400;
+
+          letter-spacing: -.05em;
+
+          line-height: 1.4;
+        }
+
+        .case-intro {
+          max-width: 650px;
+
+          margin:
+            20px 0 40px;
+
+          color: #777;
+
+          font-size: 13px;
+          line-height: 1.9;
+        }
+
+        .before-after {
+          display: grid;
+
+          grid-template-columns:
+            1fr 1fr;
+
+          gap: 12px;
+        }
+
+        .case-image {
+          position: relative;
+
+          aspect-ratio: 1.5;
+
+          overflow: hidden;
+
+          background: #eee;
+        }
+
+        .case-image img {
+          object-fit: cover;
+        }
+
+        .case-image span {
+          position: absolute;
+
+          left: 17px;
+          top: 17px;
+
+          padding: 7px 10px;
+
+          background:
+            rgba(18,28,32,.8);
+
+          color: white;
+
+          font-size: 8px;
+
+          letter-spacing: .15em;
+        }
+
+        .process-grid {
+          margin-top: 13px;
+
+          display: grid;
+
+          grid-template-columns:
+            repeat(5,1fr);
+
+          gap: 8px;
+        }
+
+        .process-grid div {
+          padding: 20px 16px;
+
+          border:
+            1px solid #e7e1d7;
+        }
+
+        .process-grid strong {
+          color: #aa906c;
+
+          font-size: 9px;
+        }
+
+        .process-grid h3 {
+          margin:
+            23px 0 8px;
+
+          font-size: 14px;
+        }
+
+        .process-grid p {
+          margin: 0;
+
+          color: #777;
+
+          font-size: 10px;
+          line-height: 1.7;
         }
 
         /* PRODUCTS */
 
         .products-section {
-          padding: 100px 0;
-          background: var(--ivory);
+          padding:
+            95px 0;
+
+          background: #f7f5f0;
         }
 
         .product-grid {
           display: grid;
+
           grid-template-columns:
-            repeat(4,minmax(0,1fr));
-          gap: 12px;
+            repeat(4,1fr);
+
+          gap: 10px;
         }
 
         .product-card {
+          display: block;
+
           overflow: hidden;
+
           background: white;
-          border: 1px solid #e1dacf;
+
+          color: #19262b;
         }
 
         .product-image {
           position: relative;
-          display: block;
+
           aspect-ratio: 1.2;
-          background: #f2f2f0;
-          overflow: hidden;
+
+          background: white;
         }
 
         .product-image img {
           object-fit: contain;
-          padding: 10px;
-          transition: transform .3s ease;
-        }
 
-        .product-card:hover
-        .product-image img {
-          transform: scale(1.035);
+          padding: 10px;
         }
 
         .product-info {
-          padding: 21px;
+          padding: 18px;
         }
 
-        .brand-name {
-          margin: 0 0 9px;
-          color: var(--gold-dark);
+        .product-info > span {
+          color: #aa906c;
+
+          font-size: 9px;
+        }
+
+        .product-info h3 {
+          margin:
+            7px 0 4px;
+
+          font-size: 17px;
+        }
+
+        .product-info > p {
+          margin:
+            0 0 16px;
+
+          color: #777;
+
           font-size: 10px;
-          font-weight: 700;
         }
 
-        .product-card h3 {
-          margin: 0 0 20px;
-          min-height: 48px;
-          font-size: 18px;
-          line-height: 1.4;
-          font-weight: 500;
-        }
-
-        .spec {
-          padding: 13px 0;
-
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
+        .product-info dl {
+          margin: 0;
 
           border-top:
             1px solid #eee8df;
+        }
+
+        .product-info dl div {
+          padding:
+            9px 0;
+
+          display: flex;
+          justify-content: space-between;
+
           border-bottom:
             1px solid #eee8df;
         }
 
-        .spec span {
+        .product-info dt,
+        .product-info dd {
+          margin: 0;
+
+          font-size: 9px;
+        }
+
+        .product-info dt {
           color: #888;
+        }
+
+        .cutout-notice {
+          margin:
+            16px 0 0;
+
+          color: #888;
+
           font-size: 10px;
-        }
-
-        .spec strong {
-          font-size: 12px;
-        }
-
-        .product-bottom {
-          margin-top: 17px;
-
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 9px;
-        }
-
-        .product-bottom > strong {
-          font-size: 18px;
-        }
-
-        .product-bottom a {
-          color: var(--gold-dark);
-          font-size: 11px;
-          font-weight: 700;
-        }
-
-        .small-note {
-          margin: 20px 0 0;
-          color: #888;
-          font-size: 11px;
-          line-height: 1.8;
-          text-align: center;
         }
 
         /* PRICE */
 
         .price-section {
-          padding: 100px 0;
-          background: white;
+          padding:
+            95px 0;
         }
 
-        .price-list {
-          max-width: 830px;
-          margin: auto;
-          border-top: 1px solid var(--line);
-        }
+        .price-grid {
+          margin-top: 40px;
 
-        .price-row {
-          padding: 22px 3px;
-          min-height: 105px;
-
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 25px;
-
-          border-bottom:
-            1px solid var(--line);
-        }
-
-        .price-label {
-          display: block;
-          margin-bottom: 7px;
-
-          color: var(--gold-dark);
-          font-size: 9px;
-          font-weight: 700;
-          letter-spacing: .13em;
-        }
-
-        .price-row h3 {
-          margin: 0 0 7px;
-          font-size: 15px;
-        }
-
-        .price-row p {
-          margin: 0;
-          color: #888;
-          font-size: 11px;
-          line-height: 1.6;
-        }
-
-        .price-row > strong {
-          flex-shrink: 0;
-          color: var(--gold-dark);
-          font-size: 19px;
-        }
-
-        .price-notice {
-          max-width: 830px;
-          margin: 17px auto 0;
-          color: #888;
-          font-size: 10px;
-          line-height: 1.8;
-        }
-
-        /* PROCESS */
-
-        .process-section {
-          padding: 100px 0;
-          background: var(--beige);
-        }
-
-        .process-grid {
           display: grid;
+
           grid-template-columns:
-            repeat(5,minmax(0,1fr));
-          gap: 9px;
+            1fr 1.3fr;
+
+          gap: 10px;
         }
 
-        .process-card {
-          min-height: 185px;
-          padding: 23px 19px;
-          background: var(--ivory);
-          border: 1px solid #ddd5ca;
-        }
+        .main-price {
+          padding: 32px;
 
-        .process-card > span {
-          color: var(--gold);
-          font-size: 25px;
-        }
+          background: #19262b;
 
-        .process-card h3 {
-          margin: 24px 0 10px;
-          font-size: 14px;
-        }
-
-        .process-card p {
-          margin: 0;
-          color: #777;
-          font-size: 11px;
-          line-height: 1.8;
-        }
-
-        /* BEFORE CHECK */
-
-        .check-section {
-          padding: 90px 0;
-          background: var(--ink);
           color: white;
         }
 
-        .check-box {
-          display: grid;
-          grid-template-columns:
-            .8fr 1.2fr;
-          gap: 80px;
-          align-items: center;
-        }
+        .main-price > span {
+          color: #d5bd99;
 
-        .check-list {
-          border-top:
-            1px solid rgba(255,255,255,.2);
-        }
-
-        .check-list > div {
-          display: flex;
-          align-items: center;
-          gap: 20px;
-
-          padding: 18px 0;
-
-          border-bottom:
-            1px solid rgba(255,255,255,.14);
-        }
-
-        .check-list span {
-          color: var(--gold);
           font-size: 11px;
         }
 
-        .check-list p {
+        .main-price strong {
+          display: block;
+
+          margin:
+            17px 0 24px;
+
+          font-size: 35px;
+
+          font-weight: 500;
+        }
+
+        .main-price p {
           margin: 0;
-          color: #e0e4e3;
+
+          color: #c8cfcd;
+
+          font-size: 11px;
+          line-height: 1.9;
+        }
+
+        .option-prices {
+          border:
+            1px solid #e4ded4;
+        }
+
+        .option-prices div {
+          padding: 22px;
+
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .option-prices
+        div + div {
+          border-top:
+            1px solid #e4ded4;
+        }
+
+        .option-prices span {
           font-size: 13px;
+        }
+
+        .option-prices strong {
+          color: #9d8562;
+
+          font-size: 16px;
+        }
+
+        .price-note {
+          margin:
+            14px 0 0;
+
+          color: #888;
+
+          font-size: 10px;
+        }
+
+        /* CHECK */
+
+        .check-section {
+          padding:
+            90px 0;
+
+          background: #ede8df;
+        }
+
+        .check-grid {
+          margin-top: 37px;
+
+          display: grid;
+
+          grid-template-columns:
+            repeat(4,1fr);
+
+          gap: 8px;
+        }
+
+        .check-grid div {
+          padding: 21px;
+
+          background: white;
+        }
+
+        .check-grid span {
+          color: #aa906c;
+
+          font-size: 9px;
+        }
+
+        .check-grid p {
+          margin:
+            28px 0 0;
+
+          font-size: 13px;
+          font-weight: 600;
         }
 
         /* FAQ */
 
         .faq-section {
-          padding: 100px 0;
-          background: white;
+          padding:
+            95px 0;
         }
 
         .faq-list {
-          max-width: 880px;
-          margin: auto;
+          margin-top: 40px;
+
           border-top:
-            1px solid var(--line);
+            1px solid #ddd6cb;
         }
 
         .faq-item {
+          padding:
+            25px 0;
+
+          display: grid;
+
+          grid-template-columns:
+            50px 1fr;
+
+          gap: 15px;
+
           border-bottom:
-            1px solid var(--line);
+            1px solid #ddd6cb;
         }
 
-        .faq-item summary {
-          padding: 22px 4px;
+        .faq-item > span {
+          color: #aa906c;
 
-          display: flex;
-          justify-content: space-between;
-          gap: 20px;
-
-          cursor: pointer;
-          list-style: none;
-
-          font-size: 13px;
-          font-weight: 600;
+          font-size: 10px;
         }
 
-        .faq-item summary::-webkit-details-marker {
-          display: none;
-        }
+        .faq-item h3 {
+          margin:
+            0 0 10px;
 
-        .faq-item summary span {
-          color: var(--gold-dark);
-          font-size: 20px;
+          font-size: 15px;
         }
 
         .faq-item p {
           margin: 0;
-          padding: 0 42px 24px 4px;
+
+          max-width: 800px;
+
           color: #777;
-          font-size: 12px;
-          line-height: 2;
+
+          font-size: 11px;
+          line-height: 1.9;
         }
 
-        /* REGIONS */
+        /* OTHER AREA */
 
-        .nearby-section {
-          padding: 100px 0;
-          background: var(--ivory);
+        .other-areas {
+          padding:
+            90px 0;
+
+          background: #f7f5f0;
         }
 
-        .nearby-grid {
+        .area-links {
+          margin-top: 35px;
+
           display: grid;
+
           grid-template-columns:
-            repeat(4,minmax(0,1fr));
+            repeat(4,1fr);
+
           gap: 7px;
         }
 
-        .nearby-grid a {
-          min-height: 55px;
-          padding: 14px;
+        .area-links a {
+          padding: 14px 13px;
 
           display: flex;
           align-items: center;
           justify-content: space-between;
 
-          background: white;
-          border: 1px solid var(--line);
+          border:
+            1px solid #e2dcd2;
 
-          color: var(--ink);
-          font-size: 11px;
-          font-weight: 600;
+          background: white;
+
+          color: #19262b;
+
+          font-size: 10px;
         }
 
-        .nearby-grid a span:last-child {
-          color: var(--gold-dark);
+        .area-links a span {
+          color: #aa906c;
         }
 
         /* CTA */
 
         .cta {
-          padding: 100px 24px;
-          background: var(--ink);
+          min-height: 390px;
+
+          padding: 70px 24px;
+
+          display: flex;
+          justify-content: center;
+          align-items: center;
+
+          background: #19262b;
+
           color: white;
+
           text-align: center;
         }
 
         .cta h2 {
           margin: 0;
+
           font-size:
-            clamp(37px,5vw,57px);
-          line-height: 1.45;
+            clamp(34px,4.8vw,55px);
+
           font-weight: 400;
-          letter-spacing: -.05em;
+
+          line-height: 1.4;
         }
 
-        .cta > p:not(.eyebrow) {
-          margin: 22px 0 0;
-          color: #c7cecc;
-          font-size: 13px;
-          line-height: 2;
+        .cta > div > p:not(.section-label) {
+          margin:
+            20px 0 27px;
+
+          color: #c7cfcd;
+
+          font-size: 12px;
+          line-height: 1.9;
+        }
+
+        .cta-button {
+          padding: 16px 20px;
+
+          display: inline-flex;
+
+          gap: 35px;
+
+          background: #c4b49a;
+
+          color: #19262b;
+
+          font-size: 12px;
+          font-weight: 700;
         }
 
         /* FOOTER */
 
         .footer {
-          padding: 58px 0;
-          background: var(--dark);
+          padding:
+            45px 0;
+
+          background: #10181c;
+
           color: white;
         }
 
-        .footer h2 {
-          margin: 0 0 12px;
-          font-size: 23px;
-          letter-spacing: .22em;
+        .footer-logo {
+          color: white;
+
+          font-size: 19px;
+          font-weight: 700;
+
+          letter-spacing: .2em;
         }
 
         .footer p {
-          color: #abb3b1;
-          font-size: 11px;
-        }
+          margin:
+            10px 0 0;
 
-        .footer-links {
-          margin-top: 27px;
+          color: #aeb5b3;
 
-          display: flex;
-          flex-wrap: wrap;
-          gap: 21px;
-        }
-
-        .footer-links a {
-          color: #e5e5e5;
-          font-size: 11px;
+          font-size: 10px;
         }
 
         /* TABLET */
 
-        @media (max-width: 900px) {
+        @media
+        (max-width: 850px) {
 
-          .intro-grid,
-          .check-box {
-            grid-template-columns: 1fr;
-            gap: 40px;
+          .header nav a:not(
+            .header-order
+          ) {
+            display: none;
           }
 
-          .intro-copy {
-            padding-left: 0;
-            border-left: 0;
-          }
-
-          .service-grid {
+          .keyword-cards {
             grid-template-columns:
-              repeat(2,minmax(0,1fr));
+              1fr 1fr;
+          }
+
+          .work-grid {
+            grid-template-columns:
+              1fr 1fr;
           }
 
           .product-grid {
             grid-template-columns:
-              repeat(2,minmax(0,1fr));
+              1fr 1fr;
           }
 
           .process-grid {
             grid-template-columns:
-              repeat(2,minmax(0,1fr));
+              1fr 1fr;
           }
 
-          .nearby-grid {
+          .area-links {
             grid-template-columns:
-              repeat(3,minmax(0,1fr));
+              1fr 1fr;
           }
 
         }
 
         /* MOBILE */
 
-        @media (max-width: 600px) {
+        @media
+        (max-width: 600px) {
 
-          .content,
-          .header-inner {
-            width: calc(100% - 32px);
+          .content-width {
+            width:
+              calc(100% - 30px);
           }
 
           .header-inner {
-            height: 76px;
+            width:
+              calc(100% - 30px);
+
+            height: 64px;
           }
 
           .logo {
-            font-size: 19px;
+            font-size: 16px;
           }
 
-          .header nav {
-            gap: 9px;
-          }
-
-          .header nav a {
-            font-size: 9px;
-          }
-
-          .header .order-link {
-            padding: 10px;
+          .header-order {
+            padding: 9px 12px;
           }
 
           .hero {
-            padding: 73px 17px 78px;
+            min-height: 510px;
+          }
+
+          .hero-image img {
+            object-position:
+              center center;
+          }
+
+          .hero-overlay {
+            background:
+              linear-gradient(
+                90deg,
+                rgba(8,15,18,.84),
+                rgba(8,15,18,.55)
+              );
+          }
+
+          .hero-content {
+            width:
+              calc(100% - 34px);
           }
 
           .hero h1 {
             font-size: 37px;
           }
 
-          .hero-copy {
+          .hero-description {
             font-size: 12px;
-            line-height: 1.95;
           }
 
-          .gold-button {
-            margin-top: 27px;
+          .hero-actions {
+            flex-direction: column;
+
+            max-width: 270px;
           }
 
-          .intro-section,
-          .services-section,
-          .products-section,
-          .price-section,
-          .process-section,
-          .faq-section,
-          .nearby-section {
-            padding: 72px 0;
+          .primary-button,
+          .secondary-button {
+            width: 100%;
           }
 
-          .intro-section h2,
-          .section-heading h2,
-          .check-box h2 {
-            font-size: 34px;
+          .gangnam-intro,
+          .standard-intro {
+            padding:
+              65px 0;
           }
 
-          .section-heading {
-            margin-bottom: 34px;
+          .gangnam-intro h2,
+          .standard-intro h2 {
+            font-size: 30px;
           }
 
-          .service-grid {
-            grid-template-columns: 1fr 1fr;
-            gap: 7px;
+          .intro-copy,
+          .standard-intro
+          .content-width
+          > p:last-child {
+            font-size: 12px;
           }
 
-          .service-card {
-            min-height: 180px;
-            padding: 18px 15px;
+          .keyword-cards {
+            margin-top: 31px;
+
+            gap: 6px;
           }
 
-          .service-card h3 {
-            margin-top: 19px;
+          .keyword-cards div {
+            padding: 17px 14px;
+          }
+
+          .keyword-cards span {
+            margin-bottom: 19px;
+          }
+
+          .keyword-cards strong {
             font-size: 13px;
           }
 
-          .service-card p {
-            font-size: 10px;
-          }
-
-          /*
-             모바일 상품은 2열로 압축
-             기존처럼 한 제품이 화면 전체를
-             차지하지 않도록 수정
-          */
-
-          .product-grid {
-            grid-template-columns:
-              repeat(2,minmax(0,1fr));
-            gap: 8px;
-          }
-
-          .product-image {
-            aspect-ratio: 1.15;
-          }
-
-          .product-image img {
-            padding: 5px;
-          }
-
-          .product-info {
-            padding: 14px;
-          }
-
-          .brand-name {
-            margin-bottom: 6px;
+          .keyword-cards p {
             font-size: 9px;
           }
 
-          .product-card h3 {
-            min-height: 39px;
-            margin-bottom: 12px;
-            font-size: 14px;
+          .work-section,
+          .case-section,
+          .products-section,
+          .price-section,
+          .check-section,
+          .faq-section,
+          .other-areas {
+            padding:
+              65px 0;
           }
 
-          .spec {
-            padding: 10px 0;
+          .section-heading {
+            display: block;
+
+            margin-bottom: 29px;
           }
 
-          .spec span {
-            font-size: 9px;
+          .section-heading h2,
+          .case-section h2,
+          .products-section h2,
+          .price-section h2,
+          .check-section h2,
+          .faq-section h2,
+          .other-areas h2 {
+            font-size: 29px;
           }
 
-          .spec strong {
+          .section-heading > p {
+            margin-top: 15px;
+
             font-size: 10px;
           }
 
-          .product-bottom {
-            margin-top: 12px;
+          .work-grid {
+            gap: 6px;
+          }
+
+          .work-grid article {
+            min-height: 170px;
+
+            padding: 16px 13px;
+          }
+
+          .work-grid h3 {
+            margin-top: 25px;
+
+            font-size: 13px;
+          }
+
+          .work-grid p {
+            font-size: 9px;
+          }
+
+          .before-after {
+            grid-template-columns: 1fr;
+
             gap: 7px;
           }
 
-          .product-bottom > strong {
-            font-size: 14px;
-          }
-
-          .product-bottom a {
-            font-size: 9px;
-          }
-
-          .price-row {
-            min-height: 95px;
-            gap: 13px;
-          }
-
-          .price-row > strong {
-            font-size: 16px;
-            white-space: nowrap;
-          }
-
-          .price-row p {
-            max-width: 210px;
-            font-size: 10px;
+          .case-image {
+            aspect-ratio: 1.55;
           }
 
           .process-grid {
+            gap: 6px;
+          }
+
+          .process-grid div {
+            padding: 15px 12px;
+          }
+
+          .process-grid h3 {
+            margin-top: 17px;
+
+            font-size: 12px;
+          }
+
+          .process-grid p {
+            font-size: 9px;
+          }
+
+          .product-grid {
+            gap: 6px;
+          }
+
+          .product-info {
+            padding: 13px;
+          }
+
+          .product-info h3 {
+            font-size: 13px;
+          }
+
+          .product-info dl div {
+            display: block;
+          }
+
+          .product-info dd {
+            margin-top: 3px;
+          }
+
+          .price-grid {
             grid-template-columns: 1fr;
           }
 
-          .process-card {
-            min-height: auto;
+          .main-price {
+            padding: 24px;
           }
 
-          .check-section {
-            padding: 72px 0;
+          .main-price strong {
+            font-size: 30px;
           }
 
-          .nearby-grid {
+          .option-prices div {
+            padding: 17px;
+          }
+
+          .check-grid {
             grid-template-columns:
-              repeat(2,minmax(0,1fr));
+              1fr 1fr;
+
+            gap: 6px;
           }
 
-          .nearby-grid a {
-            min-height: 51px;
-            padding: 12px 10px;
+          .check-grid div {
+            padding: 16px;
+          }
+
+          .check-grid p {
+            margin-top: 20px;
+
+            font-size: 11px;
+          }
+
+          .faq-item {
+            grid-template-columns:
+              32px 1fr;
+
+            padding:
+              20px 0;
+          }
+
+          .faq-item h3 {
+            font-size: 13px;
+          }
+
+          .faq-item p {
             font-size: 10px;
           }
 
+          .area-links {
+            grid-template-columns:
+              1fr 1fr;
+
+            gap: 5px;
+          }
+
+          .area-links a {
+            padding: 11px 9px;
+
+            font-size: 9px;
+          }
+
           .cta {
-            padding: 78px 18px;
+            min-height: 350px;
+
+            padding:
+              55px 18px;
           }
 
           .cta h2 {
-            font-size: 35px;
+            font-size: 32px;
           }
 
         }
