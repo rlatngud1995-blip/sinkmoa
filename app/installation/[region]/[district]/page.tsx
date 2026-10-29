@@ -502,3 +502,146 @@ export default async function InstallationPage({
               className="orderNav"
             >
               견적 문의
+            </Link>
+          </nav>
+
+        </div>
+      </header>
+
+      {/* HERO */}
+
+      <section className="hero">
+
+        <Image
+          src="/IMG_0395.jpeg"
+          alt={`${heading} 사각싱크볼 설치`}
+          fill
+          priority
+          sizes="100vw"
+          className="heroPhoto"
+        />
+
+        <div className="heroOverlay" />
+
+        <div className="heroContent">
+
+          <p className="label">
+            SINKMOA INSTALLATION
+          </p>
+
+          <h1>
+            {heading}
+            <br />
+            <span>
+              {subheading}
+            </span>
+          </h1>
+
+          <p>
+            기존 싱크볼 철거부터
+            사각싱크볼 설치,
+            상판 타공과
+            수전·배수구 연결까지
+            상담합니다.
+          </p>
+
+          <Link
+            href="/order"
+            className="heroButton"
+          >
+            설치 견적 문의
+            <span>↗</span>
+          </Link>
+
+        </div>
+
+      </section>
+
+      {/* SEO 지역 소개 */}
+
+      <section className="intro">
+
+        <div className="container">
+
+          <p className="label">
+            LOCAL SINK INSTALLATION
+          </p>
+
+          <h2>
+            {heading}
+          </h2>
+
+          {seo ? (
+            <div className="introText">
+              {seo.intro.map(
+                (text) => (
+                  <p key={text}>
+                    {text}
+                  </p>
+                )
+              )}
+            </div>
+          ) : (
+            <div className="introText">
+
+              <p>
+                {location.fullName}
+                지역에서 기존 싱크볼
+                교체와 사각싱크볼 설치
+                상담을 진행합니다.
+              </p>
+
+              <p>
+                현재 싱크볼 사진과
+                기존 상판 타공 사이즈를
+                확인하여 설치 가능한
+                제품과 필요한 작업을
+                안내합니다.
+              </p>
+
+            </div>
+          )}
+
+          {seo && (
+            <>
+              <h3 className="areaTitle">
+                {seo.searchName}
+                {" "}
+                주요 설치 상담 지역
+              </h3>
+
+              <div className="neighborhoodGrid">
+
+                {seo.neighborhoods.map(
+                  (name) => (
+                    <div key={name}>
+                      <span>
+                        {name}
+                      </span>
+
+                      <small>
+                        싱크볼 교체·설치
+                      </small>
+                    </div>
+                  )
+                )}
+
+              </div>
+            </>
+          )}
+
+        </div>
+
+      </section>
+
+      {/* 시공 내용 */}
+
+      <section className="work">
+
+        <div className="container">
+
+          <p className="label">
+            INSTALLATION SERVICE
+          </p>
+
+          <h2
