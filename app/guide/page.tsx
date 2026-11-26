@@ -4,9 +4,10 @@ import type { Metadata } from "next";
 import SiteHeader from "../components/SiteHeader";
 
 export const metadata: Metadata = {
-  title: "구매·배송·설치 안내 | 싱크모아",
+  title: "싱크볼 구매·배송·설치 이용 안내",
   description:
-    "싱크모아 싱크볼 제품 구매, 택배 배송, 전문 설치 서비스 및 추가 옵션 안내",
+    "싱크모아 이용 방법: 사각 싱크볼 제품 선택, 제품 단독 구매와 택배 배송, 설치 포함 주문(설치비 170,000원), 상판 타공·올스텐 배수구·6WAY 수전 옵션 가격 안내.",
+  alternates: { canonical: "/guide" },
 };
 
 const steps = [

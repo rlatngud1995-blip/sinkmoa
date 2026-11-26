@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { BUSINESS_SCHEMA, SITE_URL as SITE } from "./data/site";
 
 /* =========================================
    SINKMOA 홈페이지 공통 설정
@@ -17,10 +18,10 @@ const SITE_URL = "https://www.sinkmoa.com";
 const BRAND = "싱크모아";
 
 const SITE_TITLE =
-  "싱크모아 | 프리미엄 사각 싱크볼 판매 및 설치";
+  "싱크모아 | 사각 싱크볼 판매·싱크볼 교체 설치 전문";
 
 const SITE_DESCRIPTION =
-  "백조, 리젠스, 벨라고, 아티잔 프리미엄 사각 싱크볼. 싱크볼 제품 선택부터 교체 및 설치 상담까지, 싱크모아에서 편리하게 문의하세요.";
+  "백조·리젠스·벨라고·아티잔 사각 싱크볼을 39만원대부터 판매하고, 서울·경기·인천·충남·충북에서 싱크볼 교체(설치비 17만원)를 시공합니다. 제품만 구매도 가능합니다.";
 
 const LOGO_IMAGE =
   "/5C4799F6-712E-4F0E-8030-2B96BB5FC1C9.png";
@@ -142,7 +143,28 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                BUSINESS_SCHEMA,
+                {
+                  "@type": "WebSite",
+                  "@id": `${SITE}/#website`,
+                  url: SITE,
+                  name: BRAND,
+                  inLanguage: "ko-KR",
+                  publisher: { "@id": BUSINESS_SCHEMA["@id"] },
+                },
+              ],
+            }),
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

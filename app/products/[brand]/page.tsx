@@ -10,8 +10,14 @@ import {
   BRANDS,
   PRODUCTS,
   formatPrice,
+  formatCutoutSize,
   type BrandSlug,
 } from "../../data/products";
+import {
+  BRAND,
+  BUSINESS_ID,
+  SITE_URL,
+} from "../../data/site";
 
 /* =========================================
    싱크모아 브랜드별 상품 페이지
@@ -190,10 +196,36 @@ export async function generateMetadata({
 
   const item = BRANDS[brand as BrandSlug];
 
+  const list = PRODUCTS.filter(
+    (p) => p.brand === brand
+  );
+  const main = list[0];
+  const model = main
+    ? main.name.replace(item.name, "").trim()
+    : "";
+
+  const title = main
+    ? `${item.name} ${model} 사각 싱크볼 ${formatPrice(main.price)} · 타공 ${formatCutoutSize(main)}`
+    : `${item.name} 사각 싱크볼`;
+
+  const description = main
+    ? `${main.name}(${item.english}) 인셋 사각 싱크볼 ${formatPrice(main.price)}. 상판 타공 ${formatCutoutSize(main)}. 제품만 구매하거나 설치비 170,000원에 기존 싱크볼 철거·수전·배수구 연결까지 함께 맡길 수 있습니다.`
+    : `${item.name} 사각 싱크볼 제품과 설치 상담 안내.`;
+
   return {
-    title: `${item.name} 싱크볼 | 싱크모아`,
-    description:
-      `${item.name} 사각 싱크볼 제품 가격, 상판 타공 사이즈, 설치 서비스 및 시공사례를 확인하세요.`,
+    title,
+    description,
+    alternates: {
+      canonical: `/products/${brand}`,
+    },
+    openGraph: {
+      type: "website",
+      locale: "ko_KR",
+      url: `/products/${brand}`,
+      siteName: BRAND,
+      title: `${title} | ${BRAND}`,
+      description,
+    },
   };
 }
 
@@ -227,6 +259,59 @@ export default async function BrandPage({
 
   return (
     <main className="luxury-brand-page">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              ...products.map((product) => ({
+                "@type": "Product",
+                "@id": `${SITE_URL}/products/${brandSlug}#${product.id}`,
+                name: product.name,
+                brand: {
+                  "@type": "Brand",
+                  name: item.name,
+                  alternateName: item.english,
+                },
+                category: "주방 싱크볼",
+                description: product.description,
+                image: productImage
+                  ? `${SITE_URL}${productImage}`
+                  : undefined,
+                additionalProperty: [
+                  {
+                    "@type": "PropertyValue",
+                    name: "상판 타공 사이즈",
+                    value: formatCutoutSize(product),
+                  },
+                  {
+                    "@type": "PropertyValue",
+                    name: "설치 방식",
+                    value: product.installationType ?? "인셋",
+                  },
+                ],
+                offers: {
+                  "@type": "Offer",
+                  price: product.price,
+                  priceCurrency: "KRW",
+                  availability: "https://schema.org/InStock",
+                  url: `${SITE_URL}/products/${brandSlug}`,
+                  seller: { "@id": BUSINESS_ID },
+                },
+              })),
+              {
+                "@type": "BreadcrumbList",
+                itemListElement: [
+                  { "@type": "ListItem", position: 1, name: BRAND, item: SITE_URL },
+                  { "@type": "ListItem", position: 2, name: "사각 싱크볼", item: `${SITE_URL}/#brands` },
+                  { "@type": "ListItem", position: 3, name: `${item.name} 싱크볼`, item: `${SITE_URL}/products/${brandSlug}` },
+                ],
+              },
+            ],
+          }),
+        }}
+      />
       <SiteHeader />
 
       {/* 브랜드 메인 */}
